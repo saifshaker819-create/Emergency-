@@ -7547,249 +7547,550 @@ function sharePatientAllResultsWhatsApp(pid){
     return;
   }
 
-  const labName = settings.labName || 'MedLab Pro';
+  const labName    = settings.labName    || 'MedLab Pro';
+  const labPhone   = settings.ftrPhone   || '';
+  const labAddress = settings.ftrAddress || '';
+  const headerImg  = settings.headerImg  || '';
+  const footerImg  = settings.footerImg  || '';
 
   showNotif('جاري التحضير','جاري تجميع نتائج المريض...','info');
 
-  // ── بناء HTML كل زيارة باستخدام buildPrintHTML الأصلي ──
-  // نحفظ currentReqId الحالي لاستعادته لاحقاً
   const savedReqId = currentReqId;
-
-  // نبني HTML لكل زيارة
   const visitEntries = ptReqs.map(r => {
     currentReqId = r.id;
     const html = buildPrintHTML(r);
     return { r, html };
   });
-
-  // نستعيد currentReqId
   currentReqId = savedReqId;
 
-  // ── CSS موحد للصفحة الخارجية ─────────────────────────
+  const ptGender = p.gender === 'female' ? 'أنثى' : 'ذكر';
+  const ptAge    = p.ageDisplay || p.age || '-';
+
+  /* ── زيارات Timeline ── */
+  const timelineItems = visitEntries.map(({r}, i) => `
+    <div class="tl-item" onclick="scrollToVisit('visit-${r.id}')">
+      <div class="tl-dot ${i===0?'tl-dot-first':''}"></div>
+      <div class="tl-info">
+        <div class="tl-date">${r.date||''}</div>
+        <div class="tl-id">${r.id}</div>
+        ${r.doctorName ? `<div class="tl-doc">${r.doctorName}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  /* ── بطاقة كل زيارة ── */
+  const visitCards = visitEntries.map(({r, html}, i) => `
+    <section class="visit-section" id="visit-${r.id}">
+      <div class="visit-head">
+        <div class="visit-head-left">
+          <span class="badge-num">${i+1}</span>
+          <div>
+            <div class="visit-title">زيارة ${r.date||''}</div>
+            <div class="visit-sub">${r.id}${r.doctorName?' · '+r.doctorName:''}</div>
+          </div>
+        </div>
+        <button class="btn-dl" onclick="downloadVisitPDF('${r.id}',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          تنزيل PDF
+        </button>
+      </div>
+      <div class="visit-body">
+        <div class="rpt-outer" id="outer-${r.id}">
+          <div class="rpt-container" data-id="${r.id}" style="width:794px;direction:ltr;background:#fff;font-family:Inter,Arial,sans-serif">${html}</div>
+        </div>
+      </div>
+    </section>`).join('');
+
+  const VISIT_HTML_JS = visitEntries.map(({r,html}) =>
+    `"${r.id}":${JSON.stringify(html)}`).join(',\n');
+  const VISIT_INFO_JS = visitEntries.map(({r}) =>
+    `"${r.id}":${JSON.stringify({id:r.id,patientName:r.patientName||p.name,date:r.date||''})}`).join(',\n');
+
   const pageHTML = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>\u0646\u062a\u0627\u0626\u062c ${p.name} | ${labName}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<title>نتائج ${p.name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
 <style>
+:root{
+  --primary:#1a56db;
+  --primary-dark:#1340a8;
+  --accent:#0ea5e9;
+  --green:#16a34a;
+  --red:#dc2626;
+  --amber:#d97706;
+  --bg:#f1f5fb;
+  --card:#ffffff;
+  --border:#e2e8f4;
+  --text:#1e293b;
+  --text2:#64748b;
+  --text3:#94a3b8;
+  --radius:16px;
+  --shadow:0 2px 16px rgba(30,58,138,.08);
+  --shadow-lg:0 8px 32px rgba(30,58,138,.13);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cairo',Arial,sans-serif;background:#f0f4f8;color:#222;direction:rtl;min-height:100vh}
-.page-top{background:linear-gradient(135deg,#003366,#0055aa);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
-.page-top h1{font-size:18px;font-weight:900}
-.page-top .sub{font-size:11px;opacity:.8;margin-top:3px}
-.lab-logo{max-height:56px;border-radius:5px;object-fit:contain}
-.wrap{max-width:900px;margin:20px auto;padding:0 14px 40px}
-.pt-bar{background:#fff;border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.pt-bar label{font-size:10px;color:#888;display:block;margin-bottom:3px}
-.pt-bar span{font-size:13px;font-weight:700;color:#003366}
-.summary-bar{background:#003366;color:#fff;border-radius:10px;padding:10px 18px;margin-bottom:18px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px}
-.visit-wrap{margin-bottom:22px}
-.visit-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,#eef4ff,#ddeaff);border-radius:10px 10px 0 0;border:1px solid #c5d8f0;border-bottom:2px solid #003366}
-.req-id{background:#003366;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.req-date{font-size:12px;color:#444}
-.req-doc{font-size:12px;color:#0055aa;font-weight:600}
-.btn-pdf{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:none;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cairo',Arial,sans-serif;transition:opacity .2s;display:flex;align-items:center;gap:6px}
-.btn-pdf:hover{opacity:.88}
-.btn-pdf:disabled{opacity:.5;cursor:not-allowed}
-.visit-body{border:1px solid #c5d8f0;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:#fff}
-/* iframe يعرض محتوى التقرير */
-.visit-iframe{width:100%;border:none;display:block;min-height:300px}
-.ov{position:fixed;inset:0;background:rgba(0,20,50,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff;font-family:'Cairo',Arial,sans-serif}
-.ov .sp{width:52px;height:52px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
+
+/* ═══ HERO HEADER ═══ */
+.hero{
+  background:linear-gradient(135deg,#0f2460 0%,#1a56db 60%,#0ea5e9 100%);
+  padding:0;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-inner{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 36px 24px;
+  gap:20px;
+}
+.hero-logo{
+  max-height:64px;max-width:180px;
+  border-radius:10px;object-fit:contain;
+  background:rgba(255,255,255,.12);padding:6px;
+}
+.hero-lab{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);letter-spacing:.5px}
+.hero-title{font-size:22px;font-weight:900;color:#fff;line-height:1.2;margin-top:4px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;font-weight:700;color:rgba(255,255,255,.9);
+  margin-top:10px;
+}
+
+/* ═══ PATIENT CARD ═══ */
+.pt-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);
+  margin:24px auto;
+  max-width:900px;
+  padding:0;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+.pt-card-head{
+  background:linear-gradient(90deg,#f0f6ff,#e8f0fe);
+  padding:14px 22px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+}
+.pt-avatar{
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,#1a56db,#0ea5e9);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(26,86,219,.3);
+}
+.pt-name{font-size:18px;font-weight:900;color:var(--primary-dark);line-height:1.2}
+.pt-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.pt-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:16px 22px;gap:14px;
+}
+.pt-cell label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px}
+.pt-cell span{font-size:13px;font-weight:700;color:var(--text)}
+
+/* ═══ STATS STRIP ═══ */
+.stats-strip{
+  max-width:900px;margin:0 auto 20px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  padding:0 0px;
+}
+.stat-card{
+  background:var(--card);border-radius:12px;
+  padding:14px 18px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+}
+.stat-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.stat-icon.blue{background:rgba(26,86,219,.1)}
+.stat-icon.green{background:rgba(22,163,74,.1)}
+.stat-icon.amber{background:rgba(217,119,6,.1)}
+.stat-num{font-size:20px;font-weight:900;color:var(--text);line-height:1}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* ═══ LAYOUT ═══ */
+.main-wrap{max-width:900px;margin:0 auto;padding:0 0 60px;display:flex;gap:20px;align-items:flex-start}
+.sidebar{width:200px;flex-shrink:0;position:sticky;top:20px}
+.content{flex:1;min-width:0}
+
+/* ═══ SIDEBAR TIMELINE ═══ */
+.tl-card{
+  background:var(--card);border-radius:var(--radius);
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.tl-head{
+  background:linear-gradient(90deg,#0f2460,#1a56db);
+  color:#fff;padding:12px 16px;
+  font-size:13px;font-weight:800;
+}
+.tl-body{padding:12px 16px}
+.tl-item{
+  display:flex;align-items:flex-start;gap:10px;
+  cursor:pointer;padding:8px 6px;border-radius:8px;
+  transition:background .2s;margin-bottom:2px;
+}
+.tl-item:hover{background:#f0f6ff}
+.tl-line{width:2px;background:var(--border);margin:0 10px;flex-shrink:0;height:12px;align-self:center}
+.tl-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--border);flex-shrink:0;margin-top:4px;
+  border:2px solid #fff;box-shadow:0 0 0 2px var(--border);
+}
+.tl-dot-first{background:var(--primary);box-shadow:0 0 0 2px rgba(26,86,219,.3)}
+.tl-date{font-size:11px;font-weight:700;color:var(--text)}
+.tl-id{font-size:10px;color:var(--text2);margin-top:1px;font-family:monospace}
+.tl-doc{font-size:10px;color:var(--accent);margin-top:1px}
+
+/* ═══ VISIT SECTION ═══ */
+.visit-section{
+  background:var(--card);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+  overflow:hidden;
+  transition:box-shadow .3s;
+}
+.visit-section:hover{box-shadow:var(--shadow-lg)}
+.visit-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;
+  background:linear-gradient(90deg,#f8faff,#eef4ff);
+  border-bottom:2px solid var(--primary);
+}
+.visit-head-left{display:flex;align-items:center;gap:12px}
+.badge-num{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:#fff;font-size:14px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(26,86,219,.3);flex-shrink:0;
+}
+.visit-title{font-size:15px;font-weight:800;color:var(--text)}
+.visit-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.btn-dl{
+  display:flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,#16a34a,#15803d);
+  color:#fff;border:none;
+  padding:9px 18px;border-radius:10px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  font-family:'Cairo',sans-serif;
+  box-shadow:0 2px 8px rgba(22,163,74,.3);
+  transition:all .2s;
+}
+.btn-dl:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(22,163,74,.4)}
+.btn-dl:active{transform:translateY(0)}
+.btn-dl:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+.visit-body{background:#fafcff;overflow:hidden}
+.rpt-outer{
+  width:100%;overflow:hidden;background:#fff;
+  border-top:1px solid var(--border);
+}
+.rpt-container{
+  transform-origin:top right;
+  will-change:transform;
+}
+
+/* ═══ LOADING OVERLAY ═══ */
+.ov{
+  position:fixed;inset:0;
+  background:rgba(15,36,96,.85);
+  backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;color:#fff;font-family:'Cairo',sans-serif;
+}
+.ov-card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;padding:36px 48px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  backdrop-filter:blur(12px);
+}
+.sp{
+  width:52px;height:52px;
+  border:3px solid rgba(255,255,255,.2);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .75s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ov .omsg{font-size:15px;font-weight:700}
-.toast{position:fixed;bottom:24px;right:24px;background:#003366;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;z-index:10000;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:fin .3s}
-@keyframes fin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.ftr{text-align:center;padding:18px;color:#aaa;font-size:11px;margin-top:8px}
-@media(max-width:600px){.pt-bar{grid-template-columns:repeat(2,1fr)}.visit-header{flex-direction:column;align-items:flex-start;gap:8px}}
+.omsg{font-size:15px;font-weight:700;color:#fff}
+
+/* ═══ TOAST ═══ */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  display:flex;align-items:center;gap:10px;
+  background:#fff;color:var(--text);
+  padding:12px 20px;border-radius:12px;
+  font-size:13px;font-weight:700;
+  z-index:10000;
+  box-shadow:0 8px 28px rgba(0,0,0,.15);
+  border-right:4px solid var(--green);
+  animation:slideUp .3s ease;
+  max-width:320px;
+}
+.toast.err{border-right-color:var(--red)}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ FOOTER ═══ */
+.pg-footer{
+  background:linear-gradient(135deg,#0f2460,#1a56db);
+  color:rgba(255,255,255,.75);
+  text-align:center;padding:24px;
+  font-size:12px;margin-top:40px;
+}
+.pg-footer strong{color:#fff}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:700px){
+  .hero-inner{padding:20px 18px 16px}
+  .hero-title{font-size:17px}
+  .pt-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+  .main-wrap{flex-direction:column;padding:0 0 40px}
+  .sidebar{width:100%;position:static}
+  .tl-body{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px}
+  .tl-head{font-size:12px;padding:10px 12px}
+  .visit-head{flex-direction:column;align-items:flex-start;gap:10px}
+  .btn-dl{width:100%;justify-content:center}
+  .main-wrap{padding:0 12px 40px}
+  .stats-strip,.pt-card{margin-left:12px;margin-right:12px}
+}
+@media print{
+  .btn-dl,.sidebar,.stats-strip{display:none}
+  .visit-section{box-shadow:none;border:1px solid #ddd}
+}
 </style>
 </head>
 <body>
-<div class="page-top">
-  <div>
-    <h1>\ud83d\udcca \u0633\u062c\u0644 \u0646\u062a\u0627\u0626\u062c \u0627\u0644\u0645\u0631\u064a\u0636</h1>
-    <div class="sub">${labName}</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-lab">${labName}</div>
+      <div class="hero-title">📊 سجل نتائج المريض</div>
+      <div class="hero-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${ptReqs.length} زيارة مكتملة
+      </div>
+    </div>
+    ${headerImg
+      ? `<img src="${headerImg}" class="hero-logo" alt="${labName}">`
+      : `<div style="font-size:56px;opacity:.85">🏥</div>`}
   </div>
-  ${settings.headerImg ? `<img src="${settings.headerImg}" class="lab-logo" alt="${labName}">` : '<div style="font-size:34px">\ud83c\udfe5</div>'}
 </div>
 
-<div class="wrap">
-  <div class="pt-bar">
-    <div><label>\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644</label><span>${p.name}</span></div>
-    <div><label>\u0631\u0642\u0645 \u0627\u0644\u0645\u0644\u0641</label><span>${p.id}</span></div>
-    <div><label>\u0627\u0644\u0639\u0645\u0631</label><span>${p.ageDisplay||p.age||'-'}</span></div>
-    <div><label>\u0627\u0644\u0647\u0627\u062a\u0641</label><span>${p.phone||'-'}</span></div>
+<!-- PATIENT CARD -->
+<div class="pt-card" style="margin-right:auto;margin-left:auto;margin-top:-1px;border-radius:0 0 var(--radius) var(--radius)">
+  <div class="pt-card-head">
+    <div class="pt-avatar">${p.gender==='female'?'👩':'👨'}</div>
+    <div>
+      <div class="pt-name">${p.name}</div>
+      <div class="pt-sub">رقم الملف: ${p.id} · ${ptGender} · ${ptAge}</div>
+    </div>
   </div>
-  <div class="summary-bar">\ud83d\udccb \u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0632\u064a\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u0643\u062a\u0645\u0644\u0629: <strong>${ptReqs.length} \u0632\u064a\u0627\u0631\u0629</strong></div>
+  <div class="pt-grid">
+    <div class="pt-cell"><label>رقم الملف</label><span>${p.id}</span></div>
+    <div class="pt-cell"><label>العمر</label><span>${ptAge}</span></div>
+    <div class="pt-cell"><label>الجنس</label><span>${ptGender}</span></div>
+    <div class="pt-cell"><label>الهاتف</label><span>${p.phone||'—'}</span></div>
+  </div>
+</div>
 
-  ${visitEntries.map(({r, html}) => `
-  <div class="visit-wrap">
-    <div class="visit-header">
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
-        <span class="req-id">${r.id}</span>
-        <span class="req-date">\ud83d\udcc5 ${r.date||''}</span>
-        ${r.doctorName ? `<span class="req-doc">\ud83d\udc68\u200d\u2695\ufe0f ${r.doctorName}</span>` : ''}
-        ${r.printed ? '<span style="background:rgba(0,180,0,.12);border:1px solid rgba(0,180,0,.3);color:#007700;border-radius:12px;padding:2px 8px;font-size:10px;font-weight:700">\ud83d\udda8\ufe0f \u0645\u0637\u0628\u0648\u0639</span>' : ''}
-      </div>
-      <button class="btn-pdf" onclick="downloadVisitPDF('${r.id}', this)">\u2b07\ufe0f \u062a\u0646\u0632\u064a\u0644 PDF</button>
-    </div>
-    <div class="visit-body">
-      <div id="preview-${r.id}" style="width:100%;overflow-x:auto;background:#fff">
-        <div class="rpt-container" data-id="${r.id}" style="width:794px;direction:ltr;background:#fff;font-family:Inter,Arial,sans-serif;transform-origin:top right;transform:scale(1)">
-          ${html}
-        </div>
-      </div>
-    </div>
-  </div>`).join('')}
+<!-- STATS -->
+<div class="stats-strip" style="padding:0 0px;max-width:900px;margin:16px auto">
+  <div class="stat-card">
+    <div class="stat-icon blue">📋</div>
+    <div><div class="stat-num">${ptReqs.length}</div><div class="stat-lbl">إجمالي الزيارات</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">📅</div>
+    <div><div class="stat-num" style="font-size:13px">${ptReqs[0].date||'-'}</div><div class="stat-lbl">آخر زيارة</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber">📄</div>
+    <div><div class="stat-num" style="font-size:13px">${ptReqs[ptReqs.length-1].date||'-'}</div><div class="stat-lbl">أول زيارة</div></div>
+  </div>
+</div>
 
-  <div class="ftr">
-    ${labName} \u2014 \u062a\u0645 \u0625\u0646\u0634\u0627\u0621 \u0647\u0630\u0627 \u0627\u0644\u062a\u0642\u0631\u064a\u0631 \u0628\u0648\u0627\u0633\u0637\u0629 MedLab Pro
-    ${settings.footerImg ? `<br><img src="${settings.footerImg}" style="max-height:46px;margin-top:10px;border-radius:4px">` : ''}
+<!-- MAIN LAYOUT -->
+<div class="main-wrap" style="padding:0 0px 60px;max-width:900px;margin:0 auto">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="tl-card">
+      <div class="tl-head">🗂 الزيارات</div>
+      <div class="tl-body">
+        ${timelineItems}
+      </div>
+    </div>
+  </aside>
+
+  <!-- VISITS -->
+  <div class="content">
+    ${visitCards}
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="pg-footer">
+  <strong>${labName}</strong>
+  ${labPhone ? ' · 📞 '+labPhone : ''}
+  ${labAddress ? ' · 📍 '+labAddress : ''}
+  <br><span style="font-size:10px;opacity:.6;margin-top:4px;display:block">تم إنشاء هذا التقرير بواسطة MedLab Pro</span>
+  ${footerImg ? `<img src="${footerImg}" style="max-height:44px;margin-top:10px;border-radius:6px;opacity:.9">` : ''}
+</div>
+
+<!-- LOADING OVERLAY (hidden) -->
+<div id="__ov" class="ov" style="display:none">
+  <div class="ov-card">
+    <div class="sp"></div>
+    <div class="omsg">جاري إنشاء ملف PDF...</div>
   </div>
 </div>
 
 <script>
-// بيانات التقارير الكاملة لكل زيارة (HTML جاهز)
 const VISIT_HTML = {
-  ${visitEntries.map(({r, html}) => `"${r.id}": ${JSON.stringify(html)}`).join(',\n  ')}
+  ${VISIT_HTML_JS}
 };
 const VISIT_INFO = {
-  ${visitEntries.map(({r}) => `"${r.id}": ${JSON.stringify({id:r.id, patientName: r.patientName||p.name, date: r.date||''})}`).join(',\n  ')}
+  ${VISIT_INFO_JS}
 };
 
-function _toast(msg, dur){
-  const t=document.createElement('div');
-  t.className='toast';t.textContent=msg;
+/* toast */
+function _toast(msg, isErr){
+  const t = document.createElement('div');
+  t.className = 'toast' + (isErr?' err':'');
+  t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(), dur||3500);
+  setTimeout(()=>t.remove(), 3800);
 }
-function _showOv(msg){
-  const d=document.createElement('div');
-  d.id='__ov';d.className='ov';
-  d.innerHTML='<div class="sp"></div><div class="omsg">'+msg+'</div>';
-  document.body.appendChild(d);
-}
-function _hideOv(){const d=document.getElementById('__ov');if(d)d.remove();}
 
-// تحجيم محتوى التقرير ليتناسب مع عرض الحاوية
+/* loading */
+function _showOv(){document.getElementById('__ov').style.display='flex';}
+function _hideOv(){document.getElementById('__ov').style.display='none';}
+
+/* scroll to visit */
+function scrollToVisit(id){
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* scale report previews to fit container */
 function scaleReports(){
   document.querySelectorAll('.rpt-container').forEach(el=>{
-    const parent = el.parentElement;
-    const pw = parent.offsetWidth || 900;
+    const outer = el.closest('.rpt-outer');
+    if(!outer) return;
+    const pw = outer.offsetWidth || 860;
     const scale = Math.min(1, pw / 794);
     el.style.transform = 'scale('+scale+')';
     el.style.transformOrigin = 'top right';
-    parent.style.height = Math.ceil(el.scrollHeight * scale) + 'px';
+    outer.style.height = Math.ceil(el.scrollHeight * scale) + 'px';
   });
 }
-window.addEventListener('load', scaleReports);
+window.addEventListener('load', ()=>{scaleReports(); setTimeout(scaleReports,600); setTimeout(scaleReports,1500);});
 window.addEventListener('resize', scaleReports);
-setTimeout(scaleReports, 500);
-setTimeout(scaleReports, 1500);
 
+/* download PDF */
 async function downloadVisitPDF(reqId, btn){
   const html = VISIT_HTML[reqId];
   const info = VISIT_INFO[reqId];
-  if(!html){ _toast('\u0627\u0644\u062a\u0642\u0631\u064a\u0631 \u063a\u064a\u0631 \u0645\u062a\u0648\u0641\u0631'); return; }
+  if(!html){ _toast('التقرير غير متوفر', true); return; }
 
-  if(btn){ btn.disabled=true; btn.textContent='\u23f3 \u062c\u0627\u0631\u064a \u0625\u0646\u0634\u0627\u0621 PDF...'; }
-  _showOv('\u062c\u0627\u0631\u064a \u0625\u0646\u0634\u0627\u0621 \u0645\u0644\u0641 PDF...');
+  const origLabel = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التحضير...'; }
+  _showOv();
 
   try{
-    // حاوية مخفية بعيدة
     const container = document.createElement('div');
     container.style.cssText = 'position:fixed;top:0;left:-9999px;width:794px;background:#fff;z-index:99999;font-family:Inter,Arial,sans-serif;direction:ltr';
-    // نضيف CSS الخطوط + المحتوى الأصلي كما هو
-    container.innerHTML = '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet"><style>*{font-family:Inter,Arial,sans-serif;box-sizing:border-box}</style>' + html;
+    container.innerHTML =
+      '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">' +
+      '<style>*{font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}</style>' + html;
     document.body.appendChild(container);
 
     await document.fonts.ready;
-    await new Promise(r=>setTimeout(r, 400));
+    await new Promise(r=>setTimeout(r,400));
 
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      allowTaint: true,
-      letterRendering: true
+    const canvas = await html2canvas(container,{
+      scale:2, useCORS:true, backgroundColor:'#fff',
+      logging:false, allowTaint:true, letterRendering:true
     });
     document.body.removeChild(container);
 
     const {jsPDF} = window.jspdf;
-    const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    const W=210, H=297, iW=W;
-    const iH = (canvas.height * W) / canvas.width;
+    const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const img = canvas.toDataURL('image/jpeg',.95);
+    const W=210, H=297, iW=W, iH=(canvas.height*W)/canvas.width;
 
-    if(iH <= H){
-      doc.addImage(imgData, 'JPEG', 0, 0, iW, iH);
+    if(iH<=H){
+      doc.addImage(img,'JPEG',0,0,iW,iH);
     } else {
-      const pc = document.createElement('canvas');
-      const ctx = pc.getContext('2d');
-      const sf = canvas.width / W;
-      const phPx = H * sf;
-      let rem = canvas.height, sy = 0, pg = 0;
-      while(rem > 0){
-        if(pg > 0) doc.addPage();
-        const sh = Math.min(phPx, rem);
-        pc.width = canvas.width; pc.height = sh;
-        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,pc.width,pc.height);
-        ctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
-        doc.addImage(pc.toDataURL('image/jpeg',.95), 'JPEG', 0, 0, iW, sh/sf);
-        sy += sh; rem -= sh; pg++;
+      const pc=document.createElement('canvas');
+      const ctx=pc.getContext('2d');
+      const sf=canvas.width/W, phPx=H*sf;
+      let rem=canvas.height, sy=0, pg=0;
+      while(rem>0){
+        if(pg>0) doc.addPage();
+        const sh=Math.min(phPx,rem);
+        pc.width=canvas.width; pc.height=sh;
+        ctx.fillStyle='#fff'; ctx.fillRect(0,0,pc.width,pc.height);
+        ctx.drawImage(canvas,0,sy,canvas.width,sh,0,0,canvas.width,sh);
+        doc.addImage(pc.toDataURL('image/jpeg',.95),'JPEG',0,0,iW,sh/sf);
+        sy+=sh; rem-=sh; pg++;
       }
     }
-    const fname = reqId + '_' + (info.patientName||'patient').replace(/\s+/g,'_') + '.pdf';
+    const fname = reqId+'_'+(info.patientName||'patient').replace(/\s+/g,'_')+'.pdf';
     doc.save(fname);
     _hideOv();
-    _toast('\u2705 \u062a\u0645 \u062a\u0646\u0632\u064a\u0644: ' + fname);
+    _toast('✅ تم تنزيل: '+fname);
   } catch(e){
     _hideOv();
-    _toast('\u274c \u0641\u0634\u0644 \u0625\u0646\u0634\u0627\u0621 PDF: ' + e.message);
+    _toast('❌ فشل إنشاء PDF: '+e.message, true);
     console.error(e);
   }
-  if(btn){ btn.disabled=false; btn.innerHTML='\u2b07\ufe0f \u062a\u0646\u0632\u064a\u0644 PDF'; }
+  if(btn){ btn.disabled=false; btn.innerHTML=origLabel; }
 }
 <\/script>
 </body>
 </html>`;
 
-  // ── فتح الصفحة في تبويب جديد ────────────────────────
-  const blob = new Blob([pageHTML], {type: 'text/html;charset=utf-8'});
+  const blob = new Blob([pageHTML], {type:'text/html;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
   const win  = window.open(url, '_blank');
   if(!win){
-    showNotif('تنبيه','يرجى السماح بفتح نوافذ جديدة في المتصفح','warning');
+    showNotif('تنبيه','يرجى السماح بفتح نوافذ جديدة','warning');
     return;
   }
   setTimeout(()=>URL.revokeObjectURL(url), 60000);
 
-  // ── واتساب: إرسال رسالة نصية للمريض مع ملاحظة الملف ─
   if(p.phone){
     const intPhone = _formatPhoneForWhatsApp(p.phone);
-    const msgLines = [
-      'السلام عليكم ' + p.name,
-      'نُرسل إليكم سجل نتائجكم المختبرية:',
-      '🆔 رقم الملف: ' + p.id,
-      '📋 عدد الزيارات: ' + ptReqs.length,
-      '📅 آخر زيارة: ' + (ptReqs[0].date||''),
-      '',
-      '🏥 ' + (settings.labName||'MedLab Pro'),
-      (settings.ftrPhone ? '📞 ' + settings.ftrPhone : ''),
-      (settings.ftrAddress ? '📍 ' + settings.ftrAddress : '')
-    ].filter(l => l !== undefined && !(l===''&&msgLines)).join('\n');
-
     setTimeout(()=>{
       _openWhatsAppDirect(intPhone);
-      showNotif('✅ تم','تم فتح سجل المريض في المتصفح وفتح واتساب — انسخ الرسالة وأرسلها','success');
+      showNotif('✅ تم','تم فتح سجل المريض وفتح واتساب','success');
     }, 900);
   } else {
-    showNotif('✅ تم','تم فتح سجل جميع نتائج المريض في المتصفح','success');
+    showNotif('✅ تم','تم فتح سجل نتائج المريض','success');
   }
 }
 
