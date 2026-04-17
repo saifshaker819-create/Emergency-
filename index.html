@@ -7535,559 +7535,258 @@ let _dateFilter = ''; // فلتر التاريخ المحدد
 // مشاركة جميع نتائج المريض عبر واتساب — صفحة HTML شاملة
 // ============================================================
 function sharePatientAllResultsWhatsApp(pid){
-  const p = patients.find(x => x.id === pid);
-  if(!p){ showNotif('خطأ','المريض غير موجود','error'); return; }
+  var p = patients.find(function(x){return x.id===pid;});
+  if(!p){showNotif('خطأ','المريض غير موجود','error');return;}
 
-  const ptReqs = requests
-    .filter(r => r.patientId === pid && r.status === 'done')
-    .sort((a,b) => new Date(b.resultDate||b.date) - new Date(a.resultDate||a.date));
+  var ptReqs = requests
+    .filter(function(r){return r.patientId===pid && r.status==='done';})
+    .sort(function(a,b){return new Date(b.resultDate||b.date)-new Date(a.resultDate||a.date);});
 
-  if(!ptReqs.length){
-    showNotif('تنبيه','لا توجد نتائج مكتملة لهذا المريض','warning');
-    return;
-  }
+  if(!ptReqs.length){showNotif('تنبيه','لا توجد نتائج مكتملة لهذا المريض','warning');return;}
 
-  const labName    = settings.labName    || 'MedLab Pro';
-  const labPhone   = settings.ftrPhone   || '';
-  const labAddress = settings.ftrAddress || '';
-  const headerImg  = settings.headerImg  || '';
-  const footerImg  = settings.footerImg  || '';
+  var labName    = (settings.labName    ||'MedLab Pro');
+  var labPhone   = (settings.ftrPhone   ||'');
+  var labAddress = (settings.ftrAddress ||'');
+  var headerImg  = (settings.headerImg  ||'');
+  var footerImg  = (settings.footerImg  ||'');
+  var ptGender   = p.gender==='female'?'أنثى':'ذكر';
+  var ptAge      = p.ageDisplay||p.age||'-';
 
   showNotif('جاري التحضير','جاري تجميع نتائج المريض...','info');
 
-  const savedReqId = currentReqId;
-  const visitEntries = ptReqs.map(r => {
+  // بناء HTML كل زيارة باستخدام buildPrintHTML الأصلي
+  var savedReqId = currentReqId;
+  var visitEntries = ptReqs.map(function(r){
     currentReqId = r.id;
-    const html = buildPrintHTML(r);
-    return { r, html };
+    var html = buildPrintHTML(r);
+    return {r:r, html:html};
   });
   currentReqId = savedReqId;
 
-  const ptGender = p.gender === 'female' ? 'أنثى' : 'ذكر';
-  const ptAge    = p.ageDisplay || p.age || '-';
+  // ── بناء بيانات JS المُضمّنة بأمان ──
+  var visitHtmlJs = visitEntries.map(function(e){
+    return JSON.stringify(e.r.id)+':'+JSON.stringify(e.html);
+  }).join(',\n');
 
-  /* ── زيارات Timeline ── */
-  const timelineItems = visitEntries.map(({r}, i) => `
-    <div class="tl-item" onclick="scrollToVisit('visit-${r.id}')">
-      <div class="tl-dot ${i===0?'tl-dot-first':''}"></div>
-      <div class="tl-info">
-        <div class="tl-date">${r.date||''}</div>
-        <div class="tl-id">${r.id}</div>
-        ${r.doctorName ? `<div class="tl-doc">${r.doctorName}</div>` : ''}
-      </div>
-    </div>`).join('');
+  var visitInfoJs = visitEntries.map(function(e){
+    var r=e.r;
+    return JSON.stringify(r.id)+':'+JSON.stringify({id:r.id,patientName:r.patientName||p.name,date:r.date||''});
+  }).join(',\n');
 
-  /* ── بطاقة كل زيارة ── */
-  const visitCards = visitEntries.map(({r, html}, i) => `
-    <section class="visit-section" id="visit-${r.id}">
-      <div class="visit-head">
-        <div class="visit-head-left">
-          <span class="badge-num">${i+1}</span>
-          <div>
-            <div class="visit-title">زيارة ${r.date||''}</div>
-            <div class="visit-sub">${r.id}${r.doctorName?' · '+r.doctorName:''}</div>
-          </div>
-        </div>
-        <button class="btn-dl" onclick="downloadVisitPDF('${r.id}',this)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          تنزيل PDF
-        </button>
-      </div>
-      <div class="visit-body">
-        <div class="rpt-outer" id="outer-${r.id}">
-          <div class="rpt-container" data-id="${r.id}" style="width:794px;direction:ltr;background:#fff;font-family:Inter,Arial,sans-serif">${html}</div>
-        </div>
-      </div>
-    </section>`).join('');
+  // ── Timeline sidebar items ──
+  var tlItems = visitEntries.map(function(e,i){
+    var r=e.r;
+    var dot = i===0
+      ? '<div style="width:10px;height:10px;border-radius:50%;background:#1a56db;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 2px rgba(26,86,219,.3)"></div>'
+      : '<div style="width:10px;height:10px;border-radius:50%;background:#cbd5e1;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 2px #e2e8f4"></div>';
+    return '<div onclick="scrollToVisit(\'visit-'+r.id+'\')" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 6px;border-radius:8px;transition:background .2s;margin-bottom:2px" onmouseover="this.style.background=\'#f0f6ff\'" onmouseout="this.style.background=\'\'">'
+      +dot
+      +'<div>'
+      +'<div style="font-size:11px;font-weight:700;color:#1e293b">'+r.date+'</div>'
+      +'<div style="font-size:10px;color:#64748b;font-family:monospace">'+r.id+'</div>'
+      +(r.doctorName?'<div style="font-size:10px;color:#0ea5e9">'+r.doctorName+'</div>':'')
+      +'</div></div>';
+  }).join('');
 
-  const VISIT_HTML_JS = visitEntries.map(({r,html}) =>
-    `"${r.id}":${JSON.stringify(html)}`).join(',\n');
-  const VISIT_INFO_JS = visitEntries.map(({r}) =>
-    `"${r.id}":${JSON.stringify({id:r.id,patientName:r.patientName||p.name,date:r.date||''})}`).join(',\n');
+  // ── بطاقة كل زيارة ──
+  var visitCards = visitEntries.map(function(e,i){
+    var r=e.r; var html=e.html;
+    return '<section id="visit-'+r.id+'" style="background:#fff;border-radius:16px;border:1px solid #e2e8f4;box-shadow:0 2px 16px rgba(30,58,138,.08);margin-bottom:20px;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(90deg,#f8faff,#eef4ff);border-bottom:2px solid #1a56db">'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0ea5e9);color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(26,86,219,.3);flex-shrink:0">'+(i+1)+'</div>'
+      +'<div>'
+      +'<div style="font-size:15px;font-weight:800;color:#1e293b">زيارة '+r.date+'</div>'
+      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+r.id+(r.doctorName?' · '+r.doctorName:'')+'</div>'
+      +'</div></div>'
+      +'<button onclick="downloadVisitPDF(\''+r.id+'\',this)" style="display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;box-shadow:0 2px 8px rgba(22,163,74,.3)">'
+      +'⬇ تنزيل PDF'
+      +'</button>'
+      +'</div>'
+      +'<div style="background:#fafcff;overflow:hidden;border-top:1px solid #e2e8f4">'
+      +'<div id="outer-'+r.id+'" style="width:100%;overflow:hidden;background:#fff">'
+      +'<div class="rpc" data-id="'+r.id+'" style="width:794px;direction:ltr;background:#fff;font-family:Inter,Arial,sans-serif;transform-origin:top right">'+html+'</div>'
+      +'</div></div>'
+      +'</section>';
+  }).join('');
 
-  const pageHTML = `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نتائج ${p.name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
-<style>
-:root{
-  --primary:#1a56db;
-  --primary-dark:#1340a8;
-  --accent:#0ea5e9;
-  --green:#16a34a;
-  --red:#dc2626;
-  --amber:#d97706;
-  --bg:#f1f5fb;
-  --card:#ffffff;
-  --border:#e2e8f4;
-  --text:#1e293b;
-  --text2:#64748b;
-  --text3:#94a3b8;
-  --radius:16px;
-  --shadow:0 2px 16px rgba(30,58,138,.08);
-  --shadow-lg:0 8px 32px rgba(30,58,138,.13);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
+  // ── إحصائيات ──
+  var firstDate = ptReqs.length>1 ? ptReqs[ptReqs.length-1].date||'-' : '-';
+  var lastDate  = ptReqs[0].date||'-';
 
-/* ═══ HERO HEADER ═══ */
-.hero{
-  background:linear-gradient(135deg,#0f2460 0%,#1a56db 60%,#0ea5e9 100%);
-  padding:0;
-  position:relative;
-  overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-.hero-inner{
-  position:relative;z-index:1;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:28px 36px 24px;
-  gap:20px;
-}
-.hero-logo{
-  max-height:64px;max-width:180px;
-  border-radius:10px;object-fit:contain;
-  background:rgba(255,255,255,.12);padding:6px;
-}
-.hero-lab{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);letter-spacing:.5px}
-.hero-title{font-size:22px;font-weight:900;color:#fff;line-height:1.2;margin-top:4px}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.15);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.25);
-  border-radius:20px;padding:5px 14px;
-  font-size:12px;font-weight:700;color:rgba(255,255,255,.9);
-  margin-top:10px;
-}
+  // ── hero logo ──
+  var heroLogo = headerImg
+    ? '<img src="'+headerImg+'" style="max-height:60px;max-width:160px;border-radius:10px;object-fit:contain;background:rgba(255,255,255,.12);padding:6px" alt="logo">'
+    : '<div style="font-size:52px;opacity:.85">🏥</div>';
 
-/* ═══ PATIENT CARD ═══ */
-.pt-card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow-lg);
-  margin:24px auto;
-  max-width:900px;
-  padding:0;
-  overflow:hidden;
-  border:1px solid var(--border);
-}
-.pt-card-head{
-  background:linear-gradient(90deg,#f0f6ff,#e8f0fe);
-  padding:14px 22px;
-  display:flex;align-items:center;gap:12px;
-  border-bottom:1px solid var(--border);
-}
-.pt-avatar{
-  width:50px;height:50px;border-radius:50%;
-  background:linear-gradient(135deg,#1a56db,#0ea5e9);
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;flex-shrink:0;
-  box-shadow:0 2px 8px rgba(26,86,219,.3);
-}
-.pt-name{font-size:18px;font-weight:900;color:var(--primary-dark);line-height:1.2}
-.pt-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.pt-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  padding:16px 22px;gap:14px;
-}
-.pt-cell label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px}
-.pt-cell span{font-size:13px;font-weight:700;color:var(--text)}
+  // ── footer img ──
+  var footerImgHtml = footerImg
+    ? '<br><img src="'+footerImg+'" style="max-height:44px;margin-top:10px;border-radius:6px;opacity:.9">'
+    : '';
 
-/* ═══ STATS STRIP ═══ */
-.stats-strip{
-  max-width:900px;margin:0 auto 20px;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-  padding:0 0px;
-}
-.stat-card{
-  background:var(--card);border-radius:12px;
-  padding:14px 18px;
-  display:flex;align-items:center;gap:12px;
-  box-shadow:var(--shadow);border:1px solid var(--border);
-}
-.stat-icon{
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;
-}
-.stat-icon.blue{background:rgba(26,86,219,.1)}
-.stat-icon.green{background:rgba(22,163,74,.1)}
-.stat-icon.amber{background:rgba(217,119,6,.1)}
-.stat-num{font-size:20px;font-weight:900;color:var(--text);line-height:1}
-.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+  // ── الصفحة الكاملة بـ string concatenation آمن ──
+  var CSS = [
+    ':root{--p:#1a56db;--pd:#1340a8;--a:#0ea5e9;--g:#16a34a;--bg:#f1f5fb;--card:#fff;--bdr:#e2e8f4;--tx:#1e293b;--tx2:#64748b;--tx3:#94a3b8;--r:16px}',
+    '*{box-sizing:border-box;margin:0;padding:0}',
+    'html{scroll-behavior:smooth}',
+    'body{font-family:Cairo,sans-serif;background:var(--bg);color:var(--tx);direction:rtl;min-height:100vh}',
+    '.sp{width:50px;height:50px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}',
+    '@keyframes spin{to{transform:rotate(360deg)}}',
+    '.toast{position:fixed;bottom:28px;right:28px;display:flex;align-items:center;gap:10px;background:#fff;color:var(--tx);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:10000;box-shadow:0 8px 28px rgba(0,0,0,.15);border-right:4px solid var(--g);animation:su .3s ease}',
+    '.toast.err{border-right-color:#dc2626}',
+    '@keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}',
+    '@media(max-width:680px){',
+    '.ptgrid{grid-template-columns:repeat(2,1fr)!important}',
+    '.stgrid{grid-template-columns:repeat(2,1fr)!important}',
+    '.mainwrap{flex-direction:column!important}',
+    '.sidebar{width:100%!important;position:static!important}',
+    '.tlbody{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px!important}',
+    '.vhead{flex-direction:column!important;align-items:flex-start!important;gap:10px!important}',
+    '.btndl{width:100%!important;justify-content:center!important}',
+    '}'
+  ].join('');
 
-/* ═══ LAYOUT ═══ */
-.main-wrap{max-width:900px;margin:0 auto;padding:0 0 60px;display:flex;gap:20px;align-items:flex-start}
-.sidebar{width:200px;flex-shrink:0;position:sticky;top:20px}
-.content{flex:1;min-width:0}
+  var BODY = ''
+    // HERO
+    +'<div style="background:linear-gradient(135deg,#0f2460 0%,#1a56db 60%,#0ea5e9 100%);padding:28px 36px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative">'
+    +'<div>'
+    +'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px">'+labName+'</div>'
+    +'<div style="font-size:22px;font-weight:900;color:#fff;margin-top:4px">📊 سجل نتائج المريض</div>'
+    +'<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-top:10px">'
+    +'📋 '+ptReqs.length+' زيارة مكتملة'
+    +'</div>'
+    +'</div>'
+    +heroLogo
+    +'</div>'
 
-/* ═══ SIDEBAR TIMELINE ═══ */
-.tl-card{
-  background:var(--card);border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:var(--shadow);
-  overflow:hidden;
-}
-.tl-head{
-  background:linear-gradient(90deg,#0f2460,#1a56db);
-  color:#fff;padding:12px 16px;
-  font-size:13px;font-weight:800;
-}
-.tl-body{padding:12px 16px}
-.tl-item{
-  display:flex;align-items:flex-start;gap:10px;
-  cursor:pointer;padding:8px 6px;border-radius:8px;
-  transition:background .2s;margin-bottom:2px;
-}
-.tl-item:hover{background:#f0f6ff}
-.tl-line{width:2px;background:var(--border);margin:0 10px;flex-shrink:0;height:12px;align-self:center}
-.tl-dot{
-  width:10px;height:10px;border-radius:50%;
-  background:var(--border);flex-shrink:0;margin-top:4px;
-  border:2px solid #fff;box-shadow:0 0 0 2px var(--border);
-}
-.tl-dot-first{background:var(--primary);box-shadow:0 0 0 2px rgba(26,86,219,.3)}
-.tl-date{font-size:11px;font-weight:700;color:var(--text)}
-.tl-id{font-size:10px;color:var(--text2);margin-top:1px;font-family:monospace}
-.tl-doc{font-size:10px;color:var(--accent);margin-top:1px}
+    // PATIENT CARD
+    +'<div style="max-width:900px;margin:0 auto;border-bottom:1px solid var(--bdr)">'
+    +'<div style="background:#fff;border-radius:0 0 16px 16px;box-shadow:0 8px 32px rgba(30,58,138,.1);overflow:hidden;border:1px solid var(--bdr);border-top:none">'
+    +'<div style="background:linear-gradient(90deg,#f0f6ff,#e8f0fe);padding:14px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr)">'
+    +'<div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,86,219,.3)">'
+    +(p.gender==='female'?'👩':'👨')
+    +'</div>'
+    +'<div>'
+    +'<div style="font-size:18px;font-weight:900;color:#1340a8">'+p.name+'</div>'
+    +'<div style="font-size:12px;color:#64748b;margin-top:2px">رقم الملف: '+p.id+' · '+ptGender+' · '+ptAge+'</div>'
+    +'</div></div>'
+    +'<div class="ptgrid" style="display:grid;grid-template-columns:repeat(4,1fr);padding:16px 22px;gap:14px">'
+    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">رقم الملف</div><div style="font-size:13px;font-weight:700">'+p.id+'</div></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">العمر</div><div style="font-size:13px;font-weight:700">'+ptAge+'</div></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">الجنس</div><div style="font-size:13px;font-weight:700">'+ptGender+'</div></div>'
+    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">الهاتف</div><div style="font-size:13px;font-weight:700">'+(p.phone||'—')+'</div></div>'
+    +'</div></div></div>'
 
-/* ═══ VISIT SECTION ═══ */
-.visit-section{
-  background:var(--card);
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  margin-bottom:20px;
-  overflow:hidden;
-  transition:box-shadow .3s;
-}
-.visit-section:hover{box-shadow:var(--shadow-lg)}
-.visit-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;
-  background:linear-gradient(90deg,#f8faff,#eef4ff);
-  border-bottom:2px solid var(--primary);
-}
-.visit-head-left{display:flex;align-items:center;gap:12px}
-.badge-num{
-  width:34px;height:34px;border-radius:50%;
-  background:linear-gradient(135deg,var(--primary),var(--accent));
-  color:#fff;font-size:14px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 8px rgba(26,86,219,.3);flex-shrink:0;
-}
-.visit-title{font-size:15px;font-weight:800;color:var(--text)}
-.visit-sub{font-size:11px;color:var(--text2);margin-top:2px}
-.btn-dl{
-  display:flex;align-items:center;gap:7px;
-  background:linear-gradient(135deg,#16a34a,#15803d);
-  color:#fff;border:none;
-  padding:9px 18px;border-radius:10px;
-  font-size:13px;font-weight:700;cursor:pointer;
-  font-family:'Cairo',sans-serif;
-  box-shadow:0 2px 8px rgba(22,163,74,.3);
-  transition:all .2s;
-}
-.btn-dl:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(22,163,74,.4)}
-.btn-dl:active{transform:translateY(0)}
-.btn-dl:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
-.visit-body{background:#fafcff;overflow:hidden}
-.rpt-outer{
-  width:100%;overflow:hidden;background:#fff;
-  border-top:1px solid var(--border);
-}
-.rpt-container{
-  transform-origin:top right;
-  will-change:transform;
-}
+    // STATS
+    +'<div class="stgrid" style="max-width:900px;margin:16px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'
+    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(26,86,219,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div><div><div style="font-size:22px;font-weight:900">'+ptReqs.length+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">إجمالي الزيارات</div></div></div>'
+    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(22,163,74,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div><div><div style="font-size:13px;font-weight:900">'+lastDate+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">آخر زيارة</div></div></div>'
+    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(217,119,6,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📄</div><div><div style="font-size:13px;font-weight:900">'+firstDate+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">أول زيارة</div></div></div>'
+    +'</div>'
 
-/* ═══ LOADING OVERLAY ═══ */
-.ov{
-  position:fixed;inset:0;
-  background:rgba(15,36,96,.85);
-  backdrop-filter:blur(4px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:9999;color:#fff;font-family:'Cairo',sans-serif;
-}
-.ov-card{
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:20px;padding:36px 48px;
-  display:flex;flex-direction:column;align-items:center;gap:16px;
-  backdrop-filter:blur(12px);
-}
-.sp{
-  width:52px;height:52px;
-  border:3px solid rgba(255,255,255,.2);
-  border-top-color:#fff;border-radius:50%;
-  animation:spin .75s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.omsg{font-size:15px;font-weight:700;color:#fff}
+    // MAIN LAYOUT
+    +'<div class="mainwrap" style="max-width:900px;margin:0 auto;padding:0 0 60px;display:flex;gap:20px;align-items:flex-start">'
 
-/* ═══ TOAST ═══ */
-.toast{
-  position:fixed;bottom:28px;right:28px;
-  display:flex;align-items:center;gap:10px;
-  background:#fff;color:var(--text);
-  padding:12px 20px;border-radius:12px;
-  font-size:13px;font-weight:700;
-  z-index:10000;
-  box-shadow:0 8px 28px rgba(0,0,0,.15);
-  border-right:4px solid var(--green);
-  animation:slideUp .3s ease;
-  max-width:320px;
-}
-.toast.err{border-right-color:var(--red)}
-@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    // SIDEBAR
+    +'<aside class="sidebar" style="width:200px;flex-shrink:0;position:sticky;top:20px">'
+    +'<div style="background:#fff;border-radius:16px;border:1px solid #e2e8f4;box-shadow:0 2px 16px rgba(30,58,138,.08);overflow:hidden">'
+    +'<div style="background:linear-gradient(90deg,#0f2460,#1a56db);color:#fff;padding:12px 16px;font-size:13px;font-weight:800">🗂 الزيارات</div>'
+    +'<div class="tlbody" style="padding:12px 16px">'+tlItems+'</div>'
+    +'</div></aside>'
 
-/* ═══ FOOTER ═══ */
-.pg-footer{
-  background:linear-gradient(135deg,#0f2460,#1a56db);
-  color:rgba(255,255,255,.75);
-  text-align:center;padding:24px;
-  font-size:12px;margin-top:40px;
-}
-.pg-footer strong{color:#fff}
+    // VISITS
+    +'<div style="flex:1;min-width:0">'+visitCards+'</div>'
+    +'</div>'
 
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:700px){
-  .hero-inner{padding:20px 18px 16px}
-  .hero-title{font-size:17px}
-  .pt-grid{grid-template-columns:repeat(2,1fr)}
-  .stats-strip{grid-template-columns:repeat(2,1fr)}
-  .main-wrap{flex-direction:column;padding:0 0 40px}
-  .sidebar{width:100%;position:static}
-  .tl-body{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px}
-  .tl-head{font-size:12px;padding:10px 12px}
-  .visit-head{flex-direction:column;align-items:flex-start;gap:10px}
-  .btn-dl{width:100%;justify-content:center}
-  .main-wrap{padding:0 12px 40px}
-  .stats-strip,.pt-card{margin-left:12px;margin-right:12px}
-}
-@media print{
-  .btn-dl,.sidebar,.stats-strip{display:none}
-  .visit-section{box-shadow:none;border:1px solid #ddd}
-}
-</style>
-</head>
-<body>
+    // FOOTER
+    +'<div style="background:linear-gradient(135deg,#0f2460,#1a56db);color:rgba(255,255,255,.75);text-align:center;padding:24px;font-size:12px">'
+    +'<strong style="color:#fff">'+labName+'</strong>'
+    +(labPhone?' · 📞 '+labPhone:'')
+    +(labAddress?' · 📍 '+labAddress:'')
+    +'<br><span style="font-size:10px;opacity:.6;margin-top:4px;display:block">تم إنشاء هذا التقرير بواسطة MedLab Pro</span>'
+    +footerImgHtml
+    +'</div>'
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-inner">
-    <div>
-      <div class="hero-lab">${labName}</div>
-      <div class="hero-title">📊 سجل نتائج المريض</div>
-      <div class="hero-badge">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        ${ptReqs.length} زيارة مكتملة
-      </div>
-    </div>
-    ${headerImg
-      ? `<img src="${headerImg}" class="hero-logo" alt="${labName}">`
-      : `<div style="font-size:56px;opacity:.85">🏥</div>`}
-  </div>
-</div>
+    // LOADING OVERLAY
+    +'<div id="__ov" style="display:none;position:fixed;inset:0;background:rgba(15,36,96,.85);align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px">'
+    +'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 48px;display:flex;flex-direction:column;align-items:center;gap:16px">'
+    +'<div class="sp"></div>'
+    +'<div style="font-size:15px;font-weight:700;color:#fff">جاري إنشاء ملف PDF...</div>'
+    +'</div></div>';
 
-<!-- PATIENT CARD -->
-<div class="pt-card" style="margin-right:auto;margin-left:auto;margin-top:-1px;border-radius:0 0 var(--radius) var(--radius)">
-  <div class="pt-card-head">
-    <div class="pt-avatar">${p.gender==='female'?'👩':'👨'}</div>
-    <div>
-      <div class="pt-name">${p.name}</div>
-      <div class="pt-sub">رقم الملف: ${p.id} · ${ptGender} · ${ptAge}</div>
-    </div>
-  </div>
-  <div class="pt-grid">
-    <div class="pt-cell"><label>رقم الملف</label><span>${p.id}</span></div>
-    <div class="pt-cell"><label>العمر</label><span>${ptAge}</span></div>
-    <div class="pt-cell"><label>الجنس</label><span>${ptGender}</span></div>
-    <div class="pt-cell"><label>الهاتف</label><span>${p.phone||'—'}</span></div>
-  </div>
-</div>
+  // JS منفصل تماماً كـ string
+  var JS = [
+    'var VH={'+visitHtmlJs+'};',
+    'var VI={'+visitInfoJs+'};',
+    'function _t(m,e){var d=document.createElement("div");d.className="toast"+(e?" err":"");d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove();},3800);}',
+    'function _sov(){var o=document.getElementById("__ov");o.style.display="flex";}',
+    'function _hov(){var o=document.getElementById("__ov");o.style.display="none";}',
+    'function scrollToVisit(id){var e=document.getElementById(id);if(e)e.scrollIntoView({behavior:"smooth",block:"start"});}',
+    'function scaleR(){document.querySelectorAll(".rpc").forEach(function(el){var ou=el.parentElement;var pw=ou.offsetWidth||860;var sc=Math.min(1,pw/794);el.style.transform="scale("+sc+")";el.style.transformOrigin="top right";ou.style.height=Math.ceil(el.scrollHeight*sc)+"px";});}',
+    'window.addEventListener("load",function(){scaleR();setTimeout(scaleR,600);setTimeout(scaleR,1500);});',
+    'window.addEventListener("resize",scaleR);',
+    'async function downloadVisitPDF(id,btn){',
+    '  var html=VH[id];var info=VI[id];',
+    '  if(!html){_t("التقرير غير متوفر",true);return;}',
+    '  var orig=btn?btn.innerHTML:"";',
+    '  if(btn){btn.disabled=true;btn.textContent="⏳ جاري التحضير...";}',
+    '  _sov();',
+    '  try{',
+    '    var c=document.createElement("div");',
+    '    c.style.cssText="position:fixed;top:0;left:-9999px;width:794px;background:#fff;z-index:99999;font-family:Inter,Arial,sans-serif;direction:ltr";',
+    '    c.innerHTML="<link href=\'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap\' rel=\'stylesheet\'><style>*{font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}</style>"+html;',
+    '    document.body.appendChild(c);',
+    '    await document.fonts.ready;',
+    '    await new Promise(function(r){setTimeout(r,400);});',
+    '    var cv=await html2canvas(c,{scale:2,useCORS:true,backgroundColor:"#fff",logging:false,allowTaint:true,letterRendering:true});',
+    '    document.body.removeChild(c);',
+    '    var J=window.jspdf;var doc=new J.jsPDF({orientation:"portrait",unit:"mm",format:"a4"});',
+    '    var img=cv.toDataURL("image/jpeg",.95);',
+    '    var W=210,H=297,iW=W,iH=(cv.height*W)/cv.width;',
+    '    if(iH<=H){doc.addImage(img,"JPEG",0,0,iW,iH);}',
+    '    else{',
+    '      var pc=document.createElement("canvas");var ctx=pc.getContext("2d");',
+    '      var sf=cv.width/W,ph=H*sf,rem=cv.height,sy=0,pg=0;',
+    '      while(rem>0){if(pg>0)doc.addPage();var sh=Math.min(ph,rem);',
+    '        pc.width=cv.width;pc.height=sh;ctx.fillStyle="#fff";ctx.fillRect(0,0,pc.width,pc.height);',
+    '        ctx.drawImage(cv,0,sy,cv.width,sh,0,0,cv.width,sh);',
+    '        doc.addImage(pc.toDataURL("image/jpeg",.95),"JPEG",0,0,iW,sh/sf);',
+    '        sy+=sh;rem-=sh;pg++;}}',
+    '    var fn=id+"_"+(info.patientName||"patient").replace(/\\s+/g,"_")+".pdf";',
+    '    doc.save(fn);_hov();_t("✅ تم تنزيل: "+fn);',
+    '  }catch(e){_hov();_t("❌ فشل: "+e.message,true);console.error(e);}',
+    '  if(btn){btn.disabled=false;btn.innerHTML=orig;}',
+    '}'
+  ].join('\n');
 
-<!-- STATS -->
-<div class="stats-strip" style="padding:0 0px;max-width:900px;margin:16px auto">
-  <div class="stat-card">
-    <div class="stat-icon blue">📋</div>
-    <div><div class="stat-num">${ptReqs.length}</div><div class="stat-lbl">إجمالي الزيارات</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon green">📅</div>
-    <div><div class="stat-num" style="font-size:13px">${ptReqs[0].date||'-'}</div><div class="stat-lbl">آخر زيارة</div></div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-icon amber">📄</div>
-    <div><div class="stat-num" style="font-size:13px">${ptReqs[ptReqs.length-1].date||'-'}</div><div class="stat-lbl">أول زيارة</div></div>
-  </div>
-</div>
+  // تجميع الصفحة النهائية بأمان تام
+  var parts = [];
+  parts.push('<!DOCTYPE html>\n<html dir="rtl" lang="ar">\n<head>\n');
+  parts.push('<meta charset="UTF-8">\n');
+  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1">\n');
+  parts.push('<title>نتائج '+p.name+'</title>\n');
+  parts.push('<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">\n');
+  parts.push('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><'+'/'+'script>\n');
+  parts.push('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><'+'/'+'script>\n');
+  parts.push('<style>\n'+CSS+'\n</style>\n');
+  parts.push('</head>\n<body>\n');
+  parts.push(BODY);
+  parts.push('\n<script>\n'+JS+'\n<'+'/'+'script>\n');
+  parts.push('</body>\n</html>');
 
-<!-- MAIN LAYOUT -->
-<div class="main-wrap" style="padding:0 0px 60px;max-width:900px;margin:0 auto">
+  var pageHTML = parts.join('');
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="tl-card">
-      <div class="tl-head">🗂 الزيارات</div>
-      <div class="tl-body">
-        ${timelineItems}
-      </div>
-    </div>
-  </aside>
-
-  <!-- VISITS -->
-  <div class="content">
-    ${visitCards}
-  </div>
-
-</div>
-
-<!-- FOOTER -->
-<div class="pg-footer">
-  <strong>${labName}</strong>
-  ${labPhone ? ' · 📞 '+labPhone : ''}
-  ${labAddress ? ' · 📍 '+labAddress : ''}
-  <br><span style="font-size:10px;opacity:.6;margin-top:4px;display:block">تم إنشاء هذا التقرير بواسطة MedLab Pro</span>
-  ${footerImg ? `<img src="${footerImg}" style="max-height:44px;margin-top:10px;border-radius:6px;opacity:.9">` : ''}
-</div>
-
-<!-- LOADING OVERLAY (hidden) -->
-<div id="__ov" class="ov" style="display:none">
-  <div class="ov-card">
-    <div class="sp"></div>
-    <div class="omsg">جاري إنشاء ملف PDF...</div>
-  </div>
-</div>
-
-<script>
-const VISIT_HTML = {
-  ${VISIT_HTML_JS}
-};
-const VISIT_INFO = {
-  ${VISIT_INFO_JS}
-};
-
-/* toast */
-function _toast(msg, isErr){
-  const t = document.createElement('div');
-  t.className = 'toast' + (isErr?' err':'');
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 3800);
-}
-
-/* loading */
-function _showOv(){document.getElementById('__ov').style.display='flex';}
-function _hideOv(){document.getElementById('__ov').style.display='none';}
-
-/* scroll to visit */
-function scrollToVisit(id){
-  const el = document.getElementById(id);
-  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-/* scale report previews to fit container */
-function scaleReports(){
-  document.querySelectorAll('.rpt-container').forEach(el=>{
-    const outer = el.closest('.rpt-outer');
-    if(!outer) return;
-    const pw = outer.offsetWidth || 860;
-    const scale = Math.min(1, pw / 794);
-    el.style.transform = 'scale('+scale+')';
-    el.style.transformOrigin = 'top right';
-    outer.style.height = Math.ceil(el.scrollHeight * scale) + 'px';
-  });
-}
-window.addEventListener('load', ()=>{scaleReports(); setTimeout(scaleReports,600); setTimeout(scaleReports,1500);});
-window.addEventListener('resize', scaleReports);
-
-/* download PDF */
-async function downloadVisitPDF(reqId, btn){
-  const html = VISIT_HTML[reqId];
-  const info = VISIT_INFO[reqId];
-  if(!html){ _toast('التقرير غير متوفر', true); return; }
-
-  const origLabel = btn ? btn.innerHTML : '';
-  if(btn){ btn.disabled=true; btn.textContent='⏳ جاري التحضير...'; }
-  _showOv();
-
-  try{
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;top:0;left:-9999px;width:794px;background:#fff;z-index:99999;font-family:Inter,Arial,sans-serif;direction:ltr';
-    container.innerHTML =
-      '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">' +
-      '<style>*{font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}</style>' + html;
-    document.body.appendChild(container);
-
-    await document.fonts.ready;
-    await new Promise(r=>setTimeout(r,400));
-
-    const canvas = await html2canvas(container,{
-      scale:2, useCORS:true, backgroundColor:'#fff',
-      logging:false, allowTaint:true, letterRendering:true
-    });
-    document.body.removeChild(container);
-
-    const {jsPDF} = window.jspdf;
-    const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const img = canvas.toDataURL('image/jpeg',.95);
-    const W=210, H=297, iW=W, iH=(canvas.height*W)/canvas.width;
-
-    if(iH<=H){
-      doc.addImage(img,'JPEG',0,0,iW,iH);
-    } else {
-      const pc=document.createElement('canvas');
-      const ctx=pc.getContext('2d');
-      const sf=canvas.width/W, phPx=H*sf;
-      let rem=canvas.height, sy=0, pg=0;
-      while(rem>0){
-        if(pg>0) doc.addPage();
-        const sh=Math.min(phPx,rem);
-        pc.width=canvas.width; pc.height=sh;
-        ctx.fillStyle='#fff'; ctx.fillRect(0,0,pc.width,pc.height);
-        ctx.drawImage(canvas,0,sy,canvas.width,sh,0,0,canvas.width,sh);
-        doc.addImage(pc.toDataURL('image/jpeg',.95),'JPEG',0,0,iW,sh/sf);
-        sy+=sh; rem-=sh; pg++;
-      }
-    }
-    const fname = reqId+'_'+(info.patientName||'patient').replace(/\s+/g,'_')+'.pdf';
-    doc.save(fname);
-    _hideOv();
-    _toast('✅ تم تنزيل: '+fname);
-  } catch(e){
-    _hideOv();
-    _toast('❌ فشل إنشاء PDF: '+e.message, true);
-    console.error(e);
-  }
-  if(btn){ btn.disabled=false; btn.innerHTML=origLabel; }
-}
-<\/script>
-</body>
-</html>`;
-
-  const blob = new Blob([pageHTML], {type:'text/html;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const win  = window.open(url, '_blank');
-  if(!win){
-    showNotif('تنبيه','يرجى السماح بفتح نوافذ جديدة','warning');
-    return;
-  }
-  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  var blob = new Blob([pageHTML], {type:'text/html;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var win  = window.open(url, '_blank');
+  if(!win){showNotif('تنبيه','يرجى السماح بفتح نوافذ جديدة','warning');return;}
+  setTimeout(function(){URL.revokeObjectURL(url);}, 90000);
 
   if(p.phone){
-    const intPhone = _formatPhoneForWhatsApp(p.phone);
-    setTimeout(()=>{
+    var intPhone = _formatPhoneForWhatsApp(p.phone);
+    setTimeout(function(){
       _openWhatsAppDirect(intPhone);
-      showNotif('✅ تم','تم فتح سجل المريض وفتح واتساب','success');
+      showNotif('✅ تم','تم فتح سجل المريض في المتصفح وفتح واتساب','success');
     }, 900);
   } else {
     showNotif('✅ تم','تم فتح سجل نتائج المريض','success');
