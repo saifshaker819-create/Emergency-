@@ -24543,15 +24543,23 @@ function _pmBuildData(patientId) {
   const ptReqs = [...requests]
     .filter(r => r.patientId === patientId)
     .reverse()
-    .map(r => ({
-      id:         r.id,
-      date:       r.date || '',
-      resultDate: r.resultDate || r.date || '',
-      status:     r.status || 'pending',
-      tests:      r.tests  || [],
-      results:    r.results || {},
-      doctorName: r.doctorName || ''
-    }));
+    .map(r => {
+      // ── تضمين HTML التقرير الأصلي (نفس buildPrintHTML) لكل طلب مكتمل ──
+      let reportHTML = '';
+      if (r.status === 'done') {
+        try { reportHTML = buildPrintHTML(r); } catch(e) { reportHTML = ''; }
+      }
+      return {
+        id:         r.id,
+        date:       r.date || '',
+        resultDate: r.resultDate || r.date || '',
+        status:     r.status || 'pending',
+        tests:      r.tests  || [],
+        results:    r.results || {},
+        doctorName: r.doctorName || '',
+        reportHTML  // HTML التقرير الأصلي جاهز للتحويل لـ PDF
+      };
+    });
 
   // التحاليل المستخدمة فقط (تقليل الحجم)
   const usedIds = [...new Set(ptReqs.flatMap(r => r.tests))];
@@ -24824,8 +24832,6 @@ table tr:hover td{background:rgba(255,255,255,.015)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
-<script>
-const _D=${dataJson};
 function toast(m,ms=2500){const t=document.getElementById('TT');t.textContent=m;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),ms)}
 function tog(i){const c=document.getElementById('vc'+i);if(c)c.classList.toggle('op')}
 function itp(v,t){
@@ -24839,79 +24845,91 @@ async function dlPDF(i){
   const btn=document.getElementById('pb'+i);
   if(btn){btn.classList.add('ld');btn.disabled=true}
   try{
-    const req=_D.requests[i],pt=_D.patient,lab=_D.lab,at=_D.tests;
-    const wrap=document.createElement('div');
-    wrap.style.cssText='position:fixed;left:-9999px;top:0;width:740px;background:#fff;color:#000;font-family:Tajawal,Arial,sans-serif;direction:rtl;padding:28px 36px;font-size:12px;line-height:1.6';
-    function es(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-    const ids=req.tests||[],res=req.results||{};
-    let rows='';
-    ids.forEach(tid=>{
-      const t=at.find(x=>x.id===tid)||{id:tid,nameEn:tid,unit:''};
-      const val=res[tid]||'—';
-      const {c}=itp(val,t);
-      const col=c==='hi'?'#c00':c==='lo'?'#b45000':c==='ok'?'#166534':'#000';
-      const fl=c==='hi'?'▲ مرتفع':c==='lo'?'▼ منخفض':c==='ok'?'✓ طبيعي':'';
-      const rf=t.ref||(t.minVal!=null&&t.maxVal!=null?t.minVal+'–'+t.maxVal:'—');
-      rows+=\`<tr>
-        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-weight:600">\${es(t.nameShort||t.nameEn||tid)}</td>
-        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-family:monospace;font-weight:800;color:\${col}">\${es(val)} \${es(t.unit||'')}</td>
-        <td style="padding:8px 11px;border-bottom:1px solid #eee;color:#666;font-size:11px">\${es(rf)}</td>
-        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-weight:700;font-size:11px;color:\${col}">\${fl}</td></tr>\`;
+    const req=_D.requests[i];
+    const pt=_D.patient;
+
+    // ── استخدام HTML التقرير الأصلي المضمَّن مباشرة ──
+    const reportHTML = req.reportHTML || '';
+    if(!reportHTML){
+      toast('⚠️ لا يوجد تقرير محفوظ لهذا الطلب');
+      return;
+    }
+
+    // إنشاء iframe مخفي لرسم HTML التقرير
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;top:0;left:-9999px;width:794px;height:1200px;border:none;background:#fff;z-index:-1;opacity:0;pointer-events:none';
+    document.body.appendChild(iframe);
+
+    await new Promise(resolve=>{
+      iframe.onload=resolve;
+      const iDoc=iframe.contentWindow.document;
+      iDoc.open();
+      // إضافة override styles لضمان خلفية بيضاء للـ PDF
+      const pdfStyles=\`<style>
+        body,html{background:#fff!important;margin:0;padding:0}
+        .print-prev,.pp-section,.pp-tbl td,.pp-tbl{background:#fff!important;color:#111!important}
+        .pp-hdr-default{background:linear-gradient(135deg,#003d7a,#0055aa)!important;color:#fff!important}
+        .pp-tbl th{background:#003366!important;color:#fff!important}
+        .pp-tbl tr:nth-child(even) td{background:#f5f8ff!important}
+        .ab{color:#cc0000!important;font-weight:800!important}
+        .nm{color:#006600!important}
+        *{font-family:Cairo,sans-serif!important}
+        @media print{body{-webkit-print-color-adjust:exact!important}}
+      </style>\`;
+      iDoc.write(reportHTML.replace('</head>',pdfStyles+'</head>'));
+      iDoc.close();
     });
-    wrap.innerHTML=\`
-    <div style="display:flex;justify-content:space-between;border-bottom:3px solid #00b89c;padding-bottom:14px;margin-bottom:16px">
-      <div><div style="font-size:20px;font-weight:900;color:#00b89c">\${es(lab.name||'MedLab Pro')}</div>
-      \${lab.addr?'<div style=\\"font-size:11px;color:#666;margin-top:2px\\">📍 '+es(lab.addr)+'</div>':''}
-      \${lab.phone?'<div style=\\"font-size:11px;color:#666\\">📞 '+es(lab.phone)+'</div>':''}</div>
-      <div style="text-align:left"><div style="font-size:10px;color:#888">رقم الطلب</div>
-      <div style="font-size:13px;font-weight:800;color:#00b89c;font-family:monospace">\${es(req.id||'')}</div>
-      <div style="font-size:10px;color:#888">\${es(req.resultDate||req.date||'')}</div></div></div>
-    <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:9px;padding:12px 15px;margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">المريض</div><div style="font-weight:900;font-size:14px">\${es(pt.name)}</div></div>
-      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">العمر / الجنس</div><div style="font-weight:700">\${es(pt.ageDisplay||'—')} / \${pt.gender==='female'?'أنثى':'ذكر'}</div></div>
-      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">رقم الملف</div><div style="font-weight:800;font-family:monospace;color:#00b89c">\${es(pt.id||'—')}</div></div>
-      \${req.doctorName?'<div><div style=\\"font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px\\">الطبيب</div><div style=\\"font-weight:700\\">د. '+es(req.doctorName)+'</div></div>':''}
-    </div>
-    <div style="font-size:13px;font-weight:800;color:#00b89c;border-bottom:2px solid #d1fae5;padding-bottom:5px;margin-bottom:9px">نتائج التحاليل</div>
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr style="background:#f8fafb">
-        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">التحليل</th>
-        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">النتيجة</th>
-        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">القيم الطبيعية</th>
-        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">التقييم</th>
-      </tr></thead>
-      <tbody>\${rows}</tbody>
-    </table>
-    <div style="text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:16px">
-      أُصدر إلكترونياً من \${es(lab.name||'MedLab Pro')} — \${new Date().toLocaleDateString('ar-IQ')}
-    </div>\`;
-    document.body.appendChild(wrap);
-    try{
-      if(window.html2canvas){
-        const cv=await html2canvas(wrap,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
-        const{jsPDF:J}=window.jspdf;
-        const doc=new J({orientation:'p',unit:'mm',format:'a4'});
-        const iw=210,ih=(cv.height*iw)/cv.width;
-        const img=cv.toDataURL('image/jpeg',.92);
-        if(ih<=297){doc.addImage(img,'JPEG',0,0,iw,ih)}
-        else{
-          let y=0;
-          while(y<ih){
-            if(y>0)doc.addPage();
-            const sh=Math.min(297,ih-y);
-            const sc=document.createElement('canvas');
-            sc.width=cv.width;sc.height=(sh/ih)*cv.height;
-            sc.getContext('2d').drawImage(cv,0,(y/ih)*cv.height,cv.width,sc.height,0,0,cv.width,sc.height);
-            doc.addImage(sc.toDataURL('image/jpeg',.92),'JPEG',0,0,iw,sh);
-            y+=297;
-          }
+
+    // انتظار تحميل الخطوط
+    try{ await iframe.contentDocument.fonts.ready; }catch(e){}
+    await new Promise(r=>setTimeout(r,300));
+
+    if(window.html2canvas){
+      const cv=await html2canvas(iframe.contentDocument.body,{
+        scale:2,useCORS:true,backgroundColor:'#ffffff',
+        logging:false,allowTaint:true,letterRendering:true,
+        windowWidth:794,
+        width:794,
+        scrollX:0,scrollY:0
+      });
+      document.body.removeChild(iframe);
+
+      const{jsPDF:J}=window.jspdf;
+      const doc=new J({orientation:'p',unit:'mm',format:'a4'});
+      const iw=210,ih=(cv.height*iw)/cv.width;
+      const sf=cv.width/iw;
+      const phPx=297*sf;
+
+      if(ih<=297){
+        doc.addImage(cv.toDataURL('image/jpeg',.95),'JPEG',0,0,iw,ih);
+      } else {
+        let srcY=0,rem=cv.height,pg=0;
+        while(rem>0){
+          if(pg>0)doc.addPage();
+          const slH=Math.min(phPx,rem);
+          const sc=document.createElement('canvas');
+          sc.width=cv.width;sc.height=slH;
+          sc.getContext('2d').drawImage(cv,0,srcY,cv.width,slH,0,0,cv.width,slH);
+          doc.addImage(sc.toDataURL('image/jpeg',.95),'JPEG',0,0,iw,slH/sf);
+          srcY+=slH;rem-=slH;pg++;
         }
-        doc.save((pt.name+'_'+req.id).replace(/\\s+/g,'_')+'.pdf');
-        toast('✅ تم تحميل PDF');
-      } else { toast('⚠️ افتح الملف بإنترنت لتحميل PDF'); }
-    } finally { document.body.removeChild(wrap); }
-  } catch(e){ toast('❌ خطأ: '+e.message); console.error(e); }
-  finally{ if(btn){btn.classList.remove('ld');btn.disabled=false} }
+      }
+      const fname=(pt.name+'_'+req.id).replace(/\s+/g,'_')+'.pdf';
+      doc.save(fname);
+      toast('✅ تم تحميل PDF بنفس تصميم التقرير');
+    } else {
+      document.body.removeChild(iframe);
+      toast('⚠️ افتح الملف بإنترنت لتحميل PDF');
+    }
+  } catch(err){
+    toast('❌ خطأ: '+err.message);
+    console.error(err);
+  } finally {
+    if(btn){btn.classList.remove('ld');btn.disabled=false}
+    // تنظيف iframe إن بقي
+    const old=document.querySelector('iframe[style*="-9999px"]');
+    if(old) try{document.body.removeChild(old)}catch(e){}
+  }
 }
 // فتح أول طلب مكتمل تلقائياً
 (function(){
