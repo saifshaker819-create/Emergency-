@@ -1173,7 +1173,7 @@ body.light-mode ::-webkit-scrollbar-thumb:hover{background:#0077aa;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font-family);background:var(--bg-dark);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:var(--font-size-base);font-weight:700;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 20%,rgba(0,212,255,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(123,47,255,0.07) 0%,transparent 50%);pointer-events:none;z-index:0;}
-.layout{display:flex;min-height:100vh;position:relative;z-index:1;}
+.layout{display:flex;min-height:100vh;position:relative;z-index:1;overflow-x:hidden;}
 .sidebar{width:var(--sidebar-w);min-height:100vh;background:rgba(4,8,20,0.97);border-left:1px solid var(--border);display:flex;flex-direction:column;position:fixed;right:0;top:0;bottom:0;z-index:200;overflow-y:auto;overflow-x:hidden;transition:transform 0.3s ease;}
 .sidebar-logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .logo-ic{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 0 18px rgba(0,212,255,0.35);}
@@ -1714,15 +1714,32 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .inline-add.open{display:block;}
 @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr);}.g2{grid-template-columns:1fr;}.fr3{grid-template-columns:1fr 1fr;}.fr4{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){
+  /* ── الشريط الجانبي: مخفي خارج الشاشة في RTL ── */
+  /* في RTL الشريط على اليمين، نخفيه بدفعه إلى اليمين بـ translateX موجب */
   .sidebar{transform:translateX(100%);}
-  .sidebar.open{transform:none;}
-  .main{margin-right:0;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-right:0!important;}
+
+  /* ── overlay للشريط الجانبي ── */
+  #sidebar-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.55);z-index:199;
+  }
+  .sidebar.open~#sidebar-overlay,
+  #sidebar-overlay.show{display:block;}
+
+  /* ── الإحصائيات والشبكات ── */
   .stats{grid-template-columns:1fr 1fr;}
   .test-list{grid-template-columns:1fr 1fr;}
+  .g2{grid-template-columns:1fr!important;}
+  .g3{grid-template-columns:1fr 1fr!important;}
+  .fr3{grid-template-columns:1fr 1fr!important;}
+  .fr4{grid-template-columns:1fr 1fr!important;}
+
+  /* ── زر الهامبرغر ── */
   #hamburger-btn{display:flex!important;align-items:center;justify-content:center;}
-  #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;}
-  .sidebar.open~#sidebar-overlay,#sidebar-overlay.show{display:block;}
-  /* ── إصلاح الهيدر على الموبايل ── */
+
+  /* ── الهيدر ── */
   .hdr{padding:10px 12px;flex-wrap:nowrap;gap:6px;}
   .hdr-left{flex:1;min-width:0;overflow:hidden;}
   .hdr-left .page-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -1731,14 +1748,76 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .hdr-search{width:130px!important;min-width:0;padding:5px 8px;}
   .hdr-search input{font-size:10px;}
   #gs-wrap{width:130px!important;}
-  /* إخفاء زر البحث العالمي والتقويم على الشاشات الصغيرة جداً */
+
+  /* ── المحتوى الرئيسي ── */
+  .sec{padding:12px 8px!important;}
+  .gc{padding:0!important;border-radius:12px!important;}
+  .gc-hdr{padding:12px 14px!important;flex-wrap:wrap;gap:8px;}
+  .gc-body{padding:12px!important;}
+  .mbody{padding:14px!important;}
+  .mhdr{padding:14px 16px!important;}
+  .mftr{padding:10px 14px!important;flex-wrap:wrap;gap:8px;}
+  .moverlay{padding:8px!important;}
+
+  /* ── المودالات على الموبايل: تملأ الشاشة ── */
+  .modal{
+    max-width:100%!important;
+    max-height:96vh!important;
+    border-radius:12px!important;
+    margin:0!important;
+  }
+  .modal.wide{max-width:100%!important;}
+
+  /* ── جدول النتائج على الموبايل ── */
+  .res-tbl{font-size:11px!important;}
+  .res-tbl th{padding:7px 8px!important;font-size:10px!important;}
+  .res-tbl td{padding:5px 8px!important;}
+  .res-input{width:80px!important;font-size:11px!important;}
+
+  /* ── شريط بيانات المريض ── */
+  .pt-bar{grid-template-columns:repeat(2,1fr)!important;gap:8px!important;padding:10px!important;}
+
+  /* ── أزرار النتائج ── */
+  .btn-lg{padding:9px 12px!important;font-size:12px!important;}
+
+  /* ── wizard step 2 panels ── */
+  .wiz-s2-panels{
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:unset!important;
+    max-height:60vh;
+    overflow-y:auto;
+  }
+  .wiz-panel{min-height:200px;}
+
+  /* ── res-entry buttons wrap ── */
+  #sec-results .gc-body>div:last-child{
+    flex-wrap:wrap!important;
+    gap:8px!important;
+  }
 }
+
 @media(max-width:480px){
   .hdr{padding:8px 10px;}
   .hdr-search{display:none!important;}
   #gs-wrap{display:none!important;}
   .hdr-right{gap:4px;}
   .hbtn{width:32px!important;height:32px!important;font-size:13px!important;}
+
+  /* ── الإحصائيات بعمود واحد على الشاشات الضيقة جداً ── */
+  .stats{grid-template-columns:1fr!important;}
+  .pt-bar{grid-template-columns:1fr 1fr!important;}
+
+  /* ── الجدول: إخفاء الأعمدة الأقل أهمية ── */
+  .res-tbl th:nth-child(3),
+  .res-tbl td:nth-child(3),
+  .res-tbl th:nth-child(5),
+  .res-tbl td:nth-child(5){display:none!important;}
+
+  /* ── المودالات ── */
+  .modal{border-radius:8px!important;}
+  .moverlay{padding:4px!important;}
+  .mbody{padding:10px!important;}
 }
 @media print{
   body>*:not(#hidden-print){display:none!important;}
