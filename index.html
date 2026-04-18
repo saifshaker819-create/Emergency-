@@ -1545,6 +1545,7 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
               <button class="btn btn-p btn-lg" onclick="finalizeAndPrint()">🖨️ حفظ وطباعة</button>
               <button class="btn btn-ok btn-lg" onclick="downloadPDF()">📄 تحميل PDF</button>
               <button class="btn btn-w btn-lg" onclick="shareWhatsApp()">📱 مشاركة PDF واتساب</button>
+              <button class="btn btn-lg" style="background:linear-gradient(135deg,rgba(0,184,156,.18),rgba(0,130,110,.12));border:1.5px solid rgba(0,184,156,.45);color:#2dd4bf;font-weight:800" onclick="openPatientPortal()">🌐 إرسال للمريض</button>
             </div>
           </div>
         </div>
@@ -3981,6 +3982,7 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
     <div class="mftr">
       <button class="btn btn-s" onclick="closeModal('m-print')">إغلاق</button>
       <button class="btn btn-w" onclick="shareWhatsApp()">📱 واتساب PDF</button>
+      <button class="btn" style="background:rgba(0,184,156,.15);border:1px solid rgba(0,184,156,.4);color:#2dd4bf;font-weight:800" onclick="openPatientPortal()">🌐 إرسال للمريض</button>
       <button class="btn btn-ok" onclick="downloadPDF()">📄 PDF</button>
       <button class="btn btn-p btn-lg" onclick="doPrint()">🖨️ طباعة</button>
     </div>
@@ -6564,6 +6566,7 @@ function openPatientQuickPanel(pid){
           <button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}');document.getElementById('m-pt-quick').remove()">🖨️ طباعة</button>
           <button class="btn btn-sm btn-p" onclick="openPrintModal('${r.id}');document.getElementById('m-pt-quick').remove()">👁️ معاينة</button>
           <button class="btn btn-sm btn-w" onclick="currentReqId='${r.id}';shareWhatsApp();document.getElementById('m-pt-quick').remove()">📱 واتساب</button>
+          <button class="btn btn-sm" style="background:rgba(0,184,156,.14);border:1px solid rgba(0,184,156,.38);color:#2dd4bf;font-size:11px;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer" onclick="openPatientPortal('${r.id}');document.getElementById('m-pt-quick').remove()">🌐 إرسال</button>
           <button class="btn btn-sm btn-s" onclick="goToResult('${r.id}');document.getElementById('m-pt-quick').remove()">➕ إضافة تحليل</button>
           ${!r.printed?`<button class="btn btn-sm btn-d" onclick="deleteReqFromPanel('${r.id}','${pid}')">🗑️ حذف</button>`:''}
         </div>
@@ -7530,269 +7533,6 @@ function clearSingleInvoice(id){
 let filteredPatients=[];
 let _dateFilter = ''; // فلتر التاريخ المحدد
 
-
-// ============================================================
-// مشاركة جميع نتائج المريض عبر واتساب — صفحة HTML شاملة
-// ============================================================
-function sharePatientAllResultsWhatsApp(pid){
-  var p = patients.find(function(x){return x.id===pid;});
-  if(!p){showNotif('خطأ','المريض غير موجود','error');return;}
-
-  var ptReqs = requests
-    .filter(function(r){return r.patientId===pid && r.status==='done';})
-    .sort(function(a,b){return new Date(b.resultDate||b.date)-new Date(a.resultDate||a.date);});
-
-  if(!ptReqs.length){showNotif('تنبيه','لا توجد نتائج مكتملة لهذا المريض','warning');return;}
-
-  var labName    = (settings.labName    ||'MedLab Pro');
-  var labPhone   = (settings.ftrPhone   ||'');
-  var labAddress = (settings.ftrAddress ||'');
-  var headerImg  = (settings.headerImg  ||'');
-  var footerImg  = (settings.footerImg  ||'');
-  var ptGender   = p.gender==='female'?'أنثى':'ذكر';
-  var ptAge      = p.ageDisplay||p.age||'-';
-
-  showNotif('جاري التحضير','جاري تجميع نتائج المريض...','info');
-
-  // بناء HTML كل زيارة باستخدام buildPrintHTML الأصلي
-  var savedReqId = currentReqId;
-  var visitEntries = ptReqs.map(function(r){
-    currentReqId = r.id;
-    var html = buildPrintHTML(r);
-    return {r:r, html:html};
-  });
-  currentReqId = savedReqId;
-
-  // ── بناء بيانات JS المُضمّنة بأمان ──
-  var visitHtmlJs = visitEntries.map(function(e){
-    return JSON.stringify(e.r.id)+':'+JSON.stringify(e.html);
-  }).join(',\n');
-
-  var visitInfoJs = visitEntries.map(function(e){
-    var r=e.r;
-    return JSON.stringify(r.id)+':'+JSON.stringify({id:r.id,patientName:r.patientName||p.name,date:r.date||''});
-  }).join(',\n');
-
-  // ── Timeline sidebar items ──
-  var tlItems = visitEntries.map(function(e,i){
-    var r=e.r;
-    var dot = i===0
-      ? '<div style="width:10px;height:10px;border-radius:50%;background:#1a56db;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 2px rgba(26,86,219,.3)"></div>'
-      : '<div style="width:10px;height:10px;border-radius:50%;background:#cbd5e1;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 2px #e2e8f4"></div>';
-    return '<div onclick="scrollToVisit(\'visit-'+r.id+'\')" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 6px;border-radius:8px;transition:background .2s;margin-bottom:2px" onmouseover="this.style.background=\'#f0f6ff\'" onmouseout="this.style.background=\'\'">'
-      +dot
-      +'<div>'
-      +'<div style="font-size:11px;font-weight:700;color:#1e293b">'+r.date+'</div>'
-      +'<div style="font-size:10px;color:#64748b;font-family:monospace">'+r.id+'</div>'
-      +(r.doctorName?'<div style="font-size:10px;color:#0ea5e9">'+r.doctorName+'</div>':'')
-      +'</div></div>';
-  }).join('');
-
-  // ── بطاقة كل زيارة ──
-  var visitCards = visitEntries.map(function(e,i){
-    var r=e.r; var html=e.html;
-    return '<section id="visit-'+r.id+'" style="background:#fff;border-radius:16px;border:1px solid #e2e8f4;box-shadow:0 2px 16px rgba(30,58,138,.08);margin-bottom:20px;overflow:hidden">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(90deg,#f8faff,#eef4ff);border-bottom:2px solid #1a56db">'
-      +'<div style="display:flex;align-items:center;gap:12px">'
-      +'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0ea5e9);color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(26,86,219,.3);flex-shrink:0">'+(i+1)+'</div>'
-      +'<div>'
-      +'<div style="font-size:15px;font-weight:800;color:#1e293b">زيارة '+r.date+'</div>'
-      +'<div style="font-size:11px;color:#64748b;margin-top:2px">'+r.id+(r.doctorName?' · '+r.doctorName:'')+'</div>'
-      +'</div></div>'
-      +'<button onclick="downloadVisitPDF(\''+r.id+'\',this)" style="display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;box-shadow:0 2px 8px rgba(22,163,74,.3)">'
-      +'⬇ تنزيل PDF'
-      +'</button>'
-      +'</div>'
-      +'<div style="background:#fafcff;overflow:hidden;border-top:1px solid #e2e8f4">'
-      +'<div id="outer-'+r.id+'" style="width:100%;overflow:hidden;background:#fff">'
-      +'<div class="rpc" data-id="'+r.id+'" style="width:794px;direction:ltr;background:#fff;font-family:Inter,Arial,sans-serif;transform-origin:top right">'+html+'</div>'
-      +'</div></div>'
-      +'</section>';
-  }).join('');
-
-  // ── إحصائيات ──
-  var firstDate = ptReqs.length>1 ? ptReqs[ptReqs.length-1].date||'-' : '-';
-  var lastDate  = ptReqs[0].date||'-';
-
-  // ── hero logo ──
-  var heroLogo = headerImg
-    ? '<img src="'+headerImg+'" style="max-height:60px;max-width:160px;border-radius:10px;object-fit:contain;background:rgba(255,255,255,.12);padding:6px" alt="logo">'
-    : '<div style="font-size:52px;opacity:.85">🏥</div>';
-
-  // ── footer img ──
-  var footerImgHtml = footerImg
-    ? '<br><img src="'+footerImg+'" style="max-height:44px;margin-top:10px;border-radius:6px;opacity:.9">'
-    : '';
-
-  // ── الصفحة الكاملة بـ string concatenation آمن ──
-  var CSS = [
-    ':root{--p:#1a56db;--pd:#1340a8;--a:#0ea5e9;--g:#16a34a;--bg:#f1f5fb;--card:#fff;--bdr:#e2e8f4;--tx:#1e293b;--tx2:#64748b;--tx3:#94a3b8;--r:16px}',
-    '*{box-sizing:border-box;margin:0;padding:0}',
-    'html{scroll-behavior:smooth}',
-    'body{font-family:Cairo,sans-serif;background:var(--bg);color:var(--tx);direction:rtl;min-height:100vh}',
-    '.sp{width:50px;height:50px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}',
-    '@keyframes spin{to{transform:rotate(360deg)}}',
-    '.toast{position:fixed;bottom:28px;right:28px;display:flex;align-items:center;gap:10px;background:#fff;color:var(--tx);padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:10000;box-shadow:0 8px 28px rgba(0,0,0,.15);border-right:4px solid var(--g);animation:su .3s ease}',
-    '.toast.err{border-right-color:#dc2626}',
-    '@keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}',
-    '@media(max-width:680px){',
-    '.ptgrid{grid-template-columns:repeat(2,1fr)!important}',
-    '.stgrid{grid-template-columns:repeat(2,1fr)!important}',
-    '.mainwrap{flex-direction:column!important}',
-    '.sidebar{width:100%!important;position:static!important}',
-    '.tlbody{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:10px!important}',
-    '.vhead{flex-direction:column!important;align-items:flex-start!important;gap:10px!important}',
-    '.btndl{width:100%!important;justify-content:center!important}',
-    '}'
-  ].join('');
-
-  var BODY = ''
-    // HERO
-    +'<div style="background:linear-gradient(135deg,#0f2460 0%,#1a56db 60%,#0ea5e9 100%);padding:28px 36px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative">'
-    +'<div>'
-    +'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px">'+labName+'</div>'
-    +'<div style="font-size:22px;font-weight:900;color:#fff;margin-top:4px">📊 سجل نتائج المريض</div>'
-    +'<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-top:10px">'
-    +'📋 '+ptReqs.length+' زيارة مكتملة'
-    +'</div>'
-    +'</div>'
-    +heroLogo
-    +'</div>'
-
-    // PATIENT CARD
-    +'<div style="max-width:900px;margin:0 auto;border-bottom:1px solid var(--bdr)">'
-    +'<div style="background:#fff;border-radius:0 0 16px 16px;box-shadow:0 8px 32px rgba(30,58,138,.1);overflow:hidden;border:1px solid var(--bdr);border-top:none">'
-    +'<div style="background:linear-gradient(90deg,#f0f6ff,#e8f0fe);padding:14px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr)">'
-    +'<div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,86,219,.3)">'
-    +(p.gender==='female'?'👩':'👨')
-    +'</div>'
-    +'<div>'
-    +'<div style="font-size:18px;font-weight:900;color:#1340a8">'+p.name+'</div>'
-    +'<div style="font-size:12px;color:#64748b;margin-top:2px">رقم الملف: '+p.id+' · '+ptGender+' · '+ptAge+'</div>'
-    +'</div></div>'
-    +'<div class="ptgrid" style="display:grid;grid-template-columns:repeat(4,1fr);padding:16px 22px;gap:14px">'
-    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">رقم الملف</div><div style="font-size:13px;font-weight:700">'+p.id+'</div></div>'
-    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">العمر</div><div style="font-size:13px;font-weight:700">'+ptAge+'</div></div>'
-    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">الجنس</div><div style="font-size:13px;font-weight:700">'+ptGender+'</div></div>'
-    +'<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">الهاتف</div><div style="font-size:13px;font-weight:700">'+(p.phone||'—')+'</div></div>'
-    +'</div></div></div>'
-
-    // STATS
-    +'<div class="stgrid" style="max-width:900px;margin:16px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'
-    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(26,86,219,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div><div><div style="font-size:22px;font-weight:900">'+ptReqs.length+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">إجمالي الزيارات</div></div></div>'
-    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(22,163,74,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div><div><div style="font-size:13px;font-weight:900">'+lastDate+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">آخر زيارة</div></div></div>'
-    +'<div style="background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(30,58,138,.08);border:1px solid #e2e8f4"><div style="width:40px;height:40px;border-radius:10px;background:rgba(217,119,6,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📄</div><div><div style="font-size:13px;font-weight:900">'+firstDate+'</div><div style="font-size:11px;color:#64748b;margin-top:2px">أول زيارة</div></div></div>'
-    +'</div>'
-
-    // MAIN LAYOUT
-    +'<div class="mainwrap" style="max-width:900px;margin:0 auto;padding:0 0 60px;display:flex;gap:20px;align-items:flex-start">'
-
-    // SIDEBAR
-    +'<aside class="sidebar" style="width:200px;flex-shrink:0;position:sticky;top:20px">'
-    +'<div style="background:#fff;border-radius:16px;border:1px solid #e2e8f4;box-shadow:0 2px 16px rgba(30,58,138,.08);overflow:hidden">'
-    +'<div style="background:linear-gradient(90deg,#0f2460,#1a56db);color:#fff;padding:12px 16px;font-size:13px;font-weight:800">🗂 الزيارات</div>'
-    +'<div class="tlbody" style="padding:12px 16px">'+tlItems+'</div>'
-    +'</div></aside>'
-
-    // VISITS
-    +'<div style="flex:1;min-width:0">'+visitCards+'</div>'
-    +'</div>'
-
-    // FOOTER
-    +'<div style="background:linear-gradient(135deg,#0f2460,#1a56db);color:rgba(255,255,255,.75);text-align:center;padding:24px;font-size:12px">'
-    +'<strong style="color:#fff">'+labName+'</strong>'
-    +(labPhone?' · 📞 '+labPhone:'')
-    +(labAddress?' · 📍 '+labAddress:'')
-    +'<br><span style="font-size:10px;opacity:.6;margin-top:4px;display:block">تم إنشاء هذا التقرير بواسطة MedLab Pro</span>'
-    +footerImgHtml
-    +'</div>'
-
-    // LOADING OVERLAY
-    +'<div id="__ov" style="display:none;position:fixed;inset:0;background:rgba(15,36,96,.85);align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px">'
-    +'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 48px;display:flex;flex-direction:column;align-items:center;gap:16px">'
-    +'<div class="sp"></div>'
-    +'<div style="font-size:15px;font-weight:700;color:#fff">جاري إنشاء ملف PDF...</div>'
-    +'</div></div>';
-
-  // JS منفصل تماماً كـ string
-  var JS = [
-    'var VH={'+visitHtmlJs+'};',
-    'var VI={'+visitInfoJs+'};',
-    'function _t(m,e){var d=document.createElement("div");d.className="toast"+(e?" err":"");d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove();},3800);}',
-    'function _sov(){var o=document.getElementById("__ov");o.style.display="flex";}',
-    'function _hov(){var o=document.getElementById("__ov");o.style.display="none";}',
-    'function scrollToVisit(id){var e=document.getElementById(id);if(e)e.scrollIntoView({behavior:"smooth",block:"start"});}',
-    'function scaleR(){document.querySelectorAll(".rpc").forEach(function(el){var ou=el.parentElement;var pw=ou.offsetWidth||860;var sc=Math.min(1,pw/794);el.style.transform="scale("+sc+")";el.style.transformOrigin="top right";ou.style.height=Math.ceil(el.scrollHeight*sc)+"px";});}',
-    'window.addEventListener("load",function(){scaleR();setTimeout(scaleR,600);setTimeout(scaleR,1500);});',
-    'window.addEventListener("resize",scaleR);',
-    'async function downloadVisitPDF(id,btn){',
-    '  var html=VH[id];var info=VI[id];',
-    '  if(!html){_t("التقرير غير متوفر",true);return;}',
-    '  var orig=btn?btn.innerHTML:"";',
-    '  if(btn){btn.disabled=true;btn.textContent="⏳ جاري التحضير...";}',
-    '  _sov();',
-    '  try{',
-    '    var c=document.createElement("div");',
-    '    c.style.cssText="position:fixed;top:0;left:-9999px;width:794px;background:#fff;z-index:99999;font-family:Inter,Arial,sans-serif;direction:ltr";',
-    '    c.innerHTML="<link href=\'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap\' rel=\'stylesheet\'><style>*{font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}</style>"+html;',
-    '    document.body.appendChild(c);',
-    '    await document.fonts.ready;',
-    '    await new Promise(function(r){setTimeout(r,400);});',
-    '    var cv=await html2canvas(c,{scale:2,useCORS:true,backgroundColor:"#fff",logging:false,allowTaint:true,letterRendering:true});',
-    '    document.body.removeChild(c);',
-    '    var J=window.jspdf;var doc=new J.jsPDF({orientation:"portrait",unit:"mm",format:"a4"});',
-    '    var img=cv.toDataURL("image/jpeg",.95);',
-    '    var W=210,H=297,iW=W,iH=(cv.height*W)/cv.width;',
-    '    if(iH<=H){doc.addImage(img,"JPEG",0,0,iW,iH);}',
-    '    else{',
-    '      var pc=document.createElement("canvas");var ctx=pc.getContext("2d");',
-    '      var sf=cv.width/W,ph=H*sf,rem=cv.height,sy=0,pg=0;',
-    '      while(rem>0){if(pg>0)doc.addPage();var sh=Math.min(ph,rem);',
-    '        pc.width=cv.width;pc.height=sh;ctx.fillStyle="#fff";ctx.fillRect(0,0,pc.width,pc.height);',
-    '        ctx.drawImage(cv,0,sy,cv.width,sh,0,0,cv.width,sh);',
-    '        doc.addImage(pc.toDataURL("image/jpeg",.95),"JPEG",0,0,iW,sh/sf);',
-    '        sy+=sh;rem-=sh;pg++;}}',
-    '    var fn=id+"_"+(info.patientName||"patient").replace(/\\s+/g,"_")+".pdf";',
-    '    doc.save(fn);_hov();_t("✅ تم تنزيل: "+fn);',
-    '  }catch(e){_hov();_t("❌ فشل: "+e.message,true);console.error(e);}',
-    '  if(btn){btn.disabled=false;btn.innerHTML=orig;}',
-    '}'
-  ].join('\n');
-
-  // تجميع الصفحة النهائية بأمان تام
-  var parts = [];
-  parts.push('<!DOCTYPE html>\n<html dir="rtl" lang="ar">\n<head>\n');
-  parts.push('<meta charset="UTF-8">\n');
-  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1">\n');
-  parts.push('<title>نتائج '+p.name+'</title>\n');
-  parts.push('<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">\n');
-  parts.push('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><'+'/'+'script>\n');
-  parts.push('<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><'+'/'+'script>\n');
-  parts.push('<style>\n'+CSS+'\n</style>\n');
-  parts.push('</head>\n<body>\n');
-  parts.push(BODY);
-  parts.push('\n<script>\n'+JS+'\n<'+'/'+'script>\n');
-  parts.push('</body>\n</html>');
-
-  var pageHTML = parts.join('');
-
-  var blob = new Blob([pageHTML], {type:'text/html;charset=utf-8'});
-  var url  = URL.createObjectURL(blob);
-  var win  = window.open(url, '_blank');
-  if(!win){showNotif('تنبيه','يرجى السماح بفتح نوافذ جديدة','warning');return;}
-  setTimeout(function(){URL.revokeObjectURL(url);}, 90000);
-
-  if(p.phone){
-    var intPhone = _formatPhoneForWhatsApp(p.phone);
-    setTimeout(function(){
-      _openWhatsAppDirect(intPhone);
-      showNotif('✅ تم','تم فتح سجل المريض في المتصفح وفتح واتساب','success');
-    }, 900);
-  } else {
-    showNotif('✅ تم','تم فتح سجل نتائج المريض','success');
-  }
-}
-
 function renderPatients(filter='all',srch='',_overridePts=null){
   const today=new Date().toISOString().split('T')[0];
   const _src=_overridePts||patients;
@@ -7819,7 +7559,6 @@ function renderPatients(filter='all',srch='',_overridePts=null){
     <td>${getBdg(p.status||'active')}</td>
     <td><div style="display:flex;gap:5px">
       <button class="btn btn-sm btn-p" onclick="viewPatientFullModal('${p.id}')">📋 ملف</button>
-      <button class="btn btn-sm btn-w" onclick="sharePatientAllResultsWhatsApp('${p.id}')" title="إرسال جميع النتائج عبر واتساب">📱 واتساب</button>
       <button class="btn btn-sm btn-s" onclick="editPatient('${p.id}')">✏️</button>
       <button class="btn btn-sm btn-d" onclick="deletePatient('${p.id}')">🗑️</button>
     </div></td>
@@ -8146,6 +7885,7 @@ function renderRequestsFiltered(filter='today',srch=''){
       <button class="btn btn-sm" style="background:rgba(139,63,255,0.15);border-color:rgba(139,63,255,0.4);color:#c084fc;font-size:10px" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
       ${r.status==='done'?`<button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')">🖨️ طباعة</button>`:''}
       ${r.status==='done'?`<button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')">👁️ عرض النتائج</button>`:''}
+      ${r.status==='done'?`<button class="btn btn-sm" style="background:rgba(0,184,156,.14);border:1px solid rgba(0,184,156,.38);color:#2dd4bf;font-size:10px;font-weight:800;padding:4px 8px;border-radius:7px;cursor:pointer" onclick="openPatientPortal('${r.id}')">🌐 إرسال</button>`:''}
       <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
@@ -8346,6 +8086,7 @@ function openViewResultsModal(rid){
     <button class="btn btn-s" onclick="closeModal('m-view-results')">إغلاق</button>
     <button class="btn btn-ok" onclick="closeModal('m-view-results');currentReqId='${rid}';downloadPDF()">📄 تحميل PDF</button>
     <button class="btn btn-w" onclick="closeModal('m-view-results');currentReqId='${rid}';shareWhatsApp()">📱 مشاركة PDF واتساب</button>
+    <button class="btn" style="background:rgba(0,184,156,.15);border:1px solid rgba(0,184,156,.4);color:#2dd4bf;font-weight:800" onclick="closeModal('m-view-results');openPatientPortal('${rid}')">🌐 إرسال للمريض</button>
     <button class="btn btn-ok btn-lg" onclick="vrSaveResults()">💾 حفظ التعديلات</button>
     <button class="btn btn-p" onclick="closeModal('m-view-results');goToPrint('${rid}')">🖨️ طباعة</button>`;
 
@@ -24637,3 +24378,610 @@ if (typeof pages !== 'undefined' && !pages['esr']) {
 })();
 </script>
 
+
+<!-- ════════════════════════════════════════════════════════════
+     PATIENT PORTAL — بوابة نتائج المريض
+     يولّد ملف HTML كامل → يُرسَل عبر واتساب → يفتح على أي جهاز
+     ════════════════════════════════════════════════════════════ -->
+<style>
+#portal-modal-overlay{
+  position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.78);
+  display:none;align-items:center;justify-content:center;padding:16px;
+  backdrop-filter:blur(4px);
+}
+#portal-modal-overlay.open{display:flex}
+.pm-box{
+  background:linear-gradient(145deg,#071214,#0c1c20);
+  border:1.5px solid rgba(0,184,156,.38);
+  border-radius:20px;max-width:380px;width:100%;
+  box-shadow:0 0 80px rgba(0,184,156,.12),0 24px 64px rgba(0,0,0,.85);
+  animation:pmPop .35s cubic-bezier(.175,.885,.32,1.275);
+  overflow:hidden;
+}
+@keyframes pmPop{from{opacity:0;transform:scale(.82) translateY(22px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.pm-hdr{
+  padding:18px 20px 14px;
+  background:linear-gradient(135deg,rgba(0,184,156,.1),rgba(0,150,130,.06));
+  border-bottom:1px solid rgba(0,184,156,.14);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pm-hdr-title{
+  display:flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:800;color:#e2faf7;
+}
+.pm-hdr-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,#008070,#006090);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.pm-close{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);
+  color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;
+}
+.pm-close:hover{background:rgba(255,50,80,.2);color:#ff5577;border-color:rgba(255,50,80,.4)}
+.pm-pt-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;background:rgba(0,0,0,.2);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.pm-pt-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#00b89c,#0369a1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;
+}
+.pm-pt-name{font-size:13px;font-weight:700;color:#e2faf7}
+.pm-pt-id{font-size:11px;color:rgba(226,250,247,.45);font-family:'Courier New',monospace}
+.pm-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:8px}
+.pm-action-btn{
+  display:flex;align-items:center;gap:13px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;padding:13px 15px;cursor:pointer;
+  transition:all .2s;text-align:right;width:100%;
+  font-family:'Cairo','Inter',sans-serif;
+}
+.pm-action-btn:hover{background:rgba(0,184,156,.08);border-color:rgba(0,184,156,.32);transform:translateY(-1px)}
+.pm-action-btn:active{transform:translateY(0)}
+.pm-action-btn.loading{opacity:.7;pointer-events:none}
+.pm-btn-icon{font-size:22px;flex-shrink:0;width:36px;text-align:center}
+.pm-btn-text{flex:1}
+.pm-btn-title{font-size:13px;font-weight:700;color:#e2faf7;margin-bottom:2px;text-align:right}
+.pm-btn-sub{font-size:11px;color:rgba(226,250,247,.4);text-align:right}
+.pm-spinner{
+  width:16px;height:16px;flex-shrink:0;
+  border:2px solid rgba(0,184,156,.25);border-top-color:#00d4b8;
+  border-radius:50%;animation:pmSpin .6s linear infinite;display:none;
+}
+.pm-action-btn.loading .pm-spinner{display:block}
+@keyframes pmSpin{to{transform:rotate(360deg)}}
+.pm-note{
+  font-size:10px;color:rgba(226,250,247,.28);text-align:center;
+  padding-top:4px;line-height:1.5;
+}
+</style>
+
+<!-- Modal -->
+<div id="portal-modal-overlay">
+  <div class="pm-box">
+    <div class="pm-hdr">
+      <div class="pm-hdr-title">
+        <div class="pm-hdr-icon">🌐</div>
+        إرسال النتائج للمريض
+      </div>
+      <button class="pm-close" onclick="_pmClose()">✕</button>
+    </div>
+    <div class="pm-pt-bar">
+      <div class="pm-pt-avatar" id="pm-avatar">؟</div>
+      <div>
+        <div class="pm-pt-name" id="pm-pt-name">—</div>
+        <div class="pm-pt-id" id="pm-pt-id">—</div>
+      </div>
+    </div>
+    <div class="pm-body">
+      <button class="pm-action-btn" id="pm-btn-send" onclick="_pmSendFile()">
+        <div class="pm-btn-icon">📲</div>
+        <div class="pm-btn-text">
+          <div class="pm-btn-title">إرسال نتائج التحاليل</div>
+          <div class="pm-btn-sub">يحمّل ملف HTML ويفتح واتساب تلقائياً</div>
+        </div>
+        <div class="pm-spinner"></div>
+      </button>
+      <div class="pm-note">
+        الملف يعمل على أي جهاز · لا يحتاج إنترنت · يشمل جميع الزيارات وزر تحميل PDF
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   PATIENT PORTAL — CORE ENGINE
+   ════════════════════════════════════════════════════════ */
+
+// ── الحالة الداخلية ──────────────────────────────────────
+let _pmReqId = null;
+
+// ── فتح المودال ─────────────────────────────────────────
+function openPatientPortal(reqId) {
+  const rid = reqId || currentReqId;
+  const req = requests.find(r => r.id === rid);
+  if (!req) { showNotif('تنبيه','اختر طلباً أولاً','error'); return; }
+
+  const pt = patients.find(p => p.id === req.patientId) || {};
+  if (!pt.phone) { showNotif('تنبيه','لا يوجد رقم هاتف — أضف رقم المريض أولاً','error'); return; }
+
+  _pmReqId = rid;
+
+  // تحديث بيانات المريض في المودال
+  const ini = (pt.name||'؟').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('pm-avatar').textContent  = ini;
+  document.getElementById('pm-pt-name').textContent = pt.name || '—';
+  document.getElementById('pm-pt-id').textContent   = pt.id || '—';
+
+  // إعادة تهيئة الزر
+  const btn = document.getElementById('pm-btn-send');
+  if (btn) { btn.classList.remove('loading'); }
+
+  document.getElementById('portal-modal-overlay').classList.add('open');
+}
+
+function _pmClose() {
+  document.getElementById('portal-modal-overlay').classList.remove('open');
+}
+
+document.getElementById('portal-modal-overlay')
+  .addEventListener('click', function(ev){ if(ev.target===this) _pmClose(); });
+
+// ── بناء بيانات المريض ──────────────────────────────────
+function _pmBuildData(patientId) {
+  const pt = patients.find(p => p.id === patientId);
+  if (!pt) return null;
+
+  // كل طلبات هذا المريض — الأحدث أولاً
+  const ptReqs = [...requests]
+    .filter(r => r.patientId === patientId)
+    .reverse()
+    .map(r => ({
+      id:         r.id,
+      date:       r.date || '',
+      resultDate: r.resultDate || r.date || '',
+      status:     r.status || 'pending',
+      tests:      r.tests  || [],
+      results:    r.results || {},
+      doctorName: r.doctorName || ''
+    }));
+
+  // التحاليل المستخدمة فقط (تقليل الحجم)
+  const usedIds = [...new Set(ptReqs.flatMap(r => r.tests))];
+  const usedTests = tests
+    .filter(t => usedIds.includes(t.id))
+    .map(t => ({
+      id:        t.id,
+      nameEn:    t.nameEn    || t.id,
+      nameAr:    t.nameAr    || '',
+      nameShort: t.nameShort || t.nameEn || t.id,
+      unit:      t.unit      || '',
+      ref:       t.ref       || '',
+      minVal:    t.minVal    ?? null,
+      maxVal:    t.maxVal    ?? null
+    }));
+
+  // حساب العمر
+  let ageDisplay = pt.ageDisplay || '';
+  if (!ageDisplay) {
+    if (pt.dob) {
+      const y = Math.floor((Date.now() - new Date(pt.dob)) / (1000*60*60*24*365.25));
+      ageDisplay = y > 0 ? y + ' سنة' : 'أقل من سنة';
+    } else if (pt.ageY || pt.age) {
+      ageDisplay = (pt.ageY || pt.age) + ' سنة';
+    }
+  }
+
+  return {
+    patient: {
+      id:          pt.id || '',
+      name:        pt.name || '',
+      gender:      pt.gender || '',
+      registered:  pt.registered || '',
+      ageDisplay
+    },
+    requests: ptReqs,
+    tests:    usedTests,
+    lab: {
+      name:  (settings && settings.name)  || 'MedLab Pro',
+      phone: (settings && settings.phone) || '',
+      addr:  (settings && settings.addr)  || ''
+    }
+  };
+}
+
+// ── قالب HTML البوابة ────────────────────────────────────
+function _pmBuildHTML(data) {
+  const labName = data.lab.name || 'MedLab Pro';
+  const ptName  = data.patient.name;
+
+  // ─ بناء جدول كل طلب ─
+  function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function buildTable(req) {
+    const ids = req.tests || [], res = req.results || {};
+    if (!ids.length) return '<p style="text-align:center;padding:20px;color:#94a3b8">لا توجد تحاليل</p>';
+    let rows = '';
+    ids.forEach(tid => {
+      const t = data.tests.find(x => x.id === tid) || { id:tid, nameEn:tid, nameShort:tid, unit:'' };
+      const val  = res[tid] || '—';
+      const unit = t.unit || '';
+      const ref  = t.ref || (t.minVal != null && t.maxVal != null ? t.minVal + ' – ' + t.maxVal : '—');
+      // تقييم النتيجة
+      let cls = 'nd', ind = '';
+      const v = parseFloat(val);
+      if (!isNaN(v)) {
+        const lo = parseFloat(t.minVal), hi = parseFloat(t.maxVal);
+        if (!isNaN(hi) && v > hi) { cls='hi'; ind='<span class="ri hi">↑ مرتفع</span>'; }
+        else if (!isNaN(lo) && v < lo) { cls='lo'; ind='<span class="ri lo">↓ منخفض</span>'; }
+        else if (!isNaN(lo) || !isNaN(hi)) { cls='ok'; ind='<span class="ri ok">طبيعي</span>'; }
+      } else if (val && val !== '—') {
+        const lv = (val+'').toLowerCase();
+        if (/neg|سلبي/.test(lv)) { cls='ok'; ind='<span class="ri ok">طبيعي</span>'; }
+        else if (/pos|إيجابي/.test(lv)) { cls='hi'; ind='<span class="ri hi">إيجابي</span>'; }
+      }
+      const nm  = esc(t.nameShort || t.nameEn || tid);
+      const ar  = esc(t.nameAr || '');
+      rows += `<tr>
+        <td><b>${nm}</b>${ar && ar !== nm ? '<br><span style="font-size:10px;color:#94a3b8">' + ar + '</span>' : ''}</td>
+        <td><span class="rv ${cls}">${esc(val)}</span>${unit ? ' <span style="font-size:10px;color:#94a3b8">' + esc(unit) + '</span>' : ''}</td>
+        <td style="font-size:11px;color:#94a3b8;font-family:monospace">${esc(ref)}</td>
+        <td>${ind}</td>
+      </tr>`;
+    });
+    return `<div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:380px">
+        <thead><tr>
+          <th>التحليل</th><th>النتيجة</th>
+          <th>القيم الطبيعية</th><th>التقييم</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  // ─ بناء بطاقات الطلبات ─
+  let visitCards = '';
+  data.requests.forEach((req, i) => {
+    const done = req.status === 'done';
+    const names = req.tests.map(tid => {
+      const t = data.tests.find(x => x.id === tid);
+      return t ? (t.nameShort || t.nameEn) : tid;
+    });
+    const preview = names.slice(0,3).join(' · ') + (names.length > 3 ? ` +${names.length-3}` : '');
+
+    visitCards += `
+    <div class="vc" id="vc${i}">
+      <div class="vh" onclick="tog(${i})">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-family:monospace;font-size:11px;color:#2dd4bf;font-weight:700">${esc(req.id)}</span>
+            <span style="font-size:11px;color:#64748b">📅 ${esc(req.resultDate || req.date)}</span>
+          </div>
+          <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0">${esc(preview || 'طلب تحاليل')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
+          ${done
+            ? '<span class="bdg bdg-ok">✅ مكتملة</span>'
+            : '<span class="bdg bdg-pnd">⏳ انتظار</span>'}
+          <div class="vtog" id="tog${i}">⌄</div>
+        </div>
+      </div>
+      <div class="vb" id="vb${i}">
+        ${done ? buildTable(req) : '<p style="text-align:center;padding:24px;color:#64748b">⏳ النتائج قيد الإعداد</p>'}
+        ${done ? `<div class="vft">
+          <div style="font-size:11px;color:#64748b">${req.doctorName ? '<b style="color:#cbd5e1">الطبيب:</b> د. ' + esc(req.doctorName) : '<b style="color:#cbd5e1">التاريخ:</b> ' + esc(req.resultDate || req.date)}</div>
+          <button class="pb" id="pb${i}" onclick="dlPDF(${i})">
+            <span class="pbs"></span><span class="pbt">⬇ PDF</span>
+          </button>
+        </div>` : ''}
+      </div>
+    </div>`;
+  });
+
+  const doneCount = data.requests.filter(r => r.status === 'done').length;
+  const totalTests = data.requests.reduce((s,r) => s + r.tests.length, 0);
+  const ini = ptName.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+  // ─ JSON البيانات لتضمينها ─
+  const dataJson = JSON.stringify(data).replace(/<\/script>/gi, '<\\/script>');
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#030d0e">
+<title>نتائج ${esc(ptName)} — ${esc(labName)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--tl:#00b89c;--tl2:#2dd4bf;--tg:rgba(0,184,156,.14);--ro:#fb7185;--am:#fbbf24;--gr:#34d399;--bg:#030d0e;--c1:rgba(255,255,255,.04);--c2:rgba(0,184,156,.06);--bd:rgba(0,184,156,.16);--bd2:rgba(255,255,255,.07);--tx:#e2faf7;--tx2:rgba(226,250,247,.45);--fn:'Tajawal',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;direction:rtl;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 90% 50% at 15% 0%,rgba(0,184,156,.1),transparent 55%),radial-gradient(ellipse 70% 60% at 85% 100%,rgba(56,189,248,.07),transparent 55%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.018;background-image:linear-gradient(rgba(0,184,156,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(0,184,156,.5) 1px,transparent 1px);background-size:44px 44px}
+.w{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:0 14px 64px}
+/* HERO */
+.hero{text-align:center;padding:40px 16px 28px}
+.hbdg{display:inline-flex;align-items:center;gap:7px;background:rgba(0,184,156,.1);border:1px solid rgba(0,184,156,.28);border-radius:100px;padding:5px 16px;font-size:13px;font-weight:700;color:var(--tl2);margin-bottom:16px}
+.bdot{width:7px;height:7px;background:var(--tl2);border-radius:50%;animation:bk 2.2s ease infinite}
+@keyframes bk{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.75)}}
+h1{font-size:clamp(24px,7vw,38px);font-weight:900;background:linear-gradient(135deg,#e2faf7 20%,var(--tl2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:5px}
+.hsub{font-size:13px;color:var(--tx2)}
+/* PATIENT CARD */
+.pc{background:var(--c2);border:1px solid var(--bd);border-radius:16px;padding:20px 22px;margin-bottom:20px;position:relative;overflow:hidden;animation:up .45s ease both}
+.pc::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(var(--tg),transparent 70%);pointer-events:none}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ph{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.av{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--tl),#0369a1);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;box-shadow:0 0 0 3px rgba(0,184,156,.2),0 0 0 6px rgba(0,184,156,.07);flex-shrink:0}
+.pnm{font-size:18px;font-weight:800;margin-bottom:4px}
+.pid{display:inline-block;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.28);color:#38bdf8;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;font-family:monospace}
+.pm{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px}
+.mb{background:rgba(255,255,255,.03);border:1px solid var(--bd2);border-radius:9px;padding:10px 12px}
+.ml{font-size:10px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px}
+.mv{font-size:13px;font-weight:700}.mv.c{color:var(--tl2)}
+/* STATS */
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:22px;animation:up .45s .08s ease both;opacity:0;animation-fill-mode:forwards}
+.sc{background:var(--c1);border:1px solid var(--bd2);border-radius:12px;padding:16px 10px;text-align:center}
+.si{font-size:18px;margin-bottom:4px}
+.sn{font-size:24px;font-weight:900;line-height:1;margin-bottom:3px;font-family:monospace}
+.sn.t{color:var(--tl2)}.sn.s{color:#38bdf8}.sn.a{color:var(--am)}
+.sl{font-size:10px;color:var(--tx2);font-weight:600}
+/* SECTION */
+.sh{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.sic{width:30px;height:30px;background:var(--tg);border:1px solid rgba(0,184,156,.28);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.stl{font-size:15px;font-weight:800}
+/* VISIT CARDS */
+.vs{display:flex;flex-direction:column;gap:10px}
+.vc{background:var(--c1);border:1px solid var(--bd2);border-radius:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;animation:up .4s ease both;opacity:0;animation-fill-mode:forwards}
+.vc:hover{border-color:rgba(0,184,156,.32);box-shadow:0 4px 20px rgba(0,184,156,.08)}
+.vc.op{border-color:rgba(0,184,156,.35)}
+.vc:nth-child(1){animation-delay:.0s}.vc:nth-child(2){animation-delay:.06s}.vc:nth-child(3){animation-delay:.12s}.vc:nth-child(4){animation-delay:.18s}.vc:nth-child(5){animation-delay:.24s}
+.vh{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;user-select:none;gap:9px}
+.vh:hover{background:rgba(255,255,255,.02)}
+.vb{display:none;border-top:1px solid var(--bd2)}.vc.op .vb{display:block}
+.vtog{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--bd2);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;flex-shrink:0}
+.vc.op .vtog{background:var(--tg);border-color:rgba(0,184,156,.4);color:var(--tl2);transform:rotate(180deg)}
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;flex-shrink:0}
+.bdg-ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.28);color:var(--gr)}
+.bdg-pnd{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.28);color:var(--am)}
+/* RESULTS TABLE */
+table th{background:rgba(0,184,156,.07);font-size:11px;font-weight:700;color:var(--tl2);text-transform:uppercase;letter-spacing:.4px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--bd2);white-space:nowrap}
+table td{padding:10px 12px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.025);vertical-align:middle}
+table tr:last-child td{border-bottom:none}
+table tr:hover td{background:rgba(255,255,255,.015)}
+.rv{font-family:monospace;font-weight:700;font-size:13px}
+.rv.ok{color:var(--gr)}.rv.hi{color:var(--ro)}.rv.lo{color:var(--am)}.rv.nd{color:var(--tx2)}
+.ri{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ri.ok{background:rgba(52,211,153,.1);color:var(--gr)}.ri.hi{background:rgba(251,113,133,.1);color:var(--ro)}.ri.lo{background:rgba(251,191,36,.1);color:var(--am)}
+/* RESULT FOOTER */
+.vft{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:rgba(0,0,0,.2);border-top:1px solid var(--bd2);gap:9px;flex-wrap:wrap}
+/* PDF BUTTON */
+.pb{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#008070,#005580);color:#fff;border:none;border-radius:8px;padding:8px 15px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fn);transition:opacity .18s,transform .12s;white-space:nowrap;flex-shrink:0}
+.pb:hover{opacity:.85;transform:translateY(-1px)}.pb:active{transform:translateY(0)}
+.pbs{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.pb.ld .pbs{display:block}.pb.ld .pbt{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* PAGE FOOTER */
+.pf{text-align:center;padding:24px 16px 12px;font-size:11px;color:var(--tx2);position:relative;z-index:1}
+.pf .br{font-weight:800;color:var(--tl2);font-size:12px;margin-bottom:2px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:#0f2421;border:1px solid rgba(0,184,156,.4);color:var(--tx);padding:10px 18px;border-radius:9px;font-size:12px;font-weight:600;font-family:var(--fn);z-index:9999;transition:transform .3s cubic-bezier(.17,.84,.44,1),opacity .3s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.sh{transform:translateX(-50%) translateY(0);opacity:1}
+@media(max-width:420px){.pm{grid-template-columns:1fr 1fr}.st{gap:6px}.sc{padding:12px 6px}.sn{font-size:20px}.sl{font-size:9px}.vh,.vft{padding:11px 12px}table th,table td{padding:8px 9px}}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="hero">
+    <div class="hbdg"><div class="bdot"></div>${esc(labName)}</div>
+    <h1>نتائجك الطبية</h1>
+    <p class="hsub">مرحباً ${esc(ptName)} — بوابة التحاليل الخاصة بك</p>
+  </div>
+
+  <div class="pc">
+    <div class="ph">
+      <div class="av">${esc(ini)}</div>
+      <div>
+        <div class="pnm">${esc(ptName)}</div>
+        <span class="pid">${esc(data.patient.id)}</span>
+      </div>
+    </div>
+    <div class="pm">
+      <div class="mb"><div class="ml">العمر</div><div class="mv">${esc(data.patient.ageDisplay||'—')}</div></div>
+      <div class="mb"><div class="ml">الجنس</div><div class="mv">${data.patient.gender==='female'?'أنثى':data.patient.gender==='male'?'ذكر':'—'}</div></div>
+      <div class="mb"><div class="ml">رقم الملف</div><div class="mv c">${esc(data.patient.id||'—')}</div></div>
+      ${data.patient.registered ? `<div class="mb"><div class="ml">تاريخ التسجيل</div><div class="mv">${esc(data.patient.registered)}</div></div>` : ''}
+    </div>
+  </div>
+
+  <div class="st">
+    <div class="sc"><div class="si">🏥</div><div class="sn t">${data.requests.length}</div><div class="sl">الزيارات</div></div>
+    <div class="sc"><div class="si">✅</div><div class="sn s">${doneCount}</div><div class="sl">مكتملة</div></div>
+    <div class="sc"><div class="si">🧬</div><div class="sn a">${totalTests}</div><div class="sl">تحليل</div></div>
+  </div>
+
+  <div class="sh"><div class="sic">🧪</div><div class="stl">طلبات التحاليل</div></div>
+  <div class="vs">${visitCards}</div>
+</div>
+
+<div class="pf">
+  <div class="br">${esc(labName)}</div>
+  ${data.lab.phone ? `<div style="margin-bottom:2px">📞 ${esc(data.lab.phone)}</div>` : ''}
+  ${data.lab.addr  ? `<div style="margin-bottom:4px">📍 ${esc(data.lab.addr)}</div>`  : ''}
+  <div style="opacity:.4;font-size:10px;margin-top:4px">⚠️ هذا الملف خاص بك — يرجى عدم مشاركته</div>
+</div>
+
+<div class="toast" id="TT"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+<script>
+const _D=${dataJson};
+function toast(m,ms=2500){const t=document.getElementById('TT');t.textContent=m;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),ms)}
+function tog(i){const c=document.getElementById('vc'+i);if(c)c.classList.toggle('op')}
+function itp(v,t){
+  if(!v||v==='—'||v==='-') return{c:'nd'};
+  const n=parseFloat(v);
+  if(isNaN(n)){const l=(v+'').toLowerCase();if(/neg|سلبي/.test(l))return{c:'ok'};if(/pos|إيجابي/.test(l))return{c:'hi'};return{c:'nd'};}
+  const lo=parseFloat(t.minVal),hi=parseFloat(t.maxVal);
+  if(!isNaN(hi)&&n>hi)return{c:'hi'};if(!isNaN(lo)&&n<lo)return{c:'lo'};if(!isNaN(lo)||!isNaN(hi))return{c:'ok'};return{c:'nd'};
+}
+async function dlPDF(i){
+  const btn=document.getElementById('pb'+i);
+  if(btn){btn.classList.add('ld');btn.disabled=true}
+  try{
+    const req=_D.requests[i],pt=_D.patient,lab=_D.lab,at=_D.tests;
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-9999px;top:0;width:740px;background:#fff;color:#000;font-family:Tajawal,Arial,sans-serif;direction:rtl;padding:28px 36px;font-size:12px;line-height:1.6';
+    function es(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+    const ids=req.tests||[],res=req.results||{};
+    let rows='';
+    ids.forEach(tid=>{
+      const t=at.find(x=>x.id===tid)||{id:tid,nameEn:tid,unit:''};
+      const val=res[tid]||'—';
+      const {c}=itp(val,t);
+      const col=c==='hi'?'#c00':c==='lo'?'#b45000':c==='ok'?'#166534':'#000';
+      const fl=c==='hi'?'▲ مرتفع':c==='lo'?'▼ منخفض':c==='ok'?'✓ طبيعي':'';
+      const rf=t.ref||(t.minVal!=null&&t.maxVal!=null?t.minVal+'–'+t.maxVal:'—');
+      rows+=\`<tr>
+        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-weight:600">\${es(t.nameShort||t.nameEn||tid)}</td>
+        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-family:monospace;font-weight:800;color:\${col}">\${es(val)} \${es(t.unit||'')}</td>
+        <td style="padding:8px 11px;border-bottom:1px solid #eee;color:#666;font-size:11px">\${es(rf)}</td>
+        <td style="padding:8px 11px;border-bottom:1px solid #eee;font-weight:700;font-size:11px;color:\${col}">\${fl}</td></tr>\`;
+    });
+    wrap.innerHTML=\`
+    <div style="display:flex;justify-content:space-between;border-bottom:3px solid #00b89c;padding-bottom:14px;margin-bottom:16px">
+      <div><div style="font-size:20px;font-weight:900;color:#00b89c">\${es(lab.name||'MedLab Pro')}</div>
+      \${lab.addr?'<div style=\\"font-size:11px;color:#666;margin-top:2px\\">📍 '+es(lab.addr)+'</div>':''}
+      \${lab.phone?'<div style=\\"font-size:11px;color:#666\\">📞 '+es(lab.phone)+'</div>':''}</div>
+      <div style="text-align:left"><div style="font-size:10px;color:#888">رقم الطلب</div>
+      <div style="font-size:13px;font-weight:800;color:#00b89c;font-family:monospace">\${es(req.id||'')}</div>
+      <div style="font-size:10px;color:#888">\${es(req.resultDate||req.date||'')}</div></div></div>
+    <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:9px;padding:12px 15px;margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">المريض</div><div style="font-weight:900;font-size:14px">\${es(pt.name)}</div></div>
+      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">العمر / الجنس</div><div style="font-weight:700">\${es(pt.ageDisplay||'—')} / \${pt.gender==='female'?'أنثى':'ذكر'}</div></div>
+      <div><div style="font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">رقم الملف</div><div style="font-weight:800;font-family:monospace;color:#00b89c">\${es(pt.id||'—')}</div></div>
+      \${req.doctorName?'<div><div style=\\"font-size:9px;color:#777;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px\\">الطبيب</div><div style=\\"font-weight:700\\">د. '+es(req.doctorName)+'</div></div>':''}
+    </div>
+    <div style="font-size:13px;font-weight:800;color:#00b89c;border-bottom:2px solid #d1fae5;padding-bottom:5px;margin-bottom:9px">نتائج التحاليل</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:#f8fafb">
+        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">التحليل</th>
+        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">النتيجة</th>
+        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">القيم الطبيعية</th>
+        <th style="padding:8px 11px;text-align:right;font-size:10px;color:#00b89c;border-bottom:2px solid #d1fae5">التقييم</th>
+      </tr></thead>
+      <tbody>\${rows}</tbody>
+    </table>
+    <div style="text-align:center;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;margin-top:16px">
+      أُصدر إلكترونياً من \${es(lab.name||'MedLab Pro')} — \${new Date().toLocaleDateString('ar-IQ')}
+    </div>\`;
+    document.body.appendChild(wrap);
+    try{
+      if(window.html2canvas){
+        const cv=await html2canvas(wrap,{scale:2,useCORS:true,backgroundColor:'#ffffff'});
+        const{jsPDF:J}=window.jspdf;
+        const doc=new J({orientation:'p',unit:'mm',format:'a4'});
+        const iw=210,ih=(cv.height*iw)/cv.width;
+        const img=cv.toDataURL('image/jpeg',.92);
+        if(ih<=297){doc.addImage(img,'JPEG',0,0,iw,ih)}
+        else{
+          let y=0;
+          while(y<ih){
+            if(y>0)doc.addPage();
+            const sh=Math.min(297,ih-y);
+            const sc=document.createElement('canvas');
+            sc.width=cv.width;sc.height=(sh/ih)*cv.height;
+            sc.getContext('2d').drawImage(cv,0,(y/ih)*cv.height,cv.width,sc.height,0,0,cv.width,sc.height);
+            doc.addImage(sc.toDataURL('image/jpeg',.92),'JPEG',0,0,iw,sh);
+            y+=297;
+          }
+        }
+        doc.save((pt.name+'_'+req.id).replace(/\\s+/g,'_')+'.pdf');
+        toast('✅ تم تحميل PDF');
+      } else { toast('⚠️ افتح الملف بإنترنت لتحميل PDF'); }
+    } finally { document.body.removeChild(wrap); }
+  } catch(e){ toast('❌ خطأ: '+e.message); console.error(e); }
+  finally{ if(btn){btn.classList.remove('ld');btn.disabled=false} }
+}
+// فتح أول طلب مكتمل تلقائياً
+(function(){
+  const fd=_D.requests.findIndex(r=>r.status==='done');
+  if(fd>=0) setTimeout(()=>tog(fd),300);
+})();
+<\/script>
+</body>
+</html>`;
+}
+
+// ── إرسال الملف عبر واتساب ──────────────────────
+async function _pmSendFile() {
+  const btn = document.getElementById('pm-btn-send');
+  if (btn) btn.classList.add('loading');
+
+  try {
+    const req = requests.find(r => r.id === _pmReqId);
+    if (!req) throw new Error('الطلب غير موجود');
+
+    const pt = patients.find(p => p.id === req.patientId) || {};
+    if (!pt.phone) throw new Error('لا يوجد رقم هاتف');
+
+    // بناء البيانات والـ HTML
+    const data = _pmBuildData(req.patientId);
+    if (!data) throw new Error('فشل بناء البيانات');
+
+    const html = _pmBuildHTML(data);
+    const ptName = data.patient.name;
+    const labName = data.lab.name;
+
+    // تحميل الملف
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `نتائج_${ptName}.html`.replace(/\s+/g,'_');
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+    // رسالة واتساب
+    const doneReqs = data.requests.filter(r => r.status === 'done').length;
+    const msg =
+      `🏥 *${labName}*\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `السلام عليكم *${ptName}* 👋\n\n` +
+      `✅ نتائج تحاليلك جاهزة! (${doneReqs} طلب مكتمل)\n\n` +
+      `📎 *الخطوات:*\n` +
+      `1️⃣ احفظ الملف المرفق\n` +
+      `2️⃣ افتحه بـ Chrome أو Safari\n` +
+      `3️⃣ ستظهر نتائجك فوراً 🎉\n\n` +
+      `_يمكنك تحميل PDF لكل تحليل من داخل الملف_\n\n` +
+      `📞 للاستفسار: ${data.lab.phone || 'تواصل مع المختبر'}`;
+
+    const intPhone = _formatPhoneForWhatsApp(pt.phone);
+
+    // فتح واتساب بعد لحظة لضمان بدء تحميل الملف
+    setTimeout(() => {
+      _openWhatsAppDirect(intPhone + '?text=' + encodeURIComponent(msg).replace(/\?text=/, ''));
+      window.open('https://wa.me/' + intPhone + '?text=' + encodeURIComponent(msg), '_blank');
+    }, 600);
+
+    _pmClose();
+    showNotif('✅ جاهز','تم تحميل الملف وفتح واتساب — أرسل الملف للمريض 📎','success');
+
+  } catch(err) {
+    showNotif('خطأ', err.message || 'حدث خطأ', 'error');
+    console.error('[Portal]', err);
+  } finally {
+    if (btn) btn.classList.remove('loading');
+  }
+}
+</script>
