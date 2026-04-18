@@ -640,6 +640,536 @@ body.light-mode .st-card-hdr:hover{background:#f5f8fc;}
 body.light-mode .st-card-title{color:#0d1b2a;}
 body.light-mode .st-card-sub{color:#5a6a7a;}
 body.light-mode .st-card-body{border-top-color:#dde4ec;}
+
+/* ══════════════════════════════════════════════
+   إصلاح شامل للوضع الليلي — منع التبييض
+   يُطبَّق على body بدون .light-mode
+══════════════════════════════════════════════ */
+
+/* ── select و option في الوضع الليلي ── */
+body:not(.light-mode) select,
+body:not(.light-mode) select.fc,
+body:not(.light-mode) select.res-input {
+  background:#080f20!important;
+  color:#ffffff!important;
+  border-color:var(--border)!important;
+  color-scheme: dark;
+}
+body:not(.light-mode) select option {
+  background:#080f20!important;
+  color:#ffffff!important;
+}
+body:not(.light-mode) select:focus {
+  border-color:var(--primary)!important;
+  box-shadow:0 0 0 3px rgba(0,212,255,0.2)!important;
+}
+
+/* ── إلغاء color:#000 الـ hardcoded على labels وinputs في الوضع الليلي ── */
+body:not(.light-mode) #wiz-body label,
+body:not(.light-mode) #wiz-body .fl {
+  color:var(--text)!important;
+}
+body:not(.light-mode) #wiz-body input.fc,
+body:not(.light-mode) #wiz-body select.fc,
+body:not(.light-mode) #wiz-body textarea.fc {
+  color:var(--text)!important;
+  background:var(--bg-input)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) #wiz-body select#wp-doctor {
+  background:#080f20!important;
+  color:#ffffff!important;
+  border-color:var(--primary)!important;
+}
+
+/* ── إلغاء أي inline color:#000 أو background:#fff في الوضع الليلي بشكل عام ── */
+body:not(.light-mode) .modal input.fc,
+body:not(.light-mode) .modal textarea.fc,
+body:not(.light-mode) .modal select.fc,
+body:not(.light-mode) .mbody input.fc,
+body:not(.light-mode) .mbody textarea.fc,
+body:not(.light-mode) .mbody select.fc {
+  color:var(--text)!important;
+  background:rgba(255,255,255,0.05)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .modal label,
+body:not(.light-mode) .modal .fl,
+body:not(.light-mode) .mbody label,
+body:not(.light-mode) .mbody .fl {
+  color:var(--text)!important;
+}
+
+/* ── sig-preview-box و ftr-txt-preview ── */
+body:not(.light-mode) #sig-preview-box {
+  background:rgba(255,255,255,0.04)!important;
+  border-color:var(--border)!important;
+  color:var(--text)!important;
+}
+body:not(.light-mode) #sig-preview-box * {
+  color:var(--text)!important;
+}
+body:not(.light-mode) #ftr-txt-preview {
+  background:rgba(255,255,255,0.04)!important;
+  border-color:var(--border)!important;
+  color:var(--text2)!important;
+}
+
+/* ── prev-res-box في الوضع الليلي ── */
+body:not(.light-mode) .prev-res-box {
+  background:rgba(255,200,0,0.07)!important;
+  border-color:rgba(255,200,0,0.25)!important;
+  color:rgba(255,200,0,0.85)!important;
+}
+body:not(.light-mode) .prev-res-box b {
+  color:rgba(255,200,0,1)!important;
+}
+
+/* ── inline-add-doctor panel ── */
+body:not(.light-mode) .inline-add {
+  background:rgba(0,212,255,0.04)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── res-input في الوضع الليلي (ensure text is white) ── */
+body:not(.light-mode) input.res-input,
+body:not(.light-mode) select.res-input {
+  color:var(--text)!important;
+  background:rgba(0,212,255,0.08)!important;
+}
+body:not(.light-mode) input.res-input.res-high {
+  color:var(--danger)!important;
+  border-color:rgba(255,77,109,0.5)!important;
+}
+body:not(.light-mode) input.res-input.res-low {
+  color:var(--warning)!important;
+  border-color:rgba(255,214,10,0.5)!important;
+}
+body:not(.light-mode) input.res-input.res-ok {
+  color:var(--success)!important;
+  border-color:rgba(0,245,147,0.3)!important;
+}
+
+/* ── mbody داخل كل المودالات في الوضع الليلي ── */
+body:not(.light-mode) .mbody {
+  background:#070d1c!important;
+  color:var(--text)!important;
+}
+
+/* ── tabs في الوضع الليلي ── */
+body:not(.light-mode) .tabs {
+  background:rgba(255,255,255,0.03)!important;
+}
+body:not(.light-mode) .tab {
+  color:var(--text2)!important;
+}
+body:not(.light-mode) .tab.active {
+  background:linear-gradient(135deg,rgba(0,212,255,0.18),rgba(123,47,255,0.12))!important;
+  color:var(--primary)!important;
+}
+
+/* ── gc-body في الوضع الليلي ── */
+body:not(.light-mode) .gc-body {
+  background:transparent!important;
+}
+
+/* ── scard في الوضع الليلي ── */
+body:not(.light-mode) .scard {
+  background:var(--bg-card)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── تأكيد ألوان الـ tbl في الوضع الليلي ── */
+body:not(.light-mode) .tbl td {
+  color:var(--text)!important;
+  border-bottom-color:rgba(255,255,255,0.04)!important;
+}
+body:not(.light-mode) .tbl th {
+  color:var(--primary)!important;
+}
+
+/* ── color-scheme على العناصر التفاعلية لمنع المتصفح من تبييضها ── */
+body:not(.light-mode) input,
+body:not(.light-mode) textarea,
+body:not(.light-mode) select {
+  color-scheme: dark;
+}
+body:not(.light-mode) input[type="date"],
+body:not(.light-mode) input[type="time"],
+body:not(.light-mode) input[type="datetime-local"] {
+  color-scheme: dark;
+  background:rgba(255,255,255,0.05)!important;
+  color:var(--text)!important;
+}
+
+/* ── user-row و admin-card في الوضع الليلي ── */
+body:not(.light-mode) .user-row {
+  background:var(--bg-card)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .admin-card {
+  background:var(--bg-card)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── wiz-panel و wiz-s2 في الوضع الليلي ── */
+body:not(.light-mode) .wiz-panel {
+  background:var(--bg-card)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .wiz-card {
+  background:rgba(255,255,255,0.03)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── login-box و login-field في الوضع الليلي ── */
+body:not(.light-mode) .login-box {
+  background:rgba(7,13,28,0.97)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .login-field input {
+  background:rgba(255,255,255,0.05)!important;
+  color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── notif-panel سطور ── */
+body:not(.light-mode) .login-log-row {
+  border-bottom-color:rgba(255,255,255,0.04)!important;
+  color:var(--text)!important;
+}
+body:not(.light-mode) .login-log-row:hover {
+  background:rgba(0,212,255,0.04)!important;
+}
+
+/* ── perm-card في الوضع الليلي ── */
+body:not(.light-mode) .perm-card {
+  background:rgba(255,255,255,0.03)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .session-card {
+  background:rgba(255,255,255,0.04)!important;
+  border-color:var(--border)!important;
+}
+
+/* ── global-search-results items text ── */
+body:not(.light-mode) .gs-item-name {
+  color:var(--text)!important;
+}
+body:not(.light-mode) .gs-item-sub {
+  color:var(--text2)!important;
+}
+
+/* ── pt-suggest items text ── */
+body:not(.light-mode) .pt-suggest-name {
+  color:var(--primary)!important;
+}
+body:not(.light-mode) .pt-suggest-sub {
+  color:var(--text2)!important;
+}
+
+/* ── chat elements ── */
+body:not(.light-mode) .chat-msg-bubble {
+  background:var(--bg-glass)!important;
+  color:var(--text)!important;
+}
+body:not(.light-mode) .chat-item-name {
+  color:var(--text)!important;
+}
+
+/* ── st-card في الوضع الليلي ── */
+body:not(.light-mode) .st-card {
+  background:var(--bg-card)!important;
+  border-color:var(--border)!important;
+}
+body:not(.light-mode) .st-card-title {
+  color:var(--text)!important;
+}
+body:not(.light-mode) .st-card-body {
+  border-top-color:var(--border)!important;
+}
+
+/* ══════════════════════════════════════════════
+   إصلاح شامل للوضع النهاري — قوائم، مودالات، أزرار
+══════════════════════════════════════════════ */
+
+/* ── جميع القوائم المنسدلة select ── */
+body.light-mode select,
+body.light-mode select.fc,
+body.light-mode select.res-input{
+  background:#edf0f5!important;
+  color:#000000!important;
+  border-color:#c8d4e0!important;
+  -webkit-appearance:auto;
+  appearance:auto;
+}
+body.light-mode select option,
+body.light-mode select.fc option,
+body.light-mode select.res-input option{
+  background:#ffffff!important;
+  color:#000000!important;
+}
+body.light-mode select:focus{
+  border-color:#0077aa!important;
+  box-shadow:0 0 0 3px rgba(0,119,170,0.15)!important;
+}
+
+/* ── حقول إدخال النتائج res-input ── */
+body.light-mode input.res-input,
+body.light-mode select.res-input{
+  background:#edf0f5!important;
+  border:2px solid #c8d4e0!important;
+  color:#000000!important;
+  box-shadow:none!important;
+}
+body.light-mode input.res-input:focus{
+  background:#e0eef8!important;
+  border-color:#0077aa!important;
+  box-shadow:0 0 0 3px rgba(0,119,170,0.15)!important;
+}
+body.light-mode input.res-input.res-high{
+  border-color:rgba(180,0,30,0.6)!important;
+  color:#cc0011!important;
+  background:#fff0f2!important;
+}
+body.light-mode input.res-input.res-low{
+  border-color:rgba(160,100,0,0.6)!important;
+  color:#996600!important;
+  background:#fffbee!important;
+}
+body.light-mode input.res-input.res-ok{
+  border-color:rgba(0,120,60,0.5)!important;
+  color:#006633!important;
+  background:#f0fff5!important;
+}
+
+/* ── مودالات النتائج (UA / Stool / Semen / View Results) ── */
+body.light-mode #m-ua .modal,
+body.light-mode #m-stool-exam .modal,
+body.light-mode #m-semen-exam .modal,
+body.light-mode #m-view-results .modal,
+body.light-mode #m-view-results-inner,
+body.light-mode #m-ua .mbody,
+body.light-mode #m-stool-exam .mbody,
+body.light-mode #m-semen-exam .mbody{
+  background:#ffffff!important;
+  color:#000000!important;
+  border-color:#c8d4e0!important;
+}
+body.light-mode #m-ua .mhdr,
+body.light-mode #m-stool-exam .mhdr,
+body.light-mode #m-semen-exam .mhdr,
+body.light-mode #m-view-results .mhdr{
+  background:#f8fafc!important;
+  border-bottom-color:#dde4ec!important;
+}
+body.light-mode #m-ua .mftr,
+body.light-mode #m-stool-exam .mftr,
+body.light-mode #m-semen-exam .mftr,
+body.light-mode #m-view-results .mftr{
+  background:#f8fafc!important;
+  border-top-color:#dde4ec!important;
+}
+
+/* ── محتوى داخل مودالات التحاليل الخاصة ── */
+body.light-mode #ua-modal-body *,
+body.light-mode #stool-modal-body *,
+body.light-mode #semen-modal-body *{
+  color:#000000;
+}
+body.light-mode #ua-modal-body select,
+body.light-mode #stool-modal-body select,
+body.light-mode #semen-modal-body select,
+body.light-mode #ua-modal-body input,
+body.light-mode #stool-modal-body input,
+body.light-mode #semen-modal-body input{
+  background:#edf0f5!important;
+  color:#000000!important;
+  border-color:#c8d4e0!important;
+}
+body.light-mode #ua-modal-body select option,
+body.light-mode #stool-modal-body select option,
+body.light-mode #semen-modal-body select option{
+  background:#ffffff!important;
+  color:#000000!important;
+}
+
+/* ── جدول النتائج res-tbl ── */
+body.light-mode .res-tbl td{
+  color:#000000!important;
+  border-bottom-color:#e0e8f0!important;
+}
+body.light-mode .res-tbl tbody tr{
+  background:#f5fbf7!important;
+}
+body.light-mode .res-tbl tbody tr:nth-child(even){
+  background:#eef8f2!important;
+}
+
+/* ── الـ hdr-cal-panel و notif-panel ── */
+body.light-mode #hdr-cal-panel{
+  background:#ffffff!important;
+  border-color:#c8d4e0!important;
+  box-shadow:0 8px 25px rgba(0,0,0,0.14)!important;
+  color:#000000!important;
+}
+body.light-mode #hdr-cal-panel *{color:#000000!important;}
+body.light-mode #hdr-cal-panel input{
+  background:#edf0f5!important;
+  border-color:#c8d4e0!important;
+  color:#000000!important;
+}
+body.light-mode #notif-panel{
+  background:#ffffff!important;
+  border-color:#c8d4e0!important;
+  box-shadow:0 12px 40px rgba(0,0,0,0.15)!important;
+}
+body.light-mode #notif-panel *:not(.btn-p):not(.btn-ok):not(.btn-s){
+  color:#000000!important;
+}
+body.light-mode #notif-panel>div:first-child{
+  background:#f8fafc!important;
+  border-bottom-color:#dde4ec!important;
+}
+
+/* ── الـ pt-suggest و autocomplete dropdowns ── */
+body.light-mode .pt-suggest,
+body.light-mode #cult-pt-suggest,
+body.light-mode #ua-pt-suggest,
+body.light-mode #stool-pt-suggest,
+body.light-mode #semen-pt-suggest,
+body.light-mode #res-add-test-results,
+body.light-mode #vr-add-results,
+body.light-mode .global-search-results,
+body.light-mode #gs-results,
+body.light-mode #print-search-results,
+body.light-mode #add-abx-quick,
+body.light-mode #grp-inline-dropdown{
+  background:#ffffff!important;
+  border-color:#c8d4e0!important;
+  box-shadow:0 8px 25px rgba(0,0,0,0.14)!important;
+}
+body.light-mode .pt-suggest *,
+body.light-mode #cult-pt-suggest *,
+body.light-mode #ua-pt-suggest *,
+body.light-mode #stool-pt-suggest *,
+body.light-mode #semen-pt-suggest *,
+body.light-mode #res-add-test-results *,
+body.light-mode #vr-add-results *,
+body.light-mode #gs-results *,
+body.light-mode #add-abx-quick *,
+body.light-mode #grp-inline-dropdown *{
+  color:#000000!important;
+  background:transparent!important;
+}
+body.light-mode .pt-suggest-item:hover,
+body.light-mode #cult-pt-suggest div:hover,
+body.light-mode #ua-pt-suggest div:hover,
+body.light-mode #stool-pt-suggest div:hover,
+body.light-mode #vr-add-results div:hover,
+body.light-mode #add-abx-quick div:hover{
+  background:#edf5ff!important;
+  color:#000000!important;
+}
+
+/* ── أزرار عامة في الوضع النهاري ── */
+body.light-mode .btn-s{
+  background:#edf0f5!important;
+  color:#1a202c!important;
+  border-color:#c8d4e0!important;
+}
+body.light-mode .btn-s:hover{
+  background:#ddeeff!important;
+  border-color:#0077aa!important;
+  color:#0077aa!important;
+}
+body.light-mode .mclose{
+  background:rgba(0,0,0,0.06)!important;
+  border-color:rgba(0,0,0,0.15)!important;
+  color:#4a5568!important;
+}
+body.light-mode .mclose:hover{
+  background:rgba(220,0,30,0.1)!important;
+  border-color:#cc0011!important;
+  color:#cc0011!important;
+}
+
+/* ── extend/chpw/session-kick أزرار ── */
+body.light-mode .extend-btn{
+  border-color:rgba(0,120,60,0.4)!important;
+  background:rgba(0,120,60,0.08)!important;
+  color:#006633!important;
+}
+body.light-mode .chpw-btn{
+  border-color:rgba(0,100,160,0.4)!important;
+  background:rgba(0,100,160,0.08)!important;
+  color:#0055aa!important;
+}
+body.light-mode .session-kick-btn{
+  border-color:rgba(180,0,30,0.4)!important;
+  background:rgba(180,0,30,0.08)!important;
+  color:#cc0011!important;
+}
+body.light-mode .session-card{
+  background:#f8fafc!important;
+  border-color:#dde4ec!important;
+}
+
+/* ── perm cards/toggles ── */
+body.light-mode .perm-card{
+  background:#f8fafc!important;
+  border-color:#dde4ec!important;
+}
+body.light-mode .perm-tog{
+  background:#e2e8f0!important;
+  border-color:#c8d4e0!important;
+}
+
+/* ── login-log-row ── */
+body.light-mode .login-log-row{
+  border-bottom-color:rgba(0,0,0,0.06)!important;
+  color:#1a202c!important;
+}
+body.light-mode .login-log-row:hover{
+  background:#edf5ff!important;
+}
+
+/* ── تأكد أن الـ moverlay خلف الـ modal ── */
+body.light-mode .moverlay{
+  background:rgba(0,0,0,0.5)!important;
+}
+
+/* ── mbody في الوضع النهاري ── */
+body.light-mode .mbody{
+  background:#ffffff!important;
+  color:#000000!important;
+}
+body.light-mode .mbody .fg label,
+body.light-mode .mbody label,
+body.light-mode .mbody .fl{
+  color:#2d3748!important;
+}
+body.light-mode .mbody input:not(.res-input),
+body.light-mode .mbody textarea,
+body.light-mode .mbody select:not(.res-input){
+  background:#edf0f5!important;
+  color:#000000!important;
+  border-color:#c8d4e0!important;
+}
+body.light-mode .mbody input::placeholder,
+body.light-mode .mbody textarea::placeholder{
+  color:#8899aa!important;
+}
+
+/* ── إصلاح نص الـ mtitle في مودالات النهار ── */
+body.light-mode .mtitle{
+  color:#000000!important;
+}
+
+/* ── scrollbar في الوضع النهاري ── */
+body.light-mode ::-webkit-scrollbar-track{background:#f0f3f7;}
+body.light-mode ::-webkit-scrollbar-thumb{background:#c8d4e0;border-radius:4px;}
+body.light-mode ::-webkit-scrollbar-thumb:hover{background:#0077aa;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font-family);background:var(--bg-dark);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:var(--font-size-base);font-weight:700;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 20%,rgba(0,212,255,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(123,47,255,0.07) 0%,transparent 50%);pointer-events:none;z-index:0;}
@@ -666,10 +1196,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .main{flex:1;margin-right:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
-.hdr{background:rgba(4,8,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hdr{background:rgba(4,8,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;overflow:hidden;}
+.hdr-left{display:flex;flex-direction:column;flex:1;min-width:0;}
 .page-title{font-size:11px;font-weight:800;}
 .page-bc{font-size:11px;color:var(--text2);margin-top:1px;}
-.hdr-right{display:flex;align-items:center;gap:10px;}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .hbtn{width:38px;height:38px;border-radius:9px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.2s;position:relative;}
 .hbtn:hover{background:rgba(0,212,255,0.1);color:var(--primary);border-color:var(--primary);}
 .ndot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid var(--bg-dark);}
@@ -1191,6 +1722,23 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   #hamburger-btn{display:flex!important;align-items:center;justify-content:center;}
   #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;}
   .sidebar.open~#sidebar-overlay,#sidebar-overlay.show{display:block;}
+  /* ── إصلاح الهيدر على الموبايل ── */
+  .hdr{padding:10px 12px;flex-wrap:nowrap;gap:6px;}
+  .hdr-left{flex:1;min-width:0;overflow:hidden;}
+  .hdr-left .page-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hdr-left .page-bc{display:none;}
+  .hdr-right{flex-shrink:0;gap:5px;}
+  .hdr-search{width:130px!important;min-width:0;padding:5px 8px;}
+  .hdr-search input{font-size:10px;}
+  #gs-wrap{width:130px!important;}
+  /* إخفاء زر البحث العالمي والتقويم على الشاشات الصغيرة جداً */
+}
+@media(max-width:480px){
+  .hdr{padding:8px 10px;}
+  .hdr-search{display:none!important;}
+  #gs-wrap{display:none!important;}
+  .hdr-right{gap:4px;}
+  .hbtn{width:32px!important;height:32px!important;font-size:13px!important;}
 }
 @media print{
   body>*:not(#hidden-print){display:none!important;}
@@ -6746,7 +7294,7 @@ function renderWizStep(){
 
       <!-- اللقب -->
       <div class="fg" style="margin-bottom:18px">
-        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:#000000">اللقب <span class="req">*</span></label>
+        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:inherit">اللقب <span class="req">*</span></label>
         <div style="display:flex;flex-wrap:nowrap;gap:6px;margin-top:4px;overflow-x:auto;padding:6px 4px 6px 4px">
           ${titles.map(t=>{const sel=wizPatient.title===t.v;return`<button type="button" id="title-btn-${t.v}" class="btn btn-sm ${sel?'btn-p':'btn-s'}" onclick="selectTitle('${t.v}','${t.g}')" style="font-size:14px;font-family:'Cairo',sans-serif;font-weight:900;padding:8px 12px;white-space:nowrap;flex-shrink:0;${sel?'box-shadow:0 0 0 3px rgba(0,212,255,0.55),0 0 14px rgba(0,212,255,0.35);outline:none;transform:scale(1.08);':''}transition:all 0.15s">${sel?'✓ ':''}${t.v}</button>`;}).join('')}
         </div>
@@ -6754,32 +7302,32 @@ function renderWizStep(){
 
       <!-- الاسم -->
       <div class="fg" style="margin-bottom:18px;position:relative">
-        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:#000000">الاسم الكامل <span class="req">*</span></label>
+        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:inherit">الاسم الكامل <span class="req">*</span></label>
         <div class="inp-lang-wrap" style="margin-top:6px">
           <button type="button" class="lang-toggle-btn" id="wp-name-ltb" onclick="toggleInputLang('wp-name','wp-name-ltb')" title="تبديل لغة الإدخال">ع</button>
-          <input class="fc" id="wp-name" lang="ar" dir="rtl" inputmode="text" placeholder="ابدأ الكتابة للبحث..." value="${wizPatient.name||''}" oninput="suggestPatients(this.value)" autocomplete="off" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000">
+          <input class="fc" id="wp-name" lang="ar" dir="rtl" inputmode="text" placeholder="ابدأ الكتابة للبحث..." value="${wizPatient.name||''}" oninput="suggestPatients(this.value)" autocomplete="off" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:inherit">
         </div>
         <div id="pt-suggest-box" class="pt-suggest" style="display:none"></div>
       </div>
 
       <!-- العمر -->
       <div class="fg" style="margin-bottom:18px">
-        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:#000000">العمر <span class="req">*</span></label>
+        <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:inherit">العمر <span class="req">*</span></label>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
           <div style="display:flex;gap:5px;align-items:center">
-            <input class="fc" id="wp-age-y" lang="en" inputmode="numeric" placeholder="سنة" type="number" min="0" max="150" value="${wizPatient.ageY||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000">
+            <input class="fc" id="wp-age-y" lang="en" inputmode="numeric" placeholder="سنة" type="number" min="0" max="150" value="${wizPatient.ageY||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:inherit">
             <span style="color:var(--text2);font-size:15px;font-weight:700">س</span>
           </div>
           <div style="display:flex;gap:5px;align-items:center">
-            <input class="fc" id="wp-age-m" lang="en" inputmode="numeric" placeholder="شهر" type="number" min="0" max="11" value="${wizPatient.ageM||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000">
+            <input class="fc" id="wp-age-m" lang="en" inputmode="numeric" placeholder="شهر" type="number" min="0" max="11" value="${wizPatient.ageM||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:inherit">
             <span style="color:var(--text2);font-size:15px;font-weight:700">ش</span>
           </div>
           <div style="display:flex;gap:5px;align-items:center">
-            <input class="fc" id="wp-age-d" lang="en" inputmode="numeric" placeholder="يوم" type="number" min="0" max="30" value="${wizPatient.ageD||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000">
+            <input class="fc" id="wp-age-d" lang="en" inputmode="numeric" placeholder="يوم" type="number" min="0" max="30" value="${wizPatient.ageD||''}" oninput="calcAgeCompound()" style="width:75px;text-align:center;font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:inherit">
             <span style="color:var(--text2);font-size:15px;font-weight:700">ي</span>
           </div>
           <span style="color:var(--text2);font-size:15px">أو تاريخ ميلاد:</span>
-          <input class="fc" type="date" id="wp-dob" value="${wizPatient.dob||''}" oninput="calcAgeFromDob()" style="flex:1;min-width:140px;font-size:16px;font-family:'Cairo',sans-serif;color:#000000">
+          <input class="fc" type="date" id="wp-dob" value="${wizPatient.dob||''}" oninput="calcAgeFromDob()" style="flex:1;min-width:140px;font-size:16px;font-family:'Cairo',sans-serif;color:inherit">
         </div>
         <div id="age-display" style="font-size:15px;color:var(--primary);margin-top:5px;font-weight:700">${wizPatient.ageDisplay||''}</div>
       </div>
@@ -6787,8 +7335,8 @@ function renderWizStep(){
       <!-- الطبيب المحول + رقم الهاتف -->
       <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
         <div class="fg" style="flex:1;min-width:200px;margin-bottom:0">
-          <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:#000000">الطبيب المحول</label>
-          <select class="fc" id="wp-doctor" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000 !important;margin-top:6px;background:#ffffff;border:2px solid var(--primary)">
+          <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:inherit">الطبيب المحول</label>
+          <select class="fc" id="wp-doctor" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:var(--text);margin-top:6px;background:var(--bg-input);border:2px solid var(--primary)">
             <option value="">-- بدون طبيب --</option>
             ${doctors.map(d=>`<option value="${d.id}" ${wizPatient.doctorId===d.id?'selected':''}>${d.name}</option>`).join('')}
             <option value="__add__">➕ إضافة طبيب جديد...</option>
@@ -6797,16 +7345,16 @@ function renderWizStep(){
             <div class="fr2" style="margin-bottom:8px">
               <div class="inp-lang-wrap">
                 <button type="button" class="lang-toggle-btn" id="inline-dr-name-ltb" onclick="toggleInputLang('inline-dr-name','inline-dr-name-ltb')" title="تبديل لغة الإدخال">ع</button>
-                <input class="fc" id="inline-dr-name" lang="ar" dir="rtl" inputmode="text" placeholder="اسم الطبيب *" style="font-size:16px;font-family:'Cairo',sans-serif;color:#000000">
+                <input class="fc" id="inline-dr-name" lang="ar" dir="rtl" inputmode="text" placeholder="اسم الطبيب *" style="font-size:16px;font-family:'Cairo',sans-serif;color:inherit">
               </div>
-              <input class="fc" id="inline-dr-spec" placeholder="التخصص" style="font-size:16px;font-family:'Cairo',sans-serif;color:#000000">
+              <input class="fc" id="inline-dr-spec" placeholder="التخصص" style="font-size:16px;font-family:'Cairo',sans-serif;color:inherit">
             </div>
             <button class="btn btn-p btn-sm" onclick="addDoctorInline()">➕ حفظ الطبيب</button>
           </div>
         </div>
         <div class="fg" style="flex:1;min-width:180px;margin-bottom:0">
-          <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:#000000">رقم الهاتف</label>
-          <input class="fc" id="wp-phone" lang="en" inputmode="tel" placeholder="07xxxxxxxxx" value="${wizPatient.phone||''}" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:#000000;margin-top:6px">
+          <label class="fl" style="font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;color:inherit">رقم الهاتف</label>
+          <input class="fc" id="wp-phone" lang="en" inputmode="tel" placeholder="07xxxxxxxxx" value="${wizPatient.phone||''}" style="font-size:17px;font-family:'Cairo',sans-serif;font-weight:700;color:inherit;margin-top:6px">
         </div>
       </div>
 
