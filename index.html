@@ -4130,6 +4130,23 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
         <div class="fg"><label class="fl">Price</label><input class="fc" id="et-price" type="number" placeholder="0"></div>
         <div class="fg"><label class="fl">Notes</label><input class="fc" id="et-notes" placeholder="Fasting required, etc."></div>
       </div>
+
+      <!-- حقل المعادلة — يظهر فقط للتحاليل المحسوبة -->
+      <div id="et-calc-block" style="display:none;background:rgba(139,63,255,0.07);border:1px solid rgba(139,63,255,0.35);border-radius:9px;padding:13px;margin-top:4px">
+        <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:10px">🧮 تحليل محسوب — Calculated Test</div>
+        <div class="fg" style="margin-bottom:10px">
+          <label class="fl" style="font-size:11px">كود المعادلة (calcFormula)</label>
+          <input class="fc" id="et-calc-formula" placeholder="e.g. homa_ir" style="direction:ltr;font-family:monospace" oninput="renderCalcInputSettings()">
+        </div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:10px;line-height:1.7">
+          الأكواد: <span style="color:#a78bfa;font-family:monospace;font-size:9px">homa_ir | homa_b | egfr_ckd | egfr_mdrd | ldl_friedewald | non_hdl | chol_ratio | trig_hdl | bmi | ag_ratio | tbil_ratio | quicki | map | sodium_corr | anion_gap | uacr | ft3_ft4 | meld | fib4 | mchr</span>
+        </div>
+        <!-- إعدادات المدخلات — تظهر تلقائياً بعد اختيار المعادلة -->
+        <div id="et-calc-inputs-list" style="display:none">
+          <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:8px;border-top:1px solid rgba(139,63,255,0.25);padding-top:8px">⚙️ إعدادات تحاليل المدخلات</div>
+          <div id="et-calc-inputs-rows"></div>
+        </div>
+      </div>
     </div>
     <div class="mftr"><button class="btn btn-s" onclick="closeModal('m-edit-test')">Cancel</button><button class="btn btn-p" onclick="saveTest()">💾 Save</button></div>
   </div>
@@ -5963,12 +5980,27 @@ async function _mergeIDBInBackground(){
     // التحاليل
     const idbTests=await IDB.get(pfx+'tests');
     if(idbTests&&Array.isArray(idbTests)&&idbTests.length>0){
-      const map=new Map(tests.map(t=>[t.id,t]));
+      // ALL_TESTS هو المصدر الأساسي — ابنِ الخريطة منه أولاً
+      const allMap=new Map(ALL_TESTS.map(function(x){return [x.id,x];}));
+      const map=new Map(tests.map(function(x){return [x.id,x];}));
       let tc=false;
-      idbTests.forEach(t=>{
+      idbTests.forEach(function(t){
         if(!t.id)return;
-        if(!map.has(t.id)||JSON.stringify(map.get(t.id))!==JSON.stringify(t)){
-          map.set(t.id,t); tc=true;
+        // الحصول على البيانات الأصلية من ALL_TESTS لهذا التحليل إن وُجدت
+        const orig=allMap.get(t.id);
+        // دمج: بيانات IDB (اسم/فرع/وحدة/سعر) + isCalc/calcFormula من ALL_TESTS
+        const merged=Object.assign({},t);
+        if(orig){
+          if(orig.isCalc){
+            merged.isCalc=true;
+            merged.calcFormula=orig.calcFormula||t.calcFormula||'';
+            // حفظ calcInputSettings من IDB إذا وُجدت، وإلا من ALL_TESTS
+            if(!merged.calcInputSettings && orig.calcInputSettings) merged.calcInputSettings=orig.calcInputSettings;
+          }
+          else{delete merged.isCalc;delete merged.calcFormula;delete merged.calcInputSettings;}
+        }
+        if(!map.has(t.id)||JSON.stringify(map.get(t.id))!==JSON.stringify(merged)){
+          map.set(t.id,merged); tc=true;
         }
       });
       if(tc){tests=[...map.values()];changed=true;}
@@ -6631,7 +6663,8 @@ function openPrintModal(rid){
 
   // Build combined preview: regular report + any saved special exam reports
   const allTests=req.tests.map(tid=>tests.find(t=>t.id===tid)).filter(Boolean);
-  const regularTests=allTests.filter(t=>!t.isSpecialExam);
+  const regularTests=allTests.filter(t=>!t.isSpecialExam && !t.isCalc);
+  const calcTests=allTests.filter(t=>t.isCalc && req.results && req.results[t.id]);
   const specialTests=allTests.filter(t=>t.isSpecialExam);
 
   loadUARecords(); loadStoolExamRecords(); loadSemenRecords();
@@ -6639,6 +6672,11 @@ function openPrintModal(rid){
   // Gather all pages as separate HTML strings
   const pages=[];
   if(regularTests.length>0) pages.push(buildPrintHTML(req));
+
+  // كل تحليل محسوب له نتيجة → صفحة منفردة
+  calcTests.forEach(function(ct){
+    pages.push(buildCalcTestPrintHTML(req, ct));
+  });
 
   specialTests.forEach(st=>{
     if(st.isSpecialExam==='ua'){
@@ -7558,9 +7596,20 @@ function renderPatients(filter='all',srch='',_overridePts=null){
     <td><div style="display:flex;gap:5px">
       <button class="btn btn-sm btn-p" onclick="viewPatientFullModal('${p.id}')">📋 ملف</button>
       <button class="btn btn-sm btn-s" onclick="editPatient('${p.id}')">✏️</button>
+      ${_ptHasDoneReq(p.id)?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#25d366,#1a9e4a);border:1.5px solid rgba(37,211,102,0.6);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(37,211,102,0.25)" onclick="openPatientPortalByPatient('${p.id}')">📲 إرسال للمريض</button>`:''}
       <button class="btn btn-sm btn-d" onclick="deletePatient('${p.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
+}
+function _ptHasDoneReq(patientId){
+  return requests.some(r=>r.patientId===patientId&&r.status==='done');
+}
+function openPatientPortalByPatient(patientId){
+  // إيجاد آخر طلب مكتمل للمريض
+  const done=[...requests].filter(r=>r.patientId===patientId&&r.status==='done')
+    .sort((a,b)=>new Date(b.resultDate||b.date)-new Date(a.resultDate||a.date));
+  if(!done.length){showNotif('تنبيه','لا يوجد طلب مكتمل لهذا المريض','error');return;}
+  openPatientPortal(done[0].id);
 }
 function filterPatients(f,el){document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderPatients(f);}
 function searchPatients(v){
@@ -7883,7 +7932,6 @@ function renderRequestsFiltered(filter='today',srch=''){
       <button class="btn btn-sm" style="background:rgba(139,63,255,0.15);border-color:rgba(139,63,255,0.4);color:#c084fc;font-size:10px" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
       ${r.status==='done'?`<button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')">🖨️ طباعة</button>`:''}
       ${r.status==='done'?`<button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')">👁️ عرض النتائج</button>`:''}
-      ${r.status==='done'?`<button class="btn btn-sm" style="background:rgba(0,184,156,.14);border:1px solid rgba(0,184,156,.38);color:#2dd4bf;font-size:10px;font-weight:800;padding:4px 8px;border-radius:7px;cursor:pointer" onclick="openPatientPortal('${r.id}')">🌐 إرسال</button>`:''}
       <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
@@ -8516,9 +8564,11 @@ function loadResultEntry(){
       if(next){next.focus();if(next.select)next.select();}
     };
     tbody.addEventListener('keydown',tbody._resNavHandler,true);
-    // ── تركيز تلقائي على أول حقل إدخال فور ظهور الجدول ──
-    var firstInput=Array.from(document.querySelectorAll('#res-entry-tbody .res-input')).find(function(el){return el.type!=='hidden'&&el.offsetParent!==null;});
-    if(firstInput){firstInput.focus();if(firstInput.select)firstInput.select();}
+    // ── تركيز تلقائي على أول حقل إدخال — مع تأخير لتجنب تعارض language observer ──
+    setTimeout(function(){
+      var fi=Array.from(document.querySelectorAll('#res-entry-tbody .res-input')).find(function(el){return el.type!=='hidden'&&el.offsetParent!==null;});
+      if(fi){fi.focus();if(fi.select)fi.select();}
+    }, 200);
   })();
 }
 
@@ -8960,6 +9010,9 @@ function runCalcFormula(formula,testId,reqId){
         const matchTest=tests.find(t=>t.code===inp.code);
         if(matchTest&&req.results[matchTest.id]){
           vals[inp.code]=parseFloat(req.results[matchTest.id])||vals[inp.code];
+          // أيضاً أعبئ حقل الإدخال بالقيمة الموجودة في الطلب
+          const ciEl=document.getElementById('ci-'+inp.code);
+          if(ciEl&&!ciEl.value) ciEl.value=req.results[matchTest.id];
         }
       });
     }
@@ -8969,11 +9022,28 @@ function runCalcFormula(formula,testId,reqId){
   document.getElementById('calc-result-display').style.display='block';
   document.getElementById('apply-calc-btn').style.display='';
   window._calcResult=result;
+  window._calcReqId=reqId||null;
+  // حفظ قيم المدخلات مع تسمياتها لعرضها في ورقة التحليل
+  window._calcInputVals={};
+  inputs.forEach(inp=>{
+    if(inp.code==='AGE_INPUT'||inp.code==='GENDER_INPUT') return;
+    const v=vals[inp.code];
+    if(v!==undefined&&v!==0) window._calcInputVals[inp.code]={value:v, label:inp.label};
+  });
 }
 
 function applyCalcResult(testId){
   const el=document.getElementById('rv-'+testId);
   if(el){el.value=window._calcResult;checkResult(testId,window._calcResult);}
+  // حفظ قيم المدخلات في req.calcInputs لعرضها في ورقة التحليل
+  if(window._calcReqId && window._calcInputVals){
+    const req=requests.find(r=>r.id===window._calcReqId);
+    if(req){
+      if(!req.calcInputs) req.calcInputs={};
+      req.calcInputs[testId]=window._calcInputVals;
+    }
+  }
+  _autoSaveResults();
   const modal=document.getElementById('m-calc-temp');if(modal)modal.remove();
 }
 
@@ -9387,9 +9457,11 @@ function buildPrintHTML(req, opts){
   const blankBody = opts.blankBody === true;
   const pt       = patients.find(p=>p.id===req.patientId)||{};
   // Only exclude special exams (UA/Stool) from regular report — they print separately
+  // التحاليل المحسوبة (isCalc) تطبع أيضاً في صفحة منفردة
   const reqTests = req.tests.map(tid=>tests.find(t=>t.id===tid)).filter(t=>{
     if(!t) return false;
     if(t.isSpecialExam) return false; // Urine/Stool have their own report pages
+    if(t.isCalc) return false;        // Calculated tests have their own report pages
     return true;
   });
   const today    = new Date().toLocaleDateString('en-GB');
@@ -9638,6 +9710,73 @@ function buildPrintHTML(req, opts){
       const val = req.results[t.id]||'';
       // Fix 2: Skip tests with no result entered — don't print empty rows
       if(!blankBody && (!val || val.trim()==='')) return;
+
+      // ── إذا كان التحليل محسوباً — أضف صفوف المدخلات قبل النتيجة النهائية بنفس تنسيق التحاليل العادية ──
+      if(t.isCalc && t.calcFormula && val && val.trim()!==''){
+        const calcInputDefs = getCalcFormulaInputs(t.calcFormula);
+        const savedCalcInputs = (req.calcInputs && req.calcInputs[t.id]) || {};
+        const customSettings = t.calcInputSettings || {};
+        calcInputDefs.forEach(function(inp){
+          if(inp.code==='AGE_INPUT'||inp.code==='GENDER_INPUT') return;
+          const matchTest = tests.find(function(x){ return x.code===inp.code; });
+          const cs = customSettings[inp.code] || {};
+          let inpVal=null, inpName='', inpUnit='', inpRefTxt='—', inpMin=null, inpMax=null;
+          if(matchTest){
+            if(req.results && req.results[matchTest.id]!==undefined && req.results[matchTest.id]!==''){
+              inpVal=req.results[matchTest.id];
+            } else if(savedCalcInputs[inp.code]){
+              inpVal=String(savedCalcInputs[inp.code].value);
+            }
+            if(!inpVal && inpVal!==0) return;
+            inpName = (cs.nameEn) || (matchTest.nameShort&&matchTest.nameShort.trim()?matchTest.nameShort.trim():matchTest.nameEn);
+            inpUnit = (cs.unit!==undefined&&cs.unit!=='') ? cs.unit : (matchTest.unit||'');
+            const inpRef = getPatientRef(matchTest, ptGender, ptAge);
+            inpMin = (cs.minVal!==null&&cs.minVal!==undefined) ? cs.minVal : inpRef.min;
+            inpMax = (cs.maxVal!==null&&cs.maxVal!==undefined) ? cs.maxVal : inpRef.max;
+            if(cs.ref) inpRefTxt=cs.ref;
+            else if(ptGender==='female'&&matchTest.refF&&matchTest.refF.trim()) inpRefTxt=matchTest.refF.trim();
+            else if(ptGender!=='female'&&matchTest.refM&&matchTest.refM.trim()) inpRefTxt=matchTest.refM.trim();
+            else if(matchTest.ref&&matchTest.ref.trim()) inpRefTxt=matchTest.ref.trim();
+            else if(inpRef.ref&&inpRef.ref.trim()) inpRefTxt=inpRef.ref;
+            else if(inpRef.min!==null) inpRefTxt=String(inpRef.min)+' \u2013 '+String(inpRef.max);
+          } else if(savedCalcInputs[inp.code]){
+            inpVal=String(savedCalcInputs[inp.code].value);
+            inpName=inp.label; if(!inpVal && inpVal!==0) return;
+          } else { return; }
+          // تحديد H/L/Normal
+          const inpV=parseFloat(inpVal);
+          let inpIsHigh=false, inpIsLow=false;
+          if(!isNaN(inpV) && inpMin!==null){
+            if(inpV>inpMax) inpIsHigh=true;
+            else if(inpV<inpMin) inpIsLow=true;
+          }
+          const inpValColor = showHL&&inpIsHigh?'#cc0000':showHL&&inpIsLow?'#0055cc':'#000000';
+          const inpBoxBorder = showHL&&(inpIsHigh||inpIsLow)?inpValColor:'#000000';
+          const inpFlag = showHL&&inpIsHigh
+            ?`<span style="font-size:10px;font-weight:600;color:#cc0000;margin-right:2px;flex-shrink:0">H</span>`
+            :showHL&&inpIsLow
+            ?`<span style="font-size:10px;font-weight:600;color:#0055cc;margin-right:2px;flex-shrink:0">L</span>`
+            :`<span style="width:12px;flex-shrink:0;display:inline-block"></span>`;
+          const inpResultBox=`<div style="border:1.5px solid ${inpBoxBorder};border-radius:5px;background:#fff;padding:3px 6px;font-size:${pfs};font-weight:900;color:${inpValColor};min-width:80px;max-width:160px;text-align:center;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center"><span>${inpVal}</span></div>`;
+          const inpShowUnit = inpUnit && inpUnit!=='qualitative';
+          const inpRefHtml = `<div style="display:block;font-size:${pfs}">${inpRefTxt==='—'?`<span style="font-size:${pfs}">—</span>`:`<span style="font-size:${pfs};font-weight:600;color:#000">${inpRefTxt}</span>${inpShowUnit?`&nbsp;&nbsp;<span style="font-size:${pfs};font-weight:600;color:#444">${inpUnit}</span>`:''}`}</div>`;
+          body+=`
+      <div style="margin:0 6px;display:flex;align-items:flex-start;direction:ltr;padding:2px 0">
+        <div style="flex:4;font-size:${pfs};font-weight:600;color:#000000;padding-top:3px">
+          ● ${inpName}
+        </div>
+        <div style="flex:2;display:flex;align-items:flex-start;justify-content:flex-start;gap:2px;padding-left:4px;padding-top:2px">
+          <span style="font-size:${pfs};font-weight:900;color:#000;flex-shrink:0;line-height:1.4">:</span>
+          <div style="display:flex;align-items:center;gap:2px">${inpResultBox}${inpFlag}</div>
+        </div>
+        <div style="flex:3;padding:2px 4px 0 6px">${inpRefHtml}</div>
+        <div style="flex:2"></div>
+      </div>`;
+          if(settings.div_test_dotted) body+=`<div style="margin:1px 6px;border-top:1px dotted #cccccc"></div>`;
+          else if(settings.div_test_solid) body+=`<div style="margin:1px 6px;border-top:1px solid #cccccc"></div>`;
+        });
+      }
+
       // Handle titer format: "Positive|1:160" → display both
       var rawVal=val; var titerDisplay='';
       if(val&&val.indexOf('|')>-1){var tp=val.split('|');rawVal=tp[0]||val;titerDisplay=tp[1]||'';}
@@ -9813,7 +9952,7 @@ function buildPrintHTML(req, opts){
     <style>${css}</style></head>
     <body>
     <div id="print-content" style="background:#ffffff;font-family:'Inter',Arial,sans-serif;direction:ltr;width:100%">
-      ${hdr}${ptBox}${blankBody?'':separator+colHdr+body}
+      ${hdr}${ptBox}${blankBody?'<!--BLANK_BODY_PLACEHOLDER-->':separator+colHdr+body}
       ${(!blankBody&&req.resultNotes)?`<div style="margin:4px 8px;padding:4px 8px;border-left:3px solid #ffaa00;background:#fffdf0;font-size:9px;color:#444;direction:ltr;font-weight:700"><b>Note:</b> ${req.resultNotes}</div>`:''}
       <div id="print-spacer"></div>
     </div>
@@ -9838,6 +9977,162 @@ function buildPrintHTML(req, opts){
 }
 
 function getCatDeviceName(cat){ return ''; }
+
+// ============================================================
+// CALC TEST PRINT PAGE — صفحة منفردة للتحليل المحسوب
+// ============================================================
+function buildCalcTestPrintHTML(req, calcTest){
+  // نستخدم buildPrintHTML مع تحليل وهمي يحتوي على المدخلات + النتيجة النهائية فقط
+  // ننشئ req مؤقت يحتوي فقط هذا التحليل المحسوب
+  const pt = patients.find(p=>p.id===req.patientId)||{};
+  const ptAge = parseFloat(pt.ageVal)||Math.floor((Date.now()-new Date(pt.dob||0).getTime())/31557600000)||0;
+  const ptGender = pt.gender||'male';
+  const showHL = document.getElementById('tog-highlight')?.classList.contains('on');
+  const showPrev = document.getElementById('tog-prev')?.classList.contains('on');
+  const showSig = document.getElementById('tog-sig')?.classList.contains('on');
+  const showHdr = document.getElementById('tog-hdr')?.classList.contains('on');
+
+  // نبني req مؤقت يحتوي التحليل المحسوب فقط
+  const fakeReq = Object.assign({}, req, { tests: [calcTest.id] });
+
+  // نبني الصفحة باستخدام نفس buildPrintHTML مع التحليل المحسوب فقط
+  // لكن نحتاج إعادة كتابة فقط قسم body ليعرض المدخلات + النتيجة
+
+  const savedCalcInputs = (req.calcInputs && req.calcInputs[calcTest.id]) || {};
+  const calcInputDefs = getCalcFormulaInputs(calcTest.calcFormula||'');
+
+  const pfs  = settings.printFontSize||'11px';
+  const pfsN = parseInt(pfs);
+  const reportFontFamily = settings.printFontFamily || "'Inter',Arial,sans-serif";
+  const reportFontWeight = settings.printFontWeight || '700';
+  const stripColor  = settings.colorResults||'#003366';
+  const sectionColor = settings.colorSection||'#003366';
+  const subcatFsN = parseInt(settings.subcatFontSize||'12');
+  const subcatFs  = subcatFsN+'px';
+
+  // ─── بناء صفوف التحليل ─────────────────────────────────
+  // دالة مساعدة لبناء صف تحليل بنفس تنسيق buildPrintHTML
+  function _makeRow(name, val, unit, refTxt, minV, maxV){
+    if(!val && val!==0) return '';
+    const v = parseFloat(val);
+    let isHigh=false, isLow=false;
+    if(!isNaN(v) && minV!==null && maxV!==null){
+      if(v>maxV) isHigh=true;
+      else if(v<minV) isLow=true;
+    }
+    const valColor = showHL&&isHigh?'#cc0000':showHL&&isLow?'#0055cc':'#000000';
+    const boxBorder = showHL&&(isHigh||isLow)?valColor:'#000000';
+    const flag = showHL&&isHigh
+      ?`<span style="font-size:10px;font-weight:600;color:#cc0000;margin-right:2px;flex-shrink:0">H</span>`
+      :showHL&&isLow
+      ?`<span style="font-size:10px;font-weight:600;color:#0055cc;margin-right:2px;flex-shrink:0">L</span>`
+      :`<span style="width:12px;flex-shrink:0;display:inline-block"></span>`;
+    const resultBox=`<div style="border:1.5px solid ${boxBorder};border-radius:5px;background:#fff;padding:3px 6px;font-size:${pfs};font-weight:900;color:${valColor};min-width:80px;max-width:160px;text-align:center;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center"><span>${val}</span></div>`;
+    const showUnit = unit && unit!=='qualitative';
+    const refHtml = refTxt&&refTxt!=='—'
+      ? `<span style="font-size:${pfs};font-weight:600;color:#000">${refTxt}</span>${showUnit?`&nbsp;&nbsp;<span style="font-size:${pfs};font-weight:600;color:#444">${unit}</span>`:''}`
+      : `<span style="font-size:${pfs}">—</span>`;
+    return `
+    <div style="margin:0 6px;display:flex;align-items:flex-start;direction:ltr;padding:2px 0">
+      <div style="flex:4;font-size:${pfs};font-weight:600;color:#000000;padding-top:3px">● ${name}</div>
+      <div style="flex:2;display:flex;align-items:flex-start;justify-content:flex-start;gap:2px;padding-left:4px;padding-top:2px">
+        <span style="font-size:${pfs};font-weight:900;color:#000;flex-shrink:0;line-height:1.4">:</span>
+        <div style="display:flex;align-items:center;gap:2px">${resultBox}${flag}</div>
+      </div>
+      <div style="flex:3;padding:2px 4px 0 6px"><div style="display:block;font-size:${pfs}">${refHtml}</div></div>
+      <div style="flex:2"></div>
+    </div>`;
+  }
+
+  let body = '';
+  // عنوان المجموعة
+  body += `<div style="margin:4px 6px 0;direction:ltr">
+    <div style="padding:3px 10px 2px">
+      <div style="display:inline-block;font-size:${subcatFs};font-weight:900;color:${sectionColor};font-family:'Times New Roman',Times,serif;text-transform:capitalize;letter-spacing:0.5px;white-space:nowrap;border-bottom:2px solid ${sectionColor};padding-bottom:2px">calculated</div>
+    </div>
+  </div>`;
+
+  // صفوف المدخلات
+  const _td = settings.div_test_dotted;
+  const _ts = settings.div_test_solid;
+  const sep = _ts?`<div style="margin:1px 6px;border-top:1px solid #cccccc"></div>`:_td?`<div style="margin:1px 6px;border-top:1px dotted #cccccc"></div>`:'';
+
+  // احفظ قائمة الأكواد التي سنطبعها لتحديد الفاصل الأخير
+  const rowsToPrint = [];
+  calcInputDefs.forEach(function(inp){
+    if(inp.code==='AGE_INPUT'||inp.code==='GENDER_INPUT') return;
+    const matchTest = tests.find(function(x){ return x.code===inp.code; });
+    let inpVal=null, inpName='', inpUnit='', inpRefTxt='—', inpMin=null, inpMax=null;
+    if(matchTest){
+      if(req.results && req.results[matchTest.id]!==undefined && req.results[matchTest.id]!==''){
+        inpVal = req.results[matchTest.id];
+      } else if(savedCalcInputs[inp.code]){
+        inpVal = String(savedCalcInputs[inp.code].value);
+      }
+      if(!inpVal) return;
+      // استخدم الإعدادات المخصصة من calcTest.calcInputSettings إن وُجدت
+      const customInp = calcTest.calcInputSettings && calcTest.calcInputSettings[inp.code];
+      inpName = (customInp&&customInp.nameEn) || (matchTest.nameShort&&matchTest.nameShort.trim()?matchTest.nameShort.trim():matchTest.nameEn);
+      inpUnit = (customInp&&customInp.unit) || matchTest.unit||'';
+      const inpRef = getPatientRef(matchTest, ptGender, ptAge);
+      inpMin = (customInp&&customInp.minVal!==undefined) ? customInp.minVal : inpRef.min;
+      inpMax = (customInp&&customInp.maxVal!==undefined) ? customInp.maxVal : inpRef.max;
+      if(customInp&&customInp.ref) inpRefTxt=customInp.ref;
+      else if(ptGender==='female'&&matchTest.refF&&matchTest.refF.trim()) inpRefTxt=matchTest.refF.trim();
+      else if(ptGender!=='female'&&matchTest.refM&&matchTest.refM.trim()) inpRefTxt=matchTest.refM.trim();
+      else if(matchTest.ref&&matchTest.ref.trim()) inpRefTxt=matchTest.ref.trim();
+      else if(inpRef.ref) inpRefTxt=inpRef.ref;
+      else if(inpRef.min!==null) inpRefTxt=String(inpRef.min)+' \u2013 '+String(inpRef.max);
+    } else if(savedCalcInputs[inp.code]){
+      inpVal=String(savedCalcInputs[inp.code].value);
+      inpName=inp.label; if(!inpVal) return;
+    } else return;
+    rowsToPrint.push({inpName,inpVal,inpUnit,inpRefTxt,inpMin,inpMax});
+  });
+
+  rowsToPrint.forEach(function(r, i){
+    body += _makeRow(r.inpName, r.inpVal, r.inpUnit, r.inpRefTxt, r.inpMin, r.inpMax);
+    if(i < rowsToPrint.length - 1) body += sep; // فاصل بين المدخلات
+  });
+
+  // فاصل قبل النتيجة المحسوبة النهائية
+  if(rowsToPrint.length > 0) body += sep;
+
+  // صف النتيجة المحسوبة النهائية
+  const finalVal = req.results[calcTest.id]||'';
+  const finalName = calcTest.nameShort&&calcTest.nameShort.trim() ? calcTest.nameShort.trim() : calcTest.nameEn;
+  const finalUnit = calcTest.unit||'';
+  const finalRef = getPatientRef(calcTest, ptGender, ptAge);
+  let finalRefTxt = '—';
+  if(ptGender==='female'&&calcTest.refF&&calcTest.refF.trim()) finalRefTxt=calcTest.refF.trim();
+  else if(ptGender!=='female'&&calcTest.refM&&calcTest.refM.trim()) finalRefTxt=calcTest.refM.trim();
+  else if(calcTest.ref&&calcTest.ref.trim()) finalRefTxt=calcTest.ref.trim();
+  else if(finalRef.ref) finalRefTxt=finalRef.ref;
+  else if(finalRef.min!==null) finalRefTxt=String(finalRef.min)+' \u2013 '+String(finalRef.max);
+  body += _makeRow(finalName, finalVal, finalUnit, finalRefTxt, finalRef.min, finalRef.max);
+
+  // نبني الصفحة عبر req مؤقت يحتوي فقط هذا التحليل — لكن نستبدل body بمحتوانا
+  // الأسهل: استخدام buildPrintHTML مع fakeReq ونستبدل قسم body فيه
+  // لكن buildPrintHTML معقد — نستخدمه مباشرة مع override للـ reqTests
+  // الحل: نبني الصفحة يدوياً بنفس هيكل buildPrintHTML
+
+  // نستدعي buildPrintHTML مع blankBody ثم نحقن body الخاص بنا
+  const blankPage = buildPrintHTML(fakeReq, {blankBody:true});
+  const colHdr=`
+  <div style="margin:0 6px 2px;display:flex;direction:ltr;padding:4px 0;border-bottom:2px solid ${stripColor};border-top:1px solid #aab8c8;align-items:center;background:${stripColor}18">
+    <div style="flex:4;font-size:${pfsN}px;font-weight:900;color:${settings.colorStripText||stripColor};font-family:'Times New Roman',Times,serif;letter-spacing:0.5px;padding-right:4px;padding-left:18px;text-decoration:underline;text-underline-offset:3px">Test</div>
+    <div style="flex:2;font-size:${pfsN}px;font-weight:900;color:${settings.colorStripText||stripColor};font-family:'Times New Roman',Times,serif;text-align:left;letter-spacing:0.5px;padding-left:4px;text-decoration:underline;text-underline-offset:3px">Result</div>
+    <div style="flex:3;font-size:${pfsN}px;font-weight:900;color:${settings.colorStripText||stripColor};font-family:'Times New Roman',Times,serif;text-align:left;letter-spacing:0.5px;padding-left:6px;text-decoration:underline;text-underline-offset:3px">Reference</div>
+    <div style="flex:2;font-size:${pfsN}px;font-weight:900;color:${settings.colorStripText||stripColor};font-family:'Times New Roman',Times,serif;text-align:center;letter-spacing:0.5px;text-decoration:underline;text-underline-offset:3px">Last Result</div>
+  </div>`;
+  const separator=`<div style="margin:3px 6px;height:2px;background:${stripColor}"></div>`;
+  const injection = separator + colHdr + body;
+
+  // احقن المحتوى في المكان الصحيح داخل blankPage
+  return blankPage.replace('<!--BLANK_BODY_PLACEHOLDER-->', injection)
+    || blankPage.replace(/<\/div>\s*<div id="print-spacer"/, injection+'</div><div id="print-spacer"')
+    || blankPage.replace(/<div id="print-spacer"/, injection+'<div id="print-spacer"');
+}
 
 // ── نظام الإرسال الموحد ────────────────────────────────────
 let _chatSendType = 'pdf-device';
@@ -10449,12 +10744,26 @@ function openEditTest(id){
     }
     changeRefType();
     document.getElementById('m-edit-test-title').textContent='✏️ Edit Test';
+    // إظهار/إخفاء حقل المعادلة
+    const calcBlock=document.getElementById('et-calc-block');
+    const cfEl=document.getElementById('et-calc-formula');
+    if(t.isCalc){
+      if(calcBlock)calcBlock.style.display='block';
+      if(cfEl){ cfEl.value=t.calcFormula||''; renderCalcInputSettings(t.calcInputSettings||{}); }
+    } else {
+      if(calcBlock)calcBlock.style.display='none';
+      if(cfEl)cfEl.value='';
+    }
   } else {
     ['et-id','et-name-en','et-name-short','et-unit','et-min','et-max','et-min-f','et-max-f','et-ref','et-ref-m','et-ref-f','et-price','et-code','et-notes'].forEach(eid=>{const el=document.getElementById(eid);if(el)el.value='';});
     document.getElementById('rt-simple').checked=true;
     changeRefType();
     updateSubCatDropdown();
     document.getElementById('m-edit-test-title').textContent='🔬 New Test';
+    const calcBlockNew=document.getElementById('et-calc-block');
+    const cfElNew=document.getElementById('et-calc-formula');
+    if(calcBlockNew)calcBlockNew.style.display='none';
+    if(cfElNew)cfElNew.value='';
   }
   openModal('m-edit-test');
 }
@@ -10521,6 +10830,24 @@ function saveTest(){
     price:parseFloat(document.getElementById('et-price').value)||0,
     notes:document.getElementById('et-notes').value
   };
+  // الحفاظ على isCalc وcalcFormula وcalcInputSettings إذا كان التحليل محسوباً (المشكلة ٣)
+  if(editTestId){
+    const origTest=tests.find(x=>x.id===editTestId);
+    if(origTest&&origTest.isCalc){
+      t.isCalc=true;
+      const cfEl=document.getElementById('et-calc-formula');
+      t.calcFormula=cfEl&&cfEl.value.trim()?cfEl.value.trim():(origTest.calcFormula||'');
+      // حفظ إعدادات المدخلات
+      t.calcInputSettings=collectCalcInputSettings();
+    }
+  } else {
+    const cfEl=document.getElementById('et-calc-formula');
+    if(cfEl&&cfEl.value.trim()){
+      t.isCalc=true;
+      t.calcFormula=cfEl.value.trim();
+      t.calcInputSettings=collectCalcInputSettings();
+    }
+  }
   if(editTestId){const idx=tests.findIndex(x=>x.id===editTestId);if(idx>-1)tests[idx]=t;}
   else tests.push(t);
   save('tests',tests);
@@ -10529,6 +10856,73 @@ function saveTest(){
   showNotif('Saved',`Test saved: ${t.nameEn} ✅`,'success');
 }
 function deleteTest(id){if(confirm('Delete this test?')){tests=tests.filter(t=>t.id!==id);save('tests',tests);IDB.set(DB._pfx()+'tests',tests).catch(e=>console.warn('[MedLab] IDB tests save error',e));renderTestsDB();showNotif('Deleted','Test deleted');}}
+
+// ── إعدادات مدخلات التحليل المحسوب ──────────────────────────
+function renderCalcInputSettings(existingSettings){
+  existingSettings = existingSettings || {};
+  const formulaEl = document.getElementById('et-calc-formula');
+  const formula = formulaEl ? formulaEl.value.trim() : '';
+  const listDiv = document.getElementById('et-calc-inputs-list');
+  const rowsDiv = document.getElementById('et-calc-inputs-rows');
+  if(!listDiv||!rowsDiv) return;
+  const inputDefs = getCalcFormulaInputs(formula);
+  const realInputs = inputDefs.filter(function(i){ return i.code!=='AGE_INPUT'&&i.code!=='GENDER_INPUT'; });
+  if(!realInputs.length){ listDiv.style.display='none'; return; }
+  listDiv.style.display='block';
+  rowsDiv.innerHTML = realInputs.map(function(inp){
+    const matchTest = tests.find(function(x){ return x.code===inp.code; });
+    const cs = existingSettings[inp.code]||{};
+    const defName = matchTest ? (matchTest.nameShort&&matchTest.nameShort.trim()?matchTest.nameShort.trim():matchTest.nameEn) : inp.label;
+    const defUnit = matchTest ? matchTest.unit||'' : '';
+    const defRef  = matchTest ? matchTest.ref||'' : '';
+    return `<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(139,63,255,0.2);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:7px">📌 ${inp.code} — ${inp.label}</div>
+      <div class="fr2" style="gap:8px">
+        <div class="fg" style="margin-bottom:6px"><label class="fl" style="font-size:10px">الاسم في التقرير</label>
+          <input class="fc" id="ci-set-name-${inp.code}" value="${cs.nameEn||defName}" placeholder="${defName}" style="font-size:11px;padding:5px 8px">
+        </div>
+        <div class="fg" style="margin-bottom:6px"><label class="fl" style="font-size:10px">الوحدة</label>
+          <input class="fc" id="ci-set-unit-${inp.code}" value="${cs.unit!==undefined?cs.unit:defUnit}" placeholder="${defUnit}" style="font-size:11px;padding:5px 8px;direction:ltr">
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:6px"><label class="fl" style="font-size:10px">القيمة الطبيعية (نص للطباعة)</label>
+        <input class="fc" id="ci-set-ref-${inp.code}" value="${cs.ref!==undefined?cs.ref:defRef}" placeholder="${defRef}" style="font-size:11px;padding:5px 8px">
+      </div>
+      <div class="fr2" style="gap:8px">
+        <div class="fg" style="margin-bottom:0"><label class="fl" style="font-size:10px">Min (للتفسير H/L)</label>
+          <input class="fc" id="ci-set-min-${inp.code}" type="number" step="any" value="${cs.minVal!==undefined?cs.minVal:(matchTest&&matchTest.minVal!==null?matchTest.minVal:'')}" style="font-size:11px;padding:5px 8px">
+        </div>
+        <div class="fg" style="margin-bottom:0"><label class="fl" style="font-size:10px">Max (للتفسير H/L)</label>
+          <input class="fc" id="ci-set-max-${inp.code}" type="number" step="any" value="${cs.maxVal!==undefined?cs.maxVal:(matchTest&&matchTest.maxVal!==null?matchTest.maxVal:'')}" style="font-size:11px;padding:5px 8px">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function collectCalcInputSettings(){
+  const formulaEl = document.getElementById('et-calc-formula');
+  const formula = formulaEl ? formulaEl.value.trim() : '';
+  const inputDefs = getCalcFormulaInputs(formula);
+  const result = {};
+  inputDefs.forEach(function(inp){
+    if(inp.code==='AGE_INPUT'||inp.code==='GENDER_INPUT') return;
+    const nameEl = document.getElementById('ci-set-name-'+inp.code);
+    const unitEl = document.getElementById('ci-set-unit-'+inp.code);
+    const refEl  = document.getElementById('ci-set-ref-'+inp.code);
+    const minEl  = document.getElementById('ci-set-min-'+inp.code);
+    const maxEl  = document.getElementById('ci-set-max-'+inp.code);
+    if(!nameEl) return;
+    result[inp.code] = {
+      nameEn: nameEl.value.trim()||'',
+      unit:   unitEl ? unitEl.value.trim() : '',
+      ref:    refEl  ? refEl.value.trim()  : '',
+      minVal: minEl&&minEl.value!=='' ? parseFloat(minEl.value) : null,
+      maxVal: maxEl&&maxEl.value!=='' ? parseFloat(maxEl.value) : null
+    };
+  });
+  return result;
+}
 
 // ============================================================
 // DOCTORS
