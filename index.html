@@ -139,9 +139,6 @@ body.light-mode .gc { background:#ffffff; border:1.5px solid #dde4ec; box-shadow
 body.light-mode .scard { background:#ffffff; border:1.5px solid #dde4ec; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
 body.light-mode .scard-val { color:#000000; }
 body.light-mode .scard-lbl { color:#4a5568; font-weight:600; }
-/* أسماء أقسام لوحة التحكم — أسود في النهاري، أبيض في الليلي */
-body.light-mode .scard .scard-lbl[style*="color:#000000"] { color:#1a202c !important; }
-body:not(.light-mode) .scard .scard-lbl[style*="color:#000000"] { color:#ffffff !important; }
 body.light-mode .gc-hdr { border-bottom:1.5px solid #dde4ec; }
 body.light-mode .gc-title { color:#000000; font-weight:800; }
 body.light-mode .modal { background:#ffffff; border:1.5px solid #c8d4e0; box-shadow:0 12px 40px rgba(0,0,0,0.18); }
@@ -1941,11 +1938,6 @@ body.light-mode .fr-accent{color:#059669 !important;}
   direction:rtl; white-space:nowrap;
 }
 body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
-/* قائمة بحث المريض في مخطط التاريخ */
-#phc-patient-dropdown { background:var(--bg-modal,#070d1c); color:var(--text); }
-body.light-mode #phc-patient-dropdown { background:#ffffff !important; border-color:#c8d4e0 !important; box-shadow:0 8px 28px rgba(0,0,0,0.15) !important; }
-body.light-mode #phc-patient-dropdown > div { color:#1a202c !important; border-bottom-color:rgba(0,0,0,0.07) !important; }
-body.light-mode #phc-patient-dropdown > div:hover { background:rgba(0,95,153,0.08) !important; }
 </style>
 </head>
 <body>
@@ -2070,10 +2062,10 @@ body.light-mode #phc-patient-dropdown > div:hover { background:rgba(0,95,153,0.0
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-dashboard">
       <div class="stats" id="dash-stats">
-        <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl" style="color:#000000;font-weight:600;font-size:13px">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:var(--primary)">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
-        <div class="scard" style="--cc:rgba(0,245,147,0.18)"><div class="scard-lbl" style="color:#000000;font-weight:600;font-size:13px">التحاليل المنجزة</div><div class="scard-val" id="ds-done" style="color:var(--success)">0</div><div class="scard-sub">اليوم</div><div class="scard-ic">🧪</div></div>
-        <div class="scard" style="--cc:rgba(255,214,10,0.18)"><div class="scard-lbl" style="color:#000000;font-weight:600;font-size:13px">معلقة</div><div class="scard-val" id="ds-pending" style="color:var(--warning)">0</div><div class="scard-sub">طلبات انتظار</div><div class="scard-ic">⏳</div></div>
-        <div class="scard" style="--cc:rgba(123,47,255,0.18)"><div class="scard-lbl" style="color:#000000;font-weight:600;font-size:13px">إيرادات اليوم</div><div class="scard-val" id="ds-revenue" style="color:#a78bfa">0</div><div class="scard-sub" id="ds-currency-lbl">ر.س</div><div class="scard-ic">💰</div></div>
+        <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
+        <div class="scard" style="--cc:rgba(0,245,147,0.18)"><div class="scard-lbl">التحاليل المنجزة اليوم</div><div class="scard-val" id="ds-done" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub">اليوم</div><div class="scard-ic">🧪</div></div>
+        <div class="scard" style="--cc:rgba(255,214,10,0.18)"><div class="scard-lbl">معلقة اليوم</div><div class="scard-val" id="ds-pending" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub">طلبات انتظار</div><div class="scard-ic">⏳</div></div>
+        <div class="scard" style="--cc:rgba(123,47,255,0.18)"><div class="scard-lbl">إيرادات اليوم</div><div class="scard-val" id="ds-revenue" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub" id="ds-currency-lbl">ر.س</div><div class="scard-ic">💰</div></div>
       </div>
       <div class="g2">
         <div class="gc">
@@ -2542,14 +2534,13 @@ body.light-mode #phc-patient-dropdown > div:hover { background:rgba(0,95,153,0.0
         <div class="gc-body">
           <div style="display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;align-items:flex-end">
             <div class="fg" style="margin-bottom:0;flex:1;min-width:200px;position:relative">
-              <label class="fl">اختر المريض</label>
-              <div style="position:relative">
-                <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;z-index:1">🔍</span>
-                <input class="fc" id="phc-patient-search" placeholder="ابحث باسم أو رقم ملف..." autocomplete="off"
-                  oninput="phcFilterPatients(this.value)" onfocus="phcShowDropdown()" style="padding-right:34px">
-              </div>
-              <div id="phc-patient-dropdown" style="display:none;position:absolute;top:calc(100%+2px);right:0;left:0;border:1.5px solid var(--border);border-radius:10px;z-index:999;max-height:220px;overflow-y:auto;box-shadow:0 8px 28px rgba(0,0,0,0.7);scrollbar-width:thin;background:var(--bg-modal,#070d1c)"></div>
+              <label class="fl">ابحث عن مريض</label>
+              <input class="fc" id="phc-patient-search" type="text" placeholder="اكتب اسم المريض..." autocomplete="off"
+                oninput="phcSearchPatient(this.value)"
+                onfocus="phcSearchPatient(this.value)"
+                style="padding-left:8px">
               <input type="hidden" id="phc-patient-sel">
+              <div id="phc-patient-dropdown" style="display:none;position:absolute;top:100%;right:0;left:0;z-index:200;background:var(--bg-glass);border:1.5px solid var(--border);border-radius:10px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.5);margin-top:2px"></div>
             </div>
             <div class="fg" style="margin-bottom:0;flex:1;min-width:200px">
               <label class="fl">اختر التحليل</label>
@@ -2559,7 +2550,7 @@ body.light-mode #phc-patient-dropdown > div:hover { background:rgba(0,95,153,0.0
             </div>
           </div>
           <div id="phc-chart-area" style="min-height:280px;display:flex;align-items:center;justify-content:center">
-            <div class="empty"><div class="empty-ic">📈</div><p>اختر مريضاً وتحليلاً لعرض مخطط النتائج عبر الزمن</p></div>
+            <div class="empty"><div class="empty-ic">📈</div><p>ابحث عن مريض واختر تحليلاً لعرض مخطط النتائج عبر الزمن</p></div>
           </div>
         </div>
       </div>
@@ -5965,7 +5956,7 @@ const ALL_TESTS=[
 {id:'h034',code:'SICKLE',nameEn:'Sickling Test',nameShort:'Sickling Test',cat:'Hematology',subCat:'Haematology',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'Negative',time:'2 hours',price:60,notes:''},
 {id:'h035',code:'HB-ELEC',nameEn:'Hemoglobin Electrophoresis',nameShort:'Hgb Electro.',cat:'Hematology',subCat:'Hb Electrophoreses',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'HbA > 95%',time:'1 day',price:150,notes:''},
 {id:'h036',code:'G6PD',nameEn:'Glucose-6-Phosphate Dehydrogenase',nameShort:'G6PD',cat:'Hematology',subCat:'Haematology',unit:'U/gHb',minVal:4.6,maxVal:13.5,minF:4.6,maxF:13.5,ref:'4.6 - 13.5',time:'4 hours',price:120,notes:''},
-{id:'h037',code:'BLOOD-GRP',nameEn:'Blood Grouping and Rh Typing',nameShort:'Blood Group',cat:'Hematology',subCat:'Blood Group',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'See report',time:'1 hour',price:50,notes:'',customOptions:['A+','A-','B+','B-','O+','O-','AB+','AB-']},
+{id:'h037',code:'BLOOD-GRP',nameEn:'Blood Grouping and Rh Typing',nameShort:'Blood Group',cat:'Hematology',subCat:'Blood Group',unit:'blood-group',minVal:null,maxVal:null,minF:null,maxF:null,ref:'See report',time:'1 hour',price:50,notes:''},
 {id:'h038',code:'RH-TYPE',nameEn:'Rh Factor',nameShort:'Rh',cat:'Hematology',subCat:'Blood Group',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'Positive / Negative',time:'1 hour',price:30,notes:''},
 {id:'h039',code:'CROSSMATCH',nameEn:'Crossmatch',nameShort:'Crossmatch',cat:'Hematology',subCat:'Blood Group',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'Compatible',time:'2 hours',price:100,notes:'Pre-transfusion'},
 {id:'h040',code:'COOMBS-D',nameEn:'Direct Coombs Test',nameShort:'DAT',cat:'Hematology',subCat:'Blood Group',unit:'qualitative',minVal:null,maxVal:null,minF:null,maxF:null,ref:'Negative',time:'2 hours',price:90,notes:'Autoimmune hemolysis'},
@@ -6677,32 +6668,11 @@ window.onload=()=>{
   });
 };
 
-function patchBloodGroupTest(){
-  // إصلاح تحليل فصيلة الدم ليحتوي على خيارات فصائل الدم الصحيحة
-  const bloodOpts=['A+','A-','B+','B-','O+','O-','AB+','AB-'];
-  let changed=false;
-  tests.forEach(t=>{
-    if(t.code==='BLOOD-GRP'||t.id==='h037'){
-      if(!t.customOptions||t.customOptions.join(',')!==bloodOpts.join(',')){
-        t.customOptions=bloodOpts;
-        t.unit='qualitative';
-        t.minVal=null;t.maxVal=null;t.minF=null;t.maxF=null;
-        changed=true;
-      }
-    }
-  });
-  if(changed){
-    save('tests',tests);
-    try{IDB.set(DB._pfx()+'tests',tests);}catch(e){}
-  }
-}
-
 function startApp(){
   initTheme();
   loadSettings();   // أولاً: ضع القيم المحفوظة في settings object والـ DOM
   applyFontCustom(); // ثانياً: طبّق الكل على CSS
   applyCustomExamFields();
-  patchBloodGroupTest();
   buildTestCatTabs();
   renderAll();
   applyPermissionsToSidebar();
@@ -7180,7 +7150,7 @@ function nav(p){
         setTimeout(function(){
           const srch=document.getElementById('req-srch-inp');
           if(srch){srch.focus();srch.select();}
-        },120);
+        },0);
       }
       if(p==='waitqueue') { if(typeof renderWaitQueue==='function') renderWaitQueue(); }
       if(p==='lis') { if(typeof lisInit==='function') lisInit(); }
@@ -8696,12 +8666,15 @@ function openViewResultsModal(rid){
     let inputHtml;
     // Fix 4: Always allow editing - remove printed lock
     if(isQual){
-        const _vCustOpts = t.customOptions && t.customOptions.length ? t.customOptions : ['Negative','Positive','Reactive','Non-Reactive','Acceptable'];
-        const isManual = val && !_vCustOpts.includes(val);
+        const isManual = val && !['','Negative','Positive','Reactive','Non-Reactive','Acceptable'].includes(val);
         inputHtml=`<div style="display:flex;flex-direction:column;gap:4px">
           <select class="res-input" id="vr-rv-${t.id}" style="width:145px" onchange="vrHandleQualChange('${t.id}',this)">
             <option value="">-- Select --</option>
-            ${_vCustOpts.map(o=>`<option ${val===o?'selected':''}>${o}</option>`).join('')}
+            <option ${val==='Negative'?'selected':''}>Negative</option>
+            <option ${val==='Positive'?'selected':''}>Positive</option>
+            <option ${val==='Reactive'?'selected':''}>Reactive</option>
+            <option ${val==='Non-Reactive'?'selected':''}>Non-Reactive</option>
+            <option ${val==='Acceptable'?'selected':''}>Acceptable</option>
             <option value="__manual__" ${isManual?'selected':''}>✏️ إدخال يدوي</option>
           </select>
           <input type="text" class="res-input" id="vr-rv-manual-${t.id}"
@@ -9078,11 +9051,18 @@ function loadResultEntry(){
     }
 
     const savedVal=req.results[t.id];
-    const isQual=(t.unit==='qualitative'||t.refType==='pos-neg')&&!(t.ageRanges&&t.ageRanges.length);
+    const isBloodGroup=(t.unit==='blood-group'||t.code==='BLOOD-GRP');
+    const isQual=!isBloodGroup&&(t.unit==='qualitative'||t.refType==='pos-neg')&&!(t.ageRanges&&t.ageRanges.length);
     const isTiter=isQual&&(t.unit==='titer'||(t.ref&&t.ref.indexOf('1:')>-1));
     const ref=getPatientRef(t,ptGender,ptAge);
     let inputHtml;
-    if(isTiter){
+    if(isBloodGroup){
+      const bgOpts=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+      inputHtml=`<select class="res-input" id="rv-${t.id}" style="width:145px;font-weight:800;font-size:14px" onchange="_autoSaveResults()">
+        <option value="">-- فصيلة الدم --</option>
+        ${bgOpts.map(o=>`<option value="${o}" ${savedVal===o?'selected':''}>${o}</option>`).join('')}
+      </select>`;
+    } else if(isTiter){
       // Titer: Positive/Negative dropdown + titer value field
       var titerQualVal=''; var titerNumVal='';
       if(savedVal){
@@ -9104,12 +9084,16 @@ function loadResultEntry(){
         +'<input type="hidden" id="rv-'+t.id+'" value="'+(savedVal||'')+'">'
         +'</div>';
     } else if(isQual){
-      const _custOpts = t.customOptions && t.customOptions.length ? t.customOptions : ['Negative','Positive','Weak','Reactive','Non-Reactive','Acceptable'];
-      const isManual2 = savedVal && !_custOpts.includes(savedVal);
+      const isManual2 = savedVal && !['','Negative','Positive','Weak','Reactive','Non-Reactive','Acceptable'].includes(savedVal);
       inputHtml=`<div style="display:flex;flex-direction:column;gap:4px">
         <select class="res-input" id="rv-${t.id}" style="width:145px" onchange="handleQualChange('${t.id}',this)">
           <option value="">-- Select --</option>
-          ${_custOpts.map(o=>`<option ${savedVal===o?'selected':''}>${o}</option>`).join('')}
+          <option ${savedVal==='Negative'?'selected':''}>Negative</option>
+          <option ${savedVal==='Positive'?'selected':''}>Positive</option>
+          <option ${savedVal==='Weak'?'selected':''}>Weak</option>
+          <option ${savedVal==='Reactive'?'selected':''}>Reactive</option>
+          <option ${savedVal==='Non-Reactive'?'selected':''}>Non-Reactive</option>
+          <option ${savedVal==='Acceptable'?'selected':''}>Acceptable</option>
           <option value="__manual__" ${isManual2?'selected':''}>✏️ إدخال يدوي</option>
         </select>
         <input type="text" class="res-input" id="rv-manual-${t.id}"
@@ -10435,7 +10419,8 @@ function buildPrintHTML(req, opts){
       if(val&&val.indexOf('|')>-1){var tp=val.split('|');rawVal=tp[0]||val;titerDisplay=tp[1]||'';}
       const displayVal = rawVal||'—';
       const displayValFull = titerDisplay ? displayVal+' / '+titerDisplay : displayVal;
-      const isQual = (t.unit==='qualitative'||t.refType==='pos-neg')&&!(t.ageRanges&&t.ageRanges.length);
+      const isBloodGroup=(t.unit==='blood-group'||t.code==='BLOOD-GRP');
+      const isQual = !isBloodGroup&&(t.unit==='qualitative'||t.refType==='pos-neg')&&!(t.ageRanges&&t.ageRanges.length);
 
       // Fix 1: Check for local normal range override (from "Normally" button)
       const localKey='localRef_'+req.id+'_'+t.id;
@@ -10484,7 +10469,7 @@ function buildPrintHTML(req, opts){
         refTxt=ptGender==='female'&&t.minF!==null?(String(t.minF)+' – '+String(t.maxF)):(String(t.minVal)+' – '+String(t.maxVal));
       }
 
-      const unitTxt = localRef&&localRef.unit ? localRef.unit : t.unit;
+      const unitTxt = localRef&&localRef.unit ? localRef.unit : (isBloodGroup?'':t.unit);
 
       // Fix 2: Previous results — عمود Last Result مستقل
       let prevHtml='';
@@ -10502,7 +10487,7 @@ function buildPrintHTML(req, opts){
       }
 
       // بناء الوحدة — تُضاف داخل أول سطر من القيم الطبيعية وليس خارجها
-      const showUnit = (unitTxt && unitTxt !== 'qualitative' && !isQual && displayVal !== '—');
+      const showUnit = (!isBloodGroup && unitTxt && unitTxt !== 'qualitative' && !isQual && displayVal !== '—');
       const unitStr = showUnit ? ` <span style="font-size:${pfs};font-weight:${reportFontWeight};color:#444;white-space:nowrap">${unitTxt}</span>` : '';
 
       // إعادة بناء refHtml مع إدراج الوحدة مباشرة بعد أول سطر
@@ -11039,6 +11024,25 @@ function doPrint(reqId){
   const regularTests=allTests.filter(t=>!t.isSpecialExam);
   const specialTests=allTests.filter(t=>t.isSpecialExam);
 
+  // دالة طباعة الفحوصات الخاصة بالتسلسل
+  function printSpecialSequential(list, idx){
+    if(idx>=list.length) return;
+    const st=list[idx];
+    loadUARecords(); loadStoolExamRecords(); loadSemenRecords();
+    if(st.isSpecialExam==='ua'){
+      const rec=uaRecords.find(r=>r.reqId===req.id);
+      if(rec) printUAReport(rec.id);
+    } else if(st.isSpecialExam==='stool'){
+      const rec=stoolExamRecords.find(r=>r.reqId===req.id);
+      if(rec) printStoolReport(rec.id);
+    } else if(st.isSpecialExam==='semen'){
+      const rec=semenRecords.find(r=>r.reqId===req.id);
+      if(rec) printSemenReport(rec.id);
+    }
+    // الفحص التالي بعد 300ms
+    setTimeout(()=>printSpecialSequential(list,idx+1),300);
+  }
+
   // Print regular tests report via hidden iframe (silent print - no printer dialog open step)
   if(regularTests.length>0){
     const content=buildPrintHTML(req);
@@ -11051,37 +11055,28 @@ function doPrint(reqId){
     document.body.appendChild(iframe);
     const iDoc=iframe.contentWindow.document;
     iDoc.open(); iDoc.write(content); iDoc.close();
-    // Wait for content + fonts to load then print directly
+    // بعد إغلاق نافذة الطباعة العادية مباشرةً — اطبع الفحوصات الخاصة
     iframe.onload=function(){
       try{
         iframe.contentWindow.focus();
+        // استمع لحدث afterprint لطباعة الفحوصات الخاصة فور إغلاق نافذة الطباعة
+        iframe.contentWindow.addEventListener('afterprint', function(){
+          if(specialTests.length>0) printSpecialSequential(specialTests,0);
+        });
         iframe.contentWindow.print();
       }catch(e){
         const w=window.open('','_blank','width=900,height=700');
         w.document.open(); w.document.write(content); w.document.close();
+        w.addEventListener('afterprint', function(){
+          if(specialTests.length>0) printSpecialSequential(specialTests,0);
+        });
         setTimeout(()=>{try{w.focus();w.print();}catch(e2){}},100);
       }
     };
+  } else {
+    // لا توجد تحاليل عادية — اطبع الفحوصات الخاصة مباشرة
+    if(specialTests.length>0) printSpecialSequential(specialTests,0);
   }
-
-  // Print special exam reports ONLY if they were saved
-  loadUARecords(); loadStoolExamRecords(); loadSemenRecords();
-  specialTests.forEach((st, idx)=>{
-    const delay=(regularTests.length>0?200:0) + idx*200;
-    setTimeout(()=>{
-      if(st.isSpecialExam==='ua'){
-        const rec=uaRecords.find(r=>r.reqId===req.id);
-        if(rec) printUAReport(rec.id);
-      } else if(st.isSpecialExam==='stool'){
-        const rec=stoolExamRecords.find(r=>r.reqId===req.id);
-        if(rec) printStoolReport(rec.id);
-      } else if(st.isSpecialExam==='semen'){
-        const rec=semenRecords.find(r=>r.reqId===req.id);
-        if(rec) printSemenReport(rec.id);
-      }
-    }, delay);
-  });
-
   req.printed=true;
   req._updatedAt=Date.now(); // وقت التعديل — يُستخدم في المزامنة الذكية
   save('requests',requests);
@@ -12362,8 +12357,8 @@ function updateDashboard(){
   const recent=[...requests].reverse().slice(0,5);
   tbody.innerHTML=recent.map(r=>`<tr>
     <td><span class="bdg bdg-p">${r.id}</span></td>
-    <td>${r.patientName}</td>
-    <td style="font-size:11px">${r.testNames?r.testNames.slice(0,2).join(', '):'-'}</td>
+    <td style="color:#000;font-weight:900;font-size:13px">${r.patientName}</td>
+    <td style="font-size:12px;color:#000;font-weight:700">${r.testNames?r.testNames.slice(0,2).join(', '):'-'}</td>
     <td>${getStatusBdg(r.status)}</td>
     <td><div style="display:flex;gap:4px;flex-wrap:wrap">
       <button class="btn btn-sm btn-p" onclick="${r.status==='done'?`goToPrint('${r.id}')`:`goToResult('${r.id}')`}">${r.status==='done'?'🖨️':'🧪'}</button>
@@ -20523,62 +20518,49 @@ function toggleInputLang(inputId, btnId){
 // الميزة ١ — مخطط تاريخ المريض (Patient History Chart)
 // ============================================================
 function phcInit(){
-  const inp = document.getElementById('phc-patient-search');
-  if(!inp) return;
-  const curId = (document.getElementById('phc-patient-sel')||{}).value||'';
-  if(!curId){ inp.value=''; }
+  // reset search when re-entering reports section
+  const inp=document.getElementById('phc-patient-search');
+  if(inp && !inp.value){
+    document.getElementById('phc-patient-sel').value='';
+    const testSel=document.getElementById('phc-test-sel');
+    if(testSel){testSel.innerHTML='<option value="">-- اختر تحليلاً --</option>';testSel.disabled=true;}
+  }
 }
 
-function phcFilterPatients(q){
-  const dd = document.getElementById('phc-patient-dropdown');
+function phcSearchPatient(q){
+  const dd=document.getElementById('phc-patient-dropdown');
   if(!dd) return;
-  q = (q||'').trim();
-  const isLight = document.body.classList.contains('light-mode');
-  const itemBg = isLight ? '#ffffff' : '#070d1c';
-  const itemColor = isLight ? '#1a202c' : '#ffffff';
-  const itemBorder = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.04)';
-  const hoverBg = isLight ? 'rgba(0,95,153,0.08)' : 'rgba(0,212,255,0.09)';
-  const list = q
-    ? patients.filter(p=>(p.name||'').includes(q)||(p.id||'').includes(q)||(p.fileNo||'').includes(q))
-    : patients.slice(0,40);
-  if(!list.length){
-    dd.innerHTML=`<div style="padding:10px 14px;color:${isLight?'#6b7280':'rgba(255,255,255,0.5)'};font-size:12px">لا توجد نتائج</div>`;
-  } else {
-    dd.innerHTML = list.map(p=>`
-      <div onclick="phcSelectPatient('${p.id}','${(p.name||'').replace(/'/g,"\\'")}')"
-        style="padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid ${itemBorder};background:${itemBg};color:${itemColor};transition:background 0.12s"
-        onmouseover="this.style.background='${hoverBg}'" onmouseout="this.style.background='${itemBg}'">
-        <span style="font-weight:700">${p.name}</span>
-        <span style="opacity:0.6;font-size:11px;margin-right:8px">${p.fileNo||p.id}</span>
-      </div>`).join('');
+  const term=(q||'').trim().toLowerCase();
+  const matches=patients.filter(p=>!term||p.name.toLowerCase().includes(term)||(p.phone&&p.phone.includes(term))||(p.id&&p.id.toLowerCase().includes(term))).slice(0,20);
+  if(matches.length===0||!term){
+    dd.style.display='none';
+    return;
   }
   dd.style.display='block';
+  dd.innerHTML=matches.map(p=>`<div style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text)"
+    onmousedown="phcSelectPatient('${p.id}','${p.name.replace(/'/g,"\\'")}')"
+    onmouseover="this.style.background='rgba(0,212,255,0.1)'"
+    onmouseout="this.style.background=''"
+  >${p.name}<span style="font-size:11px;color:var(--text2);margin-right:8px">${p.id}</span></div>`).join('');
 }
 
-function phcShowDropdown(){
-  const inp = document.getElementById('phc-patient-search');
-  if(!inp) return;
-  phcFilterPatients(inp.value);
-}
-
-function phcSelectPatient(pid, name){
-  const inp = document.getElementById('phc-patient-search');
-  const hidden = document.getElementById('phc-patient-sel');
-  const dd = document.getElementById('phc-patient-dropdown');
-  if(inp) inp.value = name;
-  if(hidden) hidden.value = pid;
+function phcSelectPatient(pid, pname){
+  document.getElementById('phc-patient-search').value=pname;
+  document.getElementById('phc-patient-sel').value=pid;
+  const dd=document.getElementById('phc-patient-dropdown');
   if(dd) dd.style.display='none';
   phcLoadTests();
 }
 
-document.addEventListener('click', function(e){
-  const dd = document.getElementById('phc-patient-dropdown');
-  const inp = document.getElementById('phc-patient-search');
-  if(dd && inp && !dd.contains(e.target) && e.target!==inp) dd.style.display='none';
+// close dropdown when clicking outside
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('phc-patient-dropdown');
+  const inp=document.getElementById('phc-patient-search');
+  if(dd&&inp&&!dd.contains(e.target)&&e.target!==inp) dd.style.display='none';
 });
 
 function phcLoadTests(){
-  const pid = (document.getElementById('phc-patient-sel')||{}).value||'';
+  const pid = document.getElementById('phc-patient-sel').value;
   const testSel = document.getElementById('phc-test-sel');
   testSel.innerHTML = '<option value="">-- اختر تحليلاً --</option>';
   testSel.disabled = true;
@@ -20611,7 +20593,7 @@ function phcLoadTests(){
 }
 
 function phcRenderChart(){
-  const pid = (document.getElementById('phc-patient-sel')||{}).value||'';
+  const pid = document.getElementById('phc-patient-sel').value;
   const tid = document.getElementById('phc-test-sel').value;
   const area = document.getElementById('phc-chart-area');
   if(!pid || !tid){ area.innerHTML='<div class="empty"><div class="empty-ic">📈</div><p>اختر مريضاً وتحليلاً</p></div>'; return; }
