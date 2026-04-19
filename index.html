@@ -2062,10 +2062,10 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-dashboard">
       <div class="stats" id="dash-stats">
-        <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
-        <div class="scard" style="--cc:rgba(0,245,147,0.18)"><div class="scard-lbl">التحاليل المنجزة اليوم</div><div class="scard-val" id="ds-done" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub">اليوم</div><div class="scard-ic">🧪</div></div>
-        <div class="scard" style="--cc:rgba(255,214,10,0.18)"><div class="scard-lbl">معلقة اليوم</div><div class="scard-val" id="ds-pending" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub">طلبات انتظار</div><div class="scard-ic">⏳</div></div>
-        <div class="scard" style="--cc:rgba(123,47,255,0.18)"><div class="scard-lbl">إيرادات اليوم</div><div class="scard-val" id="ds-revenue" style="color:#000;font-size:28px;font-weight:900">0</div><div class="scard-sub" id="ds-currency-lbl">ر.س</div><div class="scard-ic">💰</div></div>
+        <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:var(--primary);font-size:22px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
+        <div class="scard" style="--cc:rgba(0,245,147,0.18)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">التحاليل المنجزة اليوم</div><div class="scard-val" id="ds-done" style="color:var(--success);font-size:22px;font-weight:900">0</div><div class="scard-sub">اليوم</div><div class="scard-ic">🧪</div></div>
+        <div class="scard" style="--cc:rgba(255,214,10,0.18)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">معلقة اليوم</div><div class="scard-val" id="ds-pending" style="color:var(--warning);font-size:22px;font-weight:900">0</div><div class="scard-sub">طلبات انتظار</div><div class="scard-ic">⏳</div></div>
+        <div class="scard" style="--cc:rgba(123,47,255,0.18)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">إيرادات اليوم</div><div class="scard-val" id="ds-revenue" style="color:#a78bfa;font-size:22px;font-weight:900">0</div><div class="scard-sub" id="ds-currency-lbl">ر.س</div><div class="scard-ic">💰</div></div>
       </div>
       <div class="g2">
         <div class="gc">
@@ -12357,8 +12357,8 @@ function updateDashboard(){
   const recent=[...requests].reverse().slice(0,5);
   tbody.innerHTML=recent.map(r=>`<tr>
     <td><span class="bdg bdg-p">${r.id}</span></td>
-    <td style="color:#000;font-weight:900;font-size:13px">${r.patientName}</td>
-    <td style="font-size:12px;color:#000;font-weight:700">${r.testNames?r.testNames.slice(0,2).join(', '):'-'}</td>
+    <td style="color:#000;font-weight:900;font-size:11px">${r.patientName}</td>
+    <td style="font-size:10px;color:#000;font-weight:700">${r.testNames?r.testNames.slice(0,2).join(', '):'-'}</td>
     <td>${getStatusBdg(r.status)}</td>
     <td><div style="display:flex;gap:4px;flex-wrap:wrap">
       <button class="btn btn-sm btn-p" onclick="${r.status==='done'?`goToPrint('${r.id}')`:`goToResult('${r.id}')`}">${r.status==='done'?'🖨️':'🧪'}</button>
