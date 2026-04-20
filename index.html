@@ -26745,54 +26745,115 @@ const VA = (function(){
   function _handleResults(t, raw){
     const out=[];
 
-    // ① تأكيد النتائج — زر "✅ تأكيد النتائج"
+    // ① تأكيد النتائج
     if(/تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|تأكيد نتائج|تاكيد نتايج|اكد النتائج|اكد النتيجة|confirm results|confirm|تأكيد(?:\s|$)|تاكيد(?:\s|$)/.test(t)){
       if(typeof finalizeResult==='function'){setTimeout(()=>finalizeResult(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}
       else{const b=document.querySelector('#sec-results button[onclick*="finalizeResult"]')||document.querySelector('button[onclick*="finalizeResult"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}}
       if(out.length)return out;
     }
-    // ② حفظ وطباعة — زر "🖨️ حفظ وطباعة"
+
+    // ② حفظ وطباعة
     if(/حفظ وطباعة|حفظ وطبع|احفظ وطبع|احفظ وطباعة|حفظ.*طباع|طباع.*حفظ|خزن وطبع|اطبع وخزن|save.*print|print.*save/.test(t)){
       if(typeof finalizeAndPrint==='function'){setTimeout(()=>finalizeAndPrint(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}
       else{const b=document.querySelector('#sec-results button[onclick*="finalizeAndPrint"]')||document.querySelector('button[onclick*="finalizeAndPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
       if(out.length)return out;
     }
-    // ③ تحميل PDF — زر "📄 تحميل PDF"
+
+    // ③ طباعة CBC فارغة — كلمات عراقية/عربية
+    if(/طباعة cbc|اطبع cbc|طبع cbc|cbc فارغ|طباعة سي بي سي|اطبع سي بي سي|طبع سي بي سي|cbc blank|طباعة.*دم.*فارغ/.test(t)){
+      if(typeof printCBCBlank==='function'){setTimeout(()=>printCBCBlank(),300);out.push({cls:'ok',msg:'طباعة CBC فارغة ✅'});}
+      else{const b=document.querySelector('button[onclick*="printCBCBlank"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة CBC ✅'});}}
+      return out;
+    }
+
+    // ④ تحميل PDF
     if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
       if(typeof downloadPDF==='function'){setTimeout(()=>downloadPDF(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
       else{const b=document.querySelector('#sec-results button[onclick*="downloadPDF"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}}
       return out;
     }
-    // ④ مشاركة واتساب — زر "📱 مشاركة PDF واتساب"
+
+    // ⑤ مشاركة واتساب
     if(/واتس|واتساب|whatsapp|مشاركة|ارسل|إرسال/.test(t)){
       if(typeof shareWhatsApp==='function'){setTimeout(()=>shareWhatsApp(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}
       else{const b=document.querySelector('#sec-results button[onclick*="shareWhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}}
       return out;
     }
-    // ⑤ تعديل بيانات المريض — زر "✏️ تعديل بيانات المريض"
+
+    // ⑥ تعديل بيانات المريض
     if(/تعديل بيانات|تعديل المريض|تعديل/.test(t)){
       if(typeof editPatientFromResults==='function'){setTimeout(()=>editPatientFromResults(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}
       else{const b=document.querySelector('#sec-results button[onclick*="editPatientFromResults"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}}
       return out;
     }
-    // ⑥ إضافة تحليل للطلب — حقل البحث في res-modify-bar
-    if(/اضافة تحليل|اضف تحليل|تحليل جديد|add test/.test(t)){
+
+    // ⑦ إضافة تحليل للطلب بالاسم مباشرة
+    // صيغ: "اضف تحليل كوليسترول" / "اضيف سكر للطلب" / "حط تحليل TSH" / "ضيف كرياتينين"
+    const addMatch=raw.match(/(?:اضف|اضيف|ضيف|حط|زيد|أضف|add)\s+(?:تحليل\s+)?(.+?)(?:\s+للطلب|\s+للمريض|$)/i);
+    if(addMatch){
+      const testName=addMatch[1].trim();
+      const code=_findTestCode(testName.toLowerCase());
+      if(code&&typeof tests!=='undefined'&&typeof addTestToReq==='function'){
+        const t2=tests.find(x=>x.code===code);
+        if(t2){
+          setTimeout(()=>addTestToReq(t2.id),300);
+          out.push({cls:'ok',msg:'إضافة تحليل '+code+' للطلب ✅'});
+        }else{out.push({cls:'err',msg:'لم أجد التحليل: '+code});}
+      }else if(code){
+        // بديل: استخدم حقل البحث
+        const srch=document.getElementById('res-add-test-srch');
+        const bar=document.getElementById('res-modify-bar');
+        if(srch&&bar){
+          bar.style.display='block';
+          setTimeout(()=>{srch.value=testName;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
+          out.push({cls:'ok',msg:'بحث عن: '+testName+' — اختر من القائمة'});
+        }else{out.push({cls:'err',msg:'لم أتمكن من إضافة التحليل'});}
+      }else{
+        // فتح حقل البحث وكتابة الاسم
+        const srch=document.getElementById('res-add-test-srch');
+        const bar=document.getElementById('res-modify-bar');
+        if(srch&&bar){
+          bar.style.display='block';
+          setTimeout(()=>{srch.value=testName;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
+          out.push({cls:'ok',msg:'بحث عن تحليل: '+testName});
+        }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
+      }
+      return out;
+    }
+    // فتح حقل الإضافة بدون اسم
+    if(/اضافة تحليل|اضف تحليل|تحليل جديد|add test|ضيف تحليل|زيد تحليل/.test(t)){
       const srch=document.getElementById('res-add-test-srch');
       const bar=document.getElementById('res-modify-bar');
       if(srch&&bar){
         bar.style.display='block';
-        setTimeout(()=>{srch.focus();},200);
-        out.push({cls:'ok',msg:'حقل إضافة تحليل جاهز — اكتب اسم التحليل'});
-      }else{out.push({cls:'err',msg:'إضافة التحاليل غير متاحة على هذا الطلب'});}
-      return out;
-    }
-    // ⑦ طباعة CBC فارغة
-    if(/طباعة cbc|cbc فارغة|طباعة سي بي سي/.test(t)){
-      if(typeof printCBCBlank==='function'){setTimeout(()=>printCBCBlank(),300);out.push({cls:'ok',msg:'طباعة CBC ✅'});}
+        setTimeout(()=>srch.focus(),200);
+        out.push({cls:'ok',msg:'اكتب أو قل اسم التحليل للإضافة'});
+      }else{out.push({cls:'err',msg:'إضافة التحاليل غير متاحة'});}
       return out;
     }
 
-    // ⑧ إدخال نتيجة تحليل — "اسم_التحليل + رقم أو نوعي"
+    // ⑧ حذف تحليل من الطلب الحالي
+    // صيغ: "احذف كوليسترول" / "امسح TSH" / "شيل سكر" / "حذف كرياتينين"
+    const delMatch=raw.match(/(?:احذف|حذف|امسح|مسح|شيل|شيّل|ازل|إزالة|remove|delete)\s+(?:تحليل\s+)?(.+?)(?:\s+من الطلب|$)/i);
+    if(delMatch){
+      const testName=delMatch[1].trim();
+      const code=_findTestCode(testName.toLowerCase());
+      if(code&&typeof tests!=='undefined'&&typeof removeTestFromReq==='function'){
+        const t2=tests.find(x=>x.code===code);
+        const id=document.getElementById('res-req-sel')?.value;
+        if(t2&&id){
+          // تجاوز confirm عبر تعديل مؤقت للـ confirm
+          const origConfirm=window.confirm;
+          window.confirm=()=>true;
+          setTimeout(()=>{removeTestFromReq(t2.id,id);window.confirm=origConfirm;},300);
+          out.push({cls:'ok',msg:'حذف تحليل '+code+' من الطلب ✅'});
+        }else if(!t2){out.push({cls:'err',msg:'لم أجد التحليل: '+code});}
+        else{out.push({cls:'err',msg:'لم أجد الطلب الحالي'});}
+      }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
+      return out;
+    }
+
+    // ⑨ إدخال نتيجة تحليل — "اسم_التحليل + رقم أو نوعي"
     const qualMap={
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
       'سلب':'Negative','نيكاتيف':'Negative','ما موجود':'Negative','مو موجود':'Negative',
@@ -26828,7 +26889,123 @@ const VA = (function(){
     return out;
   }
 
-  /* ── واجهة تحليل البول ── */
+  /* ── واجهة الطلبات (البحث + أزرار الصف) ── */
+  function _handleRequests(t, raw){
+    const out=[];
+
+    // ① بحث عن مريض في قسم الطلبات
+    // صيغ: "ابحث عن أحمد" / "دور على محمد" / "فتش عن سالم" / "اشوف طلبات علي"
+    const searchMatch=raw.match(/(?:ابحث عن|بحث عن|دور على|دور عن|دوّر على|فتش عن|فتّش عن|اشوف|شوف طلبات|اجيب|هاي|هات طلبات?)\s+(.+)/i);
+    if(searchMatch){
+      const name=searchMatch[1].replace(/(?:\s+في الطلبات|\s+الطلبات)$/,'').trim();
+      const inp=document.getElementById('req-srch-inp');
+      if(inp){
+        inp.value=name;
+        inp.dispatchEvent(new Event('input',{bubbles:true}));
+        if(typeof searchReq==='function')searchReq(name);
+        out.push({cls:'ok',msg:'بحث عن: '+name+' ✅'});
+      }else{out.push({cls:'err',msg:'لم أجد حقل البحث'});}
+      return out;
+    }
+
+    // ② مسح البحث / عرض الكل
+    if(/امسح البحث|مسح البحث|عرض الكل|كل الطلبات|اظهر الكل|clear search/.test(t)){
+      const inp=document.getElementById('req-srch-inp');
+      if(inp){inp.value='';if(typeof searchReq==='function')searchReq('');}
+      out.push({cls:'ok',msg:'عرض جميع الطلبات'});
+      return out;
+    }
+
+    // ③ أزرار صف الطلب المحدد (يعمل على أول صف ظاهر أو الصف المطابق للبحث الحالي)
+    // — المساعد يبحث عن الطلب المرئي الوحيد أو الأول في النتائج
+    function _getVisibleReq(){
+      const rows=document.querySelectorAll('#requests-body tr');
+      if(rows.length===1){
+        // صف واحد — هذا هو المقصود
+        const btn=rows[0].querySelector('button');
+        if(btn){
+          // استخرج id من onclick
+          const m=btn.getAttribute('onclick')?.match(/'([^']+)'/);
+          if(m)return m[1];
+        }
+      }
+      return null;
+    }
+
+    // طباعة — للطلب المطبوع فقط (status=done)
+    if(/(?:^|\s)(طباعة|اطبع|طبع|print)(?:\s|$)/.test(t)&&!/ملصق|label|cbc/.test(t)){
+      const rid=_getVisibleReq();
+      if(rid&&typeof goToPrint==='function'){
+        setTimeout(()=>goToPrint(rid),300);
+        out.push({cls:'ok',msg:'فتح طباعة الطلب ✅'});
+      }else{
+        // بحث عن زر طباعة في الصفوف الظاهرة
+        const b=document.querySelector('#requests-body button[onclick*="goToPrint"]');
+        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة ✅'});}
+        else{out.push({cls:'err',msg:'لا يوجد طلب مطبوع — استخدم "طباعة" بعد اكتمال النتائج'});}
+      }
+      return out;
+    }
+
+    // عرض النتائج / مشاهدة النتائج — للمطبوع
+    if(/عرض النتائج|مشاهدة النتائج|شوف النتائج|عرض.*نتائج|اشوف النتيجة|مشاهدة.*نتيجة|view results/.test(t)){
+      const rid=_getVisibleReq();
+      if(rid&&typeof openViewResultsModal==='function'){
+        setTimeout(()=>openViewResultsModal(rid),300);
+        out.push({cls:'ok',msg:'عرض نتائج الطلب ✅'});
+      }else{
+        const b=document.querySelector('#requests-body button[onclick*="openViewResultsModal"]');
+        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'عرض النتائج ✅'});}
+        else{out.push({cls:'err',msg:'لا توجد نتائج مكتملة لعرضها'});}
+      }
+      return out;
+    }
+
+    // نتائج / ادخال نتائج — للغير مطبوع (status=pending/inprogress)
+    if(/(?:^|\s)(نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|نتيجة|نتيجه)(?:\s|$)/.test(t)){
+      const rid=_getVisibleReq();
+      if(rid&&typeof goToResult==='function'){
+        setTimeout(()=>goToResult(rid),300);
+        out.push({cls:'ok',msg:'فتح إدخال النتائج ✅'});
+      }else{
+        const b=document.querySelector('#requests-body button[onclick*="goToResult"]');
+        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'إدخال النتائج ✅'});}
+        else{out.push({cls:'err',msg:'لم أجد طلباً معلقاً — جرب "عرض النتائج" إذا كان الطلب مكتملاً'});}
+      }
+      return out;
+    }
+
+    // طباعة ملصق
+    if(/ملصق|label|طباعة ملصق|اطبع ملصق|طبع ملصق/.test(t)){
+      const rid=_getVisibleReq();
+      if(rid&&typeof printTubeLabel==='function'){
+        setTimeout(()=>printTubeLabel(rid),300);
+        out.push({cls:'ok',msg:'طباعة ملصق الأنبوب ✅'});
+      }else{
+        const b=document.querySelector('#requests-body button[onclick*="printTubeLabel"]');
+        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة الملصق ✅'});}
+        else{out.push({cls:'err',msg:'لم أجد طلباً لطباعة ملصقه'});}
+      }
+      return out;
+    }
+
+    // حذف الطلب
+    if(/احذف الطلب|حذف الطلب|امسح الطلب|delete.*request|شيل الطلب/.test(t)){
+      const rid=_getVisibleReq();
+      if(rid&&typeof deleteReq==='function'){
+        const origConfirm=window.confirm;
+        window.confirm=()=>true;
+        setTimeout(()=>{deleteReq(rid);window.confirm=origConfirm;},300);
+        out.push({cls:'ok',msg:'حذف الطلب ✅'});
+      }else{out.push({cls:'err',msg:'لم أجد طلباً للحذف — ابحث عن المريض أولاً'});}
+      return out;
+    }
+
+    // إذا لم يُفهم الأمر
+    return [{cls:'inf',msg:'في الطلبات قل: "ابحث عن [اسم]" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"'}];
+  }
+
+
   function _handleUA(t){
     const out=[];
     if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
@@ -26942,12 +27119,13 @@ const VA = (function(){
   function _tryProcess(txt){
     const ctx=_ctx();
     const t=txt.toLowerCase().trim();
-    if(ctx==='patient')       return _handlePatient(t,txt);
-    else if(ctx==='tests')    return _handleTests(t,txt);
-    else if(ctx==='results')  return _handleResults(t,txt);
-    else if(ctx==='ua')       return _handleUA(t);
-    else if(ctx==='stool')    return _handleStool(t);
-    else                      return _handleGeneral(t);
+    if(ctx==='patient')         return _handlePatient(t,txt);
+    else if(ctx==='tests')      return _handleTests(t,txt);
+    else if(ctx==='results')    return _handleResults(t,txt);
+    else if(ctx==='requests')   return _handleRequests(t,txt);
+    else if(ctx==='ua')         return _handleUA(t);
+    else if(ctx==='stool')      return _handleStool(t);
+    else                        return _handleGeneral(t);
   }
 
   // ══════════════════════════════════════════════════════
@@ -26967,12 +27145,13 @@ const VA = (function(){
     // في السياق العام، إذا كان الأمر يخص النتائج يُحوَّل لـ _handleResults مباشرة
     const isResultsCmd = /تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|confirm results|حفظ وطباعة|حفظ وطبع|احفظ وطبع|save.*print|print.*save|تحميل pdf|واتساب.*نتائج|نتائج.*واتساب/.test(t);
 
-    if(ctx==='patient')       results=_handlePatient(t,txt);
-    else if(ctx==='tests')    results=_handleTests(t,txt);
-    else if(ctx==='results'||isResultsCmd)  results=_handleResults(t,txt);
-    else if(ctx==='ua')       results=_handleUA(t);
-    else if(ctx==='stool')    results=_handleStool(t);
-    else                      results=_handleGeneral(t);
+    if(ctx==='patient')         results=_handlePatient(t,txt);
+    else if(ctx==='tests')      results=_handleTests(t,txt);
+    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,txt);
+    else if(ctx==='requests')   results=_handleRequests(t,txt);
+    else if(ctx==='ua')         results=_handleUA(t);
+    else if(ctx==='stool')      results=_handleStool(t);
+    else                        results=_handleGeneral(t);
 
     // إذا لم يُفهم الأمر — جرب الأوامر العامة كبديل
     if(!results.length||(results.length===1&&results[0].cls==='err'&&ctx!=='general')){
@@ -27006,7 +27185,8 @@ const VA = (function(){
     const hints={
       patient: '"اسمه أحمد" — "عمره 30" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
       tests:   '"CBC" — "كوليسترول ودهون ثلاثية" — "حفظ وإنشاء" — "امسح الكل" — "رجوع"',
-      results: '"تأكيد النتائج" — "حفظ وطباعة" — "تحميل PDF" — "واتساب" — "إضافة تحليل" — "TSH واحد فاصل خمسة"',
+      results: '"تأكيد النتائج" — "حفظ وطباعة" — "اضف تحليل كوليسترول" — "احذف TSH" — "طباعة CBC"',
+      requests:'"ابحث عن أحمد" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"',
       ua:      '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
       stool:   '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
       general: '"مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير" — "تقارير"',
