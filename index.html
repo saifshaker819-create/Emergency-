@@ -26246,7 +26246,7 @@ async function _pmSendFile() {
   font-size: 24px;
   background: linear-gradient(135deg,#00d4ff,#7b2fff);
   box-shadow: 0 4px 18px rgba(0,212,255,0.5);
-  transition: all 0.2s; outline: none;
+  transition: transform 0.2s; outline: none;
   user-select: none;
   pointer-events: all !important;
 }
@@ -26359,17 +26359,52 @@ body.light-mode #va-wave.active #va-wave-bars span { background:#005f99; }
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// 🎙️ MEDLAB VOICE ASSISTANT — LOCAL ENGINE (No API needed)
+// 🎙️ MEDLAB VOICE ASSISTANT — FULL REBUILD
 // ══════════════════════════════════════════════════════════════
 const VA = (function(){
 
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   let _rec = null, _on = false, _waveTimer = null, _restartTimer = null;
 
-  // ── قاموس التحاليل ──────────────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // كشف السياق الحالي — يعتمد على القسم النشط في DOM
+  // ══════════════════════════════════════════════════════
+  function _ctx(){
+    // 1) نافذة الويزارد (مريض جديد)
+    const wiz = document.getElementById('m-wizard');
+    if(wiz && (wiz.style.display==='flex' || wiz.classList.contains('open'))){
+      if(typeof wizStep !== 'undefined'){
+        if(wizStep === 1) return 'patient';
+        if(wizStep === 2) return 'tests';
+      }
+      return 'patient';
+    }
+    // 2) نافذة تحليل البول
+    const uaModal = document.getElementById('m-ua');
+    if(uaModal && uaModal.style.display==='flex') return 'ua';
+    // 3) نافذة تحليل البراز
+    const stoolModal = document.getElementById('m-stool-exam');
+    if(stoolModal && stoolModal.style.display==='flex') return 'stool';
+    // 4) نافذة تحليل المني
+    const semenModal = document.getElementById('m-semen-exam');
+    if(semenModal && semenModal.style.display==='flex') return 'semen';
+    // 5) قسم إدخال النتائج نشط
+    const rs = document.getElementById('sec-results');
+    if(rs && rs.classList.contains('active')) return 'results';
+    // 6) قسم المرضى نشط
+    const pts = document.getElementById('sec-patients');
+    if(pts && pts.classList.contains('active')) return 'patients';
+    // 7) قسم الطلبات
+    const req = document.getElementById('sec-requests');
+    if(req && req.classList.contains('active')) return 'requests';
+    return 'general';
+  }
+
+  // ══════════════════════════════════════════════════════
+  // قاموس التحاليل
+  // ══════════════════════════════════════════════════════
   const TEST_MAP = {
-    // هيماتولوجيا
-    'cbc':'CBC','سي بي سي':'CBC','دم كامل':'CBC','صورة دم':'CBC','صورة دم كاملة':'CBC','دم':'CBC',
+    'cbc':'CBC','سي بي سي':'CBC','دم كامل':'CBC','صورة دم':'CBC','صورة دم كاملة':'CBC',
     'hgb':'HGB','هيموغلوبين':'HGB','hemoglobin':'HGB','هيموجلوبين':'HGB',
     'wbc':'WBC','كريات بيضاء':'WBC','خلايا بيضاء':'WBC',
     'rbc':'RBC','كريات حمراء':'RBC',
@@ -26377,716 +26412,601 @@ const VA = (function(){
     'hct':'HCT','هيماتوكريت':'HCT',
     'esr':'ESR','ايزر':'ESR','ترسب':'ESR','ترسيب':'ESR',
     'mcv':'MCV','mch':'MCH','mchc':'MCHC','rdw':'RDW',
-    // كلى
-    'urea':'UREA','يوريا':'UREA','بول الدم':'UREA','يوريه':'UREA',
-    'creatinine':'CREAT','كرياتينين':'CREAT','كرياتين':'CREAT','creat':'CREAT',
-    'uric acid':'UA','حمض يوريك':'UA','يوريك اسيد':'UA','يوريك اسد':'UA','يوريك':'UA',
-    'egfr':'EGFR','جي اف ار':'EGFR','معدل ترشيح':'EGFR',
-    'bun':'BUN','بي يو ان':'BUN',
-    // كبد
-    'alt':'ALT','ايه ال تي':'ALT','sgpt':'ALT','اس جي بي تي':'ALT','حمل كبدي':'ALT',
-    'ast':'AST','ايه اس تي':'AST','sgot':'AST','اس جي او تي':'AST',
-    'alp':'ALP','ايه ال بي':'ALP','قلوية':'ALP','فوسفاتاز':'ALP',
-    'ggt':'GGT','جي جي تي':'GGT','gamma gt':'GGT',
-    'tbil':'TBIL','bilirubin':'TBIL','بيليروبين':'TBIL','توتل بيليروبين':'TBIL','اجمالي بيليروبين':'TBIL',
-    'dbil':'DBIL','بيليروبين مباشر':'DBIL','direct bilirubin':'DBIL',
-    'ibil':'IBIL','بيليروبين غير مباشر':'IBIL','indirect':'IBIL',
-    'tp':'TP','total protein':'TP','بروتين كلي':'TP','توتل بروتين':'TP',
-    'albumin':'ALB','البومين':'ALB','alb':'ALB',
-    'ldh':'LDH','ال دي اتش':'LDH',
-    // سكر
-    'glucose':'GLU','سكر':'GLU','جلوكوز':'GLU','gluc':'GLU',
-    'fbs':'FBS','سكر صائم':'FBS','صائم':'FBS',
-    'rbs':'RBS','سكر عشوائي':'RBS',
-    'hba1c':'HBA1C','a1c':'HBA1C','هيموجلوبين سكري':'HBA1C','سكر تراكمي':'HBA1C',
+    'urea':'UREA','يوريا':'UREA','يوريه':'UREA',
+    'creatinine':'CREAT','كرياتينين':'CREAT','creat':'CREAT',
+    'uric acid':'UA','حمض يوريك':'UA','يوريك':'UA',
+    'egfr':'EGFR','alt':'ALT','sgpt':'ALT','ast':'AST','sgot':'AST',
+    'alp':'ALP','ggt':'GGT','tbil':'TBIL','bilirubin':'TBIL','بيليروبين':'TBIL',
+    'dbil':'DBIL','ibil':'IBIL','tp':'TP','albumin':'ALB','البومين':'ALB','alb':'ALB',
+    'ldh':'LDH','glucose':'GLU','سكر':'GLU','جلوكوز':'GLU',
+    'fbs':'FBS','سكر صائم':'FBS','rbs':'RBS','hba1c':'HBA1C','a1c':'HBA1C','سكر تراكمي':'HBA1C',
     'insulin':'INSU-F','انسولين':'INSU-F',
-    // دهون
-    'cholesterol':'CHOL','كوليسترول':'CHOL','chol':'CHOL','شحوم':'CHOL',
-    'triglycerides':'TG','tg':'TG','تريغليسيريد':'TG','دهون ثلاثية':'TG',
-    'ترايغليسيرايد':'TG','ترايكليسيرايد':'TG','تريكلسيريد':'TG','تي جي':'TG',
-    'hdl':'HDL','اتش دي ال':'HDL','كوليسترول جيد':'HDL',
-    'ldl':'LDL','ال دي ال':'LDL','كوليسترول سيء':'LDL','كوليسترول ضار':'LDL',
-    'vldl':'VLDL','في ال دي ال':'VLDL',
-    'non hdl':'NON-HDL','نون اتش دي ال':'NON-HDL',
-    // غدة درقية
-    'tsh':'TSH','تي اس اتش':'TSH','تي اس اج':'TSH','ثيروتروبين':'TSH',
-    't4':'TT4','تي فور':'TT4','ثيروكسين':'TT4',
-    't3':'TT3','تي ثري':'TT3',
-    'ft4':'FT4','اف تي فور':'FT4','فري تي فور':'FT4','free t4':'FT4',
-    'ft3':'FT3','اف تي ثري':'FT3','فري تي ثري':'FT3','free t3':'FT3',
-    // هرمونات
+    'cholesterol':'CHOL','كوليسترول':'CHOL','chol':'CHOL',
+    'triglycerides':'TG','tg':'TG','تريغليسيريد':'TG','دهون ثلاثية':'TG','تي جي':'TG',
+    'hdl':'HDL','ldl':'LDL','vldl':'VLDL',
+    'tsh':'TSH','تي اس اتش':'TSH','t4':'TT4','t3':'TT3','ft4':'FT4','ft3':'FT3',
     'cortisol':'CORT','كورتيزول':'CORT',
     'progesterone':'PROG','بروجسترون':'PROG',
     'testosterone':'TEST','تيستوستيرون':'TEST',
-    'fsh':'FSH','اف اس اتش':'FSH',
-    'lh':'LH','ال اتش':'LH',
-    'prolactin':'PRL','برولاكتين':'PRL','prl':'PRL',
-    'estradiol':'E2','استراديول':'E2','e2':'E2',
-    'hcg':'β-HCG','حمل':'β-HCG','اختبار حمل':'β-HCG',
-    // مناعة
-    'crp':'CRP','سي ار بي':'CRP','بروتين تفاعلي':'CRP',
-    'ra':'RA','روماتيزم':'RA','عامل روماتيزم':'RA',
-    'ana':'ANA','اي ان ايه':'ANA',
-    'aso':'ASO','اي اس او':'ASO',
-    // فيتامينات
-    'vitamin d':'VITD','vit d':'VITD','فيتامين دي':'VITD','فيتامين د':'VITD','vitd':'VITD',
-    'b12':'VB12','vit b12':'VB12','فيتامين ب 12':'VB12','b 12':'VB12',
+    'fsh':'FSH','lh':'LH','prolactin':'PRL','برولاكتين':'PRL','prl':'PRL',
+    'estradiol':'E2','استراديول':'E2',
+    'hcg':'β-HCG','حمل':'β-HCG',
+    'crp':'CRP','سي ار بي':'CRP',
+    'ra':'RA','روماتيزم':'RA',
+    'ana':'ANA','aso':'ASO',
+    'vitamin d':'VITD','فيتامين دي':'VITD','فيتامين د':'VITD','vitd':'VITD',
+    'b12':'VB12','فيتامين ب12':'VB12',
     'ferritin':'FERR','فيريتين':'FERR','ferr':'FERR',
-    'iron':'FE','fe':'FE','حديد':'FE',
-    'folate':'FOLATE','folic acid':'FOLATE','حمض فوليك':'FOLATE',
-    'transferrin':'TRANSF','ترانسفيرين':'TRANSF',
-    // امراض معدية
-    'hbsag':'HBsAg','hbs':'HBsAg','التهاب كبد ب':'HBsAg','هيباتيتس ب':'HBsAg',
-    'hcv':'Anti-HCV','التهاب كبد سي':'Anti-HCV','هيباتيتس سي':'Anti-HCV',
-    'hiv':'HIV','ايدز':'HIV','اتش اي في':'HIV',
+    'iron':'FE','حديد':'FE',
+    'folate':'FOLATE','حمض فوليك':'FOLATE',
+    'hbsag':'HBsAg','hbs':'HBsAg','التهاب كبد ب':'HBsAg',
+    'hcv':'Anti-HCV','التهاب كبد سي':'Anti-HCV',
+    'hiv':'HIV','ايدز':'HIV',
     'vdrl':'VDRL','سيفلس':'VDRL',
     'covid':'COVID-AG','كوفيد':'COVID-AG',
-    'typhoid':'TYPH','تيفوئيد':'TYPH','تيفويد':'TYPH',
+    'typhoid':'TYPH','تيفويد':'TYPH',
     'brucella':'BRUC','بروسيلا':'BRUC',
-    'h pylori':'HPYL','هيليكوباكتر':'HPYL','ملوية':'HPYL',
-    // اورام
-    'cea':'CEA','سي اي ايه':'CEA',
-    'psa':'PSA','بي اس ايه':'PSA','بروستات':'PSA',
-    'afp':'AFP','اي اف بي':'AFP','الفا فيتو':'AFP',
-    'ca125':'CA125','سي ايه 125':'CA125',
-    'ca19':'CA19-9','سي ايه 19':'CA19-9',
-    'ca153':'CA15-3','سي ايه 15':'CA15-3',
-    // فصيلة دم
-    'blood group':'BLOOD-GRP','فصيلة دم':'BLOOD-GRP','فصيلة الدم':'BLOOD-GRP','blood grouping':'BLOOD-GRP',
+    'h pylori':'HPYL','هيليكوباكتر':'HPYL',
+    'cea':'CEA','psa':'PSA','بروستات':'PSA',
+    'afp':'AFP','ca125':'CA125','ca19':'CA19-9',
+    'blood group':'BLOOD-GRP','فصيلة دم':'BLOOD-GRP','فصيلة الدم':'BLOOD-GRP',
   };
 
-  // ── قاموس الأرقام العربية ─────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // قاموس الأرقام العربية
+  // ══════════════════════════════════════════════════════
   const NUM_MAP = {
     'صفر':0,'واحد':1,'اثنين':2,'اثنان':2,'ثلاثة':3,'ثلاث':3,'أربعة':4,'اربعة':4,
     'خمسة':5,'خمس':5,'ستة':6,'ست':6,'سبعة':7,'سبع':7,'ثمانية':8,'ثمان':8,'ثماني':8,
     'تسعة':9,'تسع':9,'عشرة':10,'عشر':10,'عشرين':20,'ثلاثين':30,'أربعين':40,'اربعين':40,
     'خمسين':50,'ستين':60,'سبعين':70,'ثمانين':80,'تسعين':90,
-    'مئة':100,'مائة':100,'مية':100,'ميه':100,'مئتين':200,'مياتين':200,
-    'ثلاثمئة':300,'اربعمئة':400,'خمسمئة':500,
-    'ألف':1000,'الف':1000,'ألفين':2000,'الفين':2000,
-    'فاصل':'.','نقطة':'.','وفاصل':'.','فاصلة':'.',
-    'صفر فاصل':'0.','صفر نقطة':'0.',
+    'مئة':100,'مائة':100,'مية':100,'ميه':100,'مئتين':200,
+    'ألف':1000,'الف':1000,'فاصل':'.','نقطة':'.','فاصلة':'.',
   };
 
-  // ── تحويل النص إلى رقم ───────────────────────────────
   function _parseNum(txt){
-    // أرقام إنجليزية مباشرة
     const direct = txt.match(/[\d]+(?:[.,]\d+)?/);
     if(direct) return direct[0].replace(',','.');
-
     let s = txt.toLowerCase().trim();
-    // استبدل الكلمات بأرقام
-    let result = '';
-    let cur = 0;
+    let result = '', cur = 0;
     const words = s.split(/\s+/);
     for(let w of words){
-      if(w === 'فاصل' || w === 'نقطة' || w === 'فاصلة'){
-        result += cur > 0 ? cur.toString() : '';
-        cur = 0;
-        result += '.';
-        continue;
+      if(w==='فاصل'||w==='نقطة'||w==='فاصلة'){
+        result += cur>0?cur.toString():'';cur=0;result+='.';continue;
       }
-      const n = NUM_MAP[w];
-      if(n !== undefined){
-        if(n >= 100 && cur > 0) cur *= n;
-        else cur += n;
-      } else if(result || cur){
-        // كلمة غير رقمية — توقف
-        break;
-      }
+      const n=NUM_MAP[w];
+      if(n!==undefined){if(n>=100&&cur>0)cur*=n;else cur+=n;}
+      else if(result||cur){break;}
     }
-    if(cur > 0) result += cur.toString();
-    return result || null;
+    if(cur>0)result+=cur.toString();
+    return result||null;
   }
 
-  // ── تشابه نصي ────────────────────────────────────────
-  function _sim(a, b){
-    a = a.toLowerCase(); b = b.toLowerCase();
-    if(a === b) return 1;
-    if(b.includes(a) || a.includes(b)) return 0.85;
-    let m = 0;
-    for(let c of a) if(b.includes(c)) m++;
-    return m / Math.max(a.length, b.length);
+  function _sim(a,b){
+    a=a.toLowerCase();b=b.toLowerCase();
+    if(a===b)return 1;
+    if(b.includes(a)||a.includes(b))return 0.85;
+    let m=0;
+    for(let c of a)if(b.includes(c))m++;
+    return m/Math.max(a.length,b.length);
   }
 
-  // ── البحث عن تحليل في القاموس ────────────────────────
   function _findTestCode(word){
-    const w = word.toLowerCase().trim();
-    // مطابقة مباشرة
-    if(TEST_MAP[w]) return TEST_MAP[w];
-    // بحث جزئي
-    for(const [k,v] of Object.entries(TEST_MAP)){
-      if(w.includes(k) || k.includes(w)) return v;
+    const w=word.toLowerCase().trim();
+    if(TEST_MAP[w])return TEST_MAP[w];
+    for(const[k,v]of Object.entries(TEST_MAP)){if(w.includes(k)||k.includes(w))return v;}
+    let best=null,bestScore=0;
+    for(const[k,v]of Object.entries(TEST_MAP)){
+      const s=_sim(w,k);if(s>bestScore&&s>0.72){bestScore=s;best=v;}
     }
-    // تشابه صوتي
-    let best = null, bestScore = 0;
-    for(const [k,v] of Object.entries(TEST_MAP)){
-      const s = _sim(w, k);
-      if(s > bestScore && s > 0.72){ bestScore = s; best = v; }
-    }
-    // بحث في قاعدة التحاليل الحقيقية
-    if(!best && typeof tests !== 'undefined'){
-      const t = tests.find(t =>
-        t.code.toLowerCase() === w ||
-        (t.nameShort||'').toLowerCase().includes(w) ||
-        t.nameEn.toLowerCase().includes(w)
-      );
-      if(t) return t.code;
+    if(!best&&typeof tests!=='undefined'){
+      const t=tests.find(t=>t.code.toLowerCase()===w||(t.nameShort||'').toLowerCase().includes(w)||t.nameEn.toLowerCase().includes(w));
+      if(t)return t.code;
     }
     return best;
   }
 
-  // ── اكتشاف السياق الحالي ─────────────────────────────
-  function _ctx(){
-    const wiz = document.getElementById('m-wizard');
-    if(wiz && wiz.classList.contains('open')){
-      if(typeof wizStep !== 'undefined'){
-        if(wizStep === 1) return 'patient';
-        if(wizStep === 2) return 'tests';
-      }
-    }
-    // تحليل البول
-    const uaModal = document.getElementById('m-ua');
-    if(uaModal && (uaModal.style.display==='flex'||uaModal.classList.contains('open'))) return 'ua';
-    // تحليل البراز
-    const stoolModal = document.getElementById('m-stool');
-    if(stoolModal && (stoolModal.style.display==='flex'||stoolModal.classList.contains('open'))) return 'stool';
-    if(typeof currentPage !== 'undefined' && currentPage === 'results') return 'results';
-    const rs = document.getElementById('sec-results');
-    if(rs && (rs.style.display === '' || rs.style.display === 'block')) return 'results';
-    return 'general';
-  }
-
   // ══════════════════════════════════════════════════════
-  // معالجة الأمر الصوتي
+  // معالجات كل واجهة
   // ══════════════════════════════════════════════════════
-  function _process(txt){
-    const ctx = _ctx();
-    _setCtxLabel(ctx);
-    const t = txt.toLowerCase().trim();
-    let results = [];
 
-    // أوامر عالمية تعمل في أي سياق
-    if(/(?:^|\s)(اغلق|إغلاق|close|إلغاء|الغاء|cancel)(?:\s|$)/.test(t)){
-      // أغلق أي modal مفتوح
-      const openModals = document.querySelectorAll('.moverlay[style*="flex"],.modal-overlay[style*="flex"]');
-      if(openModals.length){
-        const closeBtn = document.querySelector('.mclose');
-        if(closeBtn) closeBtn.click();
-        else if(typeof closeModal==='function') closeModal();
-        results.push({cls:'ok', msg:'تم الإغلاق'});
-      } else {
-        close();
-        results.push({cls:'ok', msg:'تم إغلاق المساعد'});
-      }
-      _showReply(results);
-      _speak(results.map(r=>r.msg).join('، '));
-      return;
-    }
-
-    if(ctx === 'patient')      results = _handlePatient(t, txt);
-    else if(ctx === 'tests')   results = _handleTests(t, txt);
-    else if(ctx === 'results' || ctx === 'ua' || ctx === 'stool') results = _handleResults(t, txt);
-    else results = _handleGeneral(t);
-
-    // fallback: إذا لم يُفهم الأمر في السياق الحالي، جرّب الأوامر العامة
-    if(results.length === 0 || (results.length===1 && results[0].cls==='err')){
-      const gen = _handleGeneral(t);
-      if(gen.length && gen[0].cls!=='inf') results = gen;
-    }
-
-    if(results.length === 0){
-      results = [{cls:'err', msg:'لم أفهم الأمر — حاول مرة أخرى'}];
-    }
-    _showReply(results);
-    _speak(results.map(r=>r.msg).join('، '));
-  }
-
-  // ── واجهة بيانات المريض ──────────────────────────────
+  /* ── واجهة بيانات المريض (الخطوة 1) ── */
   function _handlePatient(t, raw){
-    const out = [];
-
+    const out=[];
     // اللقب
-    const titles = ['السيد','السيدة','الآنسة','الحاج','الحاجة','الاستاذ','الاستاذة','الطفل','الطفلة','الدكتور','الدكتورة'];
-    const titleGender = {'السيد':'male','الحاج':'male','الاستاذ':'male','الطفل':'male','الدكتور':'male','السيدة':'female','الآنسة':'female','الحاجة':'female','الاستاذة':'female','الطفلة':'female','الدكتورة':'female'};
+    const titles=['السيد','السيدة','الآنسة','الحاج','الحاجة','الاستاذ','الاستاذة','الطفل','الطفلة','الدكتور','الدكتورة'];
+    const titleGender={'السيد':'male','الحاج':'male','الاستاذ':'male','الطفل':'male','الدكتور':'male','السيدة':'female','الآنسة':'female','الحاجة':'female','الاستاذة':'female','الطفلة':'female','الدكتورة':'female'};
     for(const tv of titles){
       if(t.includes(tv)){
-        if(typeof selectTitle === 'function') selectTitle(tv, titleGender[tv]||'male');
-        out.push({cls:'ok', msg:'اللقب: '+tv});
+        if(typeof selectTitle==='function')selectTitle(tv,titleGender[tv]||'male');
+        out.push({cls:'ok',msg:'اللقب: '+tv});
       }
     }
-
     // الجنس
-    if(/\b(أنثى|بنت|انثى|فيميل|female)\b/.test(t)){
-      const el=document.getElementById('wp-gender'); if(el){el.value='female';el.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof wizPatient!=='undefined') wizPatient.gender='female';
-      out.push({cls:'ok', msg:'الجنس: أنثى'});
-    } else if(/\b(ذكر|ولد|رجل|male)\b/.test(t)){
-      const el=document.getElementById('wp-gender'); if(el){el.value='male';el.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof wizPatient!=='undefined') wizPatient.gender='male';
-      out.push({cls:'ok', msg:'الجنس: ذكر'});
+    if(/\b(أنثى|بنت|انثى|female)\b/.test(t)){
+      const el=document.getElementById('wp-gender');if(el){el.value='female';el.dispatchEvent(new Event('change',{bubbles:true}));}
+      if(typeof wizPatient!=='undefined')wizPatient.gender='female';
+      out.push({cls:'ok',msg:'الجنس: أنثى'});
+    }else if(/\b(ذكر|ولد|رجل|male)\b/.test(t)){
+      const el=document.getElementById('wp-gender');if(el){el.value='male';el.dispatchEvent(new Event('change',{bubbles:true}));}
+      if(typeof wizPatient!=='undefined')wizPatient.gender='male';
+      out.push({cls:'ok',msg:'الجنس: ذكر'});
     }
-
-    // الاسم — يأتي بعد كلمات مثل "اسمه" أو "الاسم" أو "اسم المريض"
-    const nameMatch = raw.match(/(?:اسمه|اسمها|الاسم|اسم المريض|المريض)\s+([^\d،,]+?)(?:\s+عمره|\s+عمرها|\s+العمر|\s+رقم|\s+الطبيب|$)/i);
+    // الاسم
+    const nameMatch=raw.match(/(?:اسمه|اسمها|الاسم|اسم المريض|المريض)\s+([^\d،,]+?)(?:\s+عمره|\s+عمرها|\s+العمر|\s+رقم|\s+الطبيب|$)/i);
     if(nameMatch){
-      const name = nameMatch[1].trim();
-      const el = document.getElementById('wp-name');
-      if(el){ el.value=name; el.dispatchEvent(new Event('input',{bubbles:true})); }
-      if(typeof wizPatient!=='undefined') wizPatient.name=name;
-      out.push({cls:'ok', msg:'الاسم: '+name});
+      const name=nameMatch[1].trim();
+      const el=document.getElementById('wp-name');
+      if(el){el.value=name;el.dispatchEvent(new Event('input',{bubbles:true}));}
+      if(typeof wizPatient!=='undefined')wizPatient.name=name;
+      out.push({cls:'ok',msg:'الاسم: '+name});
     }
-
     // العمر
-    const ageMatch = t.match(/(?:عمره|عمرها|العمر|عمر)\s+(.+?)(?:\s+سنة|\s+سنوات|$)/i)
-                  || t.match(/(\d+)\s+سن/i);
+    const ageMatch=t.match(/(?:عمره|عمرها|العمر|عمر)\s+(.+?)(?:\s+سنة|\s+سنوات|$)/i)||t.match(/(\d+)\s+سن/i);
     if(ageMatch){
-      const ageStr = ageMatch[1]||ageMatch[0];
-      const ageNum = _parseNum(ageStr) || ageStr.match(/\d+/)?.[0];
+      const ageStr=ageMatch[1]||ageMatch[0];
+      const ageNum=_parseNum(ageStr)||ageStr.match(/\d+/)?.[0];
       if(ageNum){
         const el=document.getElementById('wp-age-y');
-        if(el){ el.value=ageNum; el.dispatchEvent(new Event('input',{bubbles:true})); if(typeof calcAgeCompound==='function') calcAgeCompound(); }
-        out.push({cls:'ok', msg:'العمر: '+ageNum+' سنة'});
+        if(el){el.value=ageNum;el.dispatchEvent(new Event('input',{bubbles:true}));if(typeof calcAgeCompound==='function')calcAgeCompound();}
+        out.push({cls:'ok',msg:'العمر: '+ageNum+' سنة'});
       }
     }
-
     // رقم الهاتف
-    const phoneMatch = raw.match(/(?:رقمه|رقمها|الرقم|هاتفه|موبايله|تلفونه|رقم الهاتف)\s*([\d\s\-]+)/i)
-                    || raw.match(/(07\d[\d\s]{8,})/);
+    const phoneMatch=raw.match(/(?:رقمه|رقمها|الرقم|هاتفه|موبايله|تلفونه|رقم الهاتف)\s*([\d\s\-]+)/i)||raw.match(/(07\d[\d\s]{8,})/);
     if(phoneMatch){
-      const phone = (phoneMatch[1]||phoneMatch[0]).replace(/\s+/g,'').trim();
+      const phone=(phoneMatch[1]||phoneMatch[0]).replace(/\s+/g,'').trim();
       const el=document.getElementById('wp-phone');
-      if(el){ el.value=phone; if(typeof wizPatient!=='undefined') wizPatient.phone=phone; }
-      out.push({cls:'ok', msg:'الهاتف: '+phone});
+      if(el){el.value=phone;if(typeof wizPatient!=='undefined')wizPatient.phone=phone;}
+      out.push({cls:'ok',msg:'الهاتف: '+phone});
     }
-
     // الطبيب
-    const docMatch = raw.match(/(?:الطبيب|دكتور|دكتورة|د\.)\s+([^\d،,]+?)(?:\s+رقم|\s+عمر|$)/i);
-    if(docMatch && typeof doctors !== 'undefined'){
-      const dName = docMatch[1].trim().toLowerCase();
-      const found = doctors.find(d =>
-        d.name.toLowerCase().includes(dName) ||
-        dName.includes(d.name.toLowerCase().split(' ')[0]) ||
-        _sim(d.name.toLowerCase(), dName) > 0.6
-      );
+    const docMatch=raw.match(/(?:الطبيب|دكتور|دكتورة|د\.)\s+([^\d،,]+?)(?:\s+رقم|\s+عمر|$)/i);
+    if(docMatch&&typeof doctors!=='undefined'){
+      const dName=docMatch[1].trim().toLowerCase();
+      const found=doctors.find(d=>d.name.toLowerCase().includes(dName)||dName.includes(d.name.toLowerCase().split(' ')[0])||_sim(d.name.toLowerCase(),dName)>0.6);
       if(found){
         const el=document.getElementById('wp-doctor');
-        if(el){ el.value=found.id; el.dispatchEvent(new Event('change',{bubbles:true})); }
-        if(typeof wizPatient!=='undefined'){ wizPatient.doctorId=found.id; wizPatient.doctorName=found.name; }
-        out.push({cls:'ok', msg:'الطبيب: '+found.name});
-      } else {
-        out.push({cls:'err', msg:'لم أجد الطبيب: '+docMatch[1]});
-      }
+        if(el){el.value=found.id;el.dispatchEvent(new Event('change',{bubbles:true}));}
+        if(typeof wizPatient!=='undefined'){wizPatient.doctorId=found.id;wizPatient.doctorName=found.name;}
+        out.push({cls:'ok',msg:'الطبيب: '+found.name});
+      }else{out.push({cls:'err',msg:'لم أجد الطبيب: '+docMatch[1]});}
     }
-
-    // التالي / اكمل
-    if(/(?:^|\s)(التالي|اكمل|انتقل|اكمل الان|تالي|next)(?:\s|$)/.test(t)){
-      if(typeof wizNext==='function') setTimeout(()=>wizNext(),250);
-      out.push({cls:'ok', msg:'انتقال للخطوة التالية ✅'});
+    // التالي → واجهة اختيار التحاليل
+    if(/(?:^|\s)(التالي|اكمل|انتقل|تالي|next)(?:\s|$)/.test(t)){
+      if(typeof wizNext==='function')setTimeout(()=>wizNext(),250);
+      out.push({cls:'ok',msg:'انتقال لاختيار التحاليل ✅'});
     }
-
-    // إلغاء / اغلق
+    // إلغاء / أغلق
     if(/(?:^|\s)(الغاء|إلغاء|اغلق|إغلاق|cancel|close)(?:\s|$)/.test(t)){
-      if(typeof closeModal==='function') closeModal('m-wizard');
-      out.push({cls:'ok', msg:'تم الإغلاق'});
+      const btn=document.querySelector('#m-wizard .mclose');
+      if(btn)btn.click();else if(typeof closeModal==='function')closeModal('m-wizard');
+      out.push({cls:'ok',msg:'تم الإغلاق'});
     }
-
     return out;
   }
 
-  // ── واجهة اختيار التحاليل ────────────────────────────
+  /* ── واجهة اختيار التحاليل (الخطوة 2) ── */
   function _handleTests(t, raw){
-    const out = [];
-
+    const out=[];
     // مسح الكل
-    if(/امسح الكل|مسح كل|clear all|حذف كل|مسح الكل/.test(t)){
+    if(/امسح الكل|مسح كل|clear all|حذف كل/.test(t)){
       if(typeof wizSelectedTests!=='undefined'){
         wizSelectedTests=[];
-        if(typeof renderWizTestList==='function') renderWizTestList();
-        if(typeof renderWizRightPanel==='function') renderWizRightPanel();
-        out.push({cls:'ok', msg:'تم مسح جميع التحاليل'});
+        if(typeof renderWizTestList==='function')renderWizTestList();
+        if(typeof renderWizRightPanel==='function')renderWizRightPanel();
+        out.push({cls:'ok',msg:'تم مسح جميع التحاليل'});
       }
       return out;
     }
-
-    // تأكيد / إنشاء
-    if(/(?:^|\s)(انشاء|إنشاء|تأكيد|اكمل|تم|انتهيت|next|confirm|done)(?:\s|$)/.test(t)){
-      if(typeof wizNext==='function') setTimeout(()=>wizNext(),250);
-      out.push({cls:'ok', msg:'تأكيد وإنشاء الطلب ✅'});
+    // تأكيد / إنشاء الطلب → زر "حفظ وإنشاء الطلب"
+    if(/(?:^|\s)(انشاء|إنشاء|تأكيد|اكمل|تم|انتهيت|next|confirm|done|حفظ وإنشاء|حفظ وانشاء)(?:\s|$)/.test(t)){
+      if(typeof wizFinish==='function'){setTimeout(()=>wizFinish(),250);out.push({cls:'ok',msg:'حفظ وإنشاء الطلب ✅'});}
+      else if(typeof wizNext==='function'){setTimeout(()=>wizNext(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
+      // كبديل: ابحث عن زر الإنشاء بالنص
+      else{
+        const finBtn=document.querySelector('#wiz-ftr button.btn-p');
+        if(finBtn){setTimeout(()=>finBtn.click(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
+      }
       return out;
     }
-
+    // رجوع → الخطوة الأولى
+    if(/(?:^|\s)(رجوع|السابق|back)(?:\s|$)/.test(t)){
+      if(typeof wizBack==='function')wizBack();
+      out.push({cls:'ok',msg:'رجوع لبيانات المريض'});return out;
+    }
+    // إلغاء
+    if(/(?:^|\s)(الغاء|إلغاء|اغلق|إغلاق|cancel)(?:\s|$)/.test(t)){
+      const btn=document.querySelector('#m-wizard .mclose');
+      if(btn)btn.click();else if(typeof closeModal==='function')closeModal('m-wizard');
+      out.push({cls:'ok',msg:'تم الإغلاق'});return out;
+    }
     // حذف تحليل
-    const removeMatch = t.match(/(?:احذف|حذف|ازل|إزالة|remove)\s+(.+)/);
+    const removeMatch=t.match(/(?:احذف|حذف|ازل|إزالة|remove)\s+(.+)/);
     if(removeMatch){
-      const code = _findTestCode(removeMatch[1]);
-      if(code && typeof wizSelectedTests!=='undefined'){
-        wizSelectedTests = wizSelectedTests.filter(x=>x.code!==code);
-        if(typeof renderWizTestList==='function') renderWizTestList();
-        if(typeof renderWizRightPanel==='function') renderWizRightPanel();
-        out.push({cls:'ok', msg:'تم حذف: '+code});
+      const code=_findTestCode(removeMatch[1]);
+      if(code&&typeof wizSelectedTests!=='undefined'){
+        wizSelectedTests=wizSelectedTests.filter(x=>x.code!==code);
+        if(typeof renderWizTestList==='function')renderWizTestList();
+        if(typeof renderWizRightPanel==='function')renderWizRightPanel();
+        out.push({cls:'ok',msg:'تم حذف: '+code});
       }
       return out;
     }
-
-    // إضافة تحاليل — قسّم النص بفواصل أو "و" أو "مع"
-    const parts = raw.split(/[،,وومع\+&]/g).map(p=>p.trim()).filter(Boolean);
-    // أضف كذلك النص الكامل كاحتمال
-    const allParts = parts.length > 1 ? parts : [raw];
-
-    let added = 0;
+    // إضافة تحاليل
+    const parts=raw.split(/[،,وومع\+&]/g).map(p=>p.trim()).filter(Boolean);
+    const allParts=parts.length>1?parts:[raw];
+    let added=0;
     for(const part of allParts){
-      const code = _findTestCode(part.trim().toLowerCase());
-      if(code && typeof tests!=='undefined'){
-        const t2 = tests.find(x=>x.code===code);
-        if(t2 && typeof wizSelectedTests!=='undefined'){
-          if(!wizSelectedTests.find(x=>x.id===t2.id)){
-            wizSelectedTests.push(t2);
-            added++;
-            out.push({cls:'ok', msg:'✅ '+code});
-          } else {
-            out.push({cls:'inf', msg:'موجود: '+code});
-          }
-        } else {
-          out.push({cls:'err', msg:'كود غير موجود: '+code});
-        }
-      } else if(part.trim()){
-        out.push({cls:'err', msg:'لم أعرف: '+part.trim()});
-      }
+      const code=_findTestCode(part.trim().toLowerCase());
+      if(code&&typeof tests!=='undefined'){
+        const t2=tests.find(x=>x.code===code);
+        if(t2&&typeof wizSelectedTests!=='undefined'){
+          if(!wizSelectedTests.find(x=>x.id===t2.id)){wizSelectedTests.push(t2);added++;out.push({cls:'ok',msg:'✅ '+code});}
+          else{out.push({cls:'inf',msg:'موجود: '+code});}
+        }else{out.push({cls:'err',msg:'كود غير موجود: '+code});}
+      }else if(part.trim()&&part.trim().length>1){out.push({cls:'err',msg:'لم أعرف: '+part.trim()});}
     }
-    if(added > 0){
-      if(typeof renderWizTestList==='function') renderWizTestList();
-      if(typeof renderWizRightPanel==='function') renderWizRightPanel();
+    if(added>0){
+      if(typeof renderWizTestList==='function')renderWizTestList();
+      if(typeof renderWizRightPanel==='function')renderWizRightPanel();
     }
-
     return out;
   }
 
-  // ── واجهة إدخال النتائج ──────────────────────────────
+  /* ── واجهة إدخال النتائج ── */
   function _handleResults(t, raw){
-    const out = [];
+    const out=[];
 
-    // حفظ وطباعة
-    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ|save.*print|print.*save/.test(t)){
-      const ctx = _ctx();
-      if(ctx==='ua'){
-        if(typeof saveAndPrintUA==='function') setTimeout(()=>saveAndPrintUA(),300);
-        out.push({cls:'ok', msg:'حفظ وطباعة تحليل البول ✅'});
-      } else if(ctx==='stool'){
-        if(typeof saveAndPrintStool==='function') setTimeout(()=>saveAndPrintStool(),300);
-        out.push({cls:'ok', msg:'حفظ وطباعة تحليل البراز ✅'});
-      } else {
-        if(typeof finalizeAndPrint==='function') setTimeout(()=>finalizeAndPrint(),300);
-        out.push({cls:'ok', msg:'حفظ وطباعة ✅'});
-      }
+    // ① تأكيد النتائج — زر "✅ تأكيد النتائج"
+    if(/تأكيد النتائج|تأكيد(?:\s|$)|confirm/.test(t)){
+      if(typeof finalizeResult==='function'){setTimeout(()=>finalizeResult(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}
+      else{const b=document.querySelector('#sec-results button[onclick*="finalizeResult"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}}
       return out;
     }
-    // تحميل PDF / تنزيل
-    if(/تنزيل|تحميل|download|pdf/.test(t)){
-      if(typeof downloadPDF==='function') setTimeout(()=>downloadPDF(),300);
-      out.push({cls:'ok', msg:'تحميل PDF ✅'}); return out;
-    }
-    // مشاركة واتساب
-    if(/واتس|واتساب|whatsapp|ارسل|مشاركة|إرسال/.test(t)){
-      const ctx = _ctx();
-      if(ctx==='ua'){
-        if(typeof saveAndShareUAWhatsApp==='function') setTimeout(()=>saveAndShareUAWhatsApp(),300);
-        out.push({cls:'ok', msg:'إرسال تقرير البول عبر واتساب ✅'});
-      } else if(ctx==='stool'){
-        if(typeof saveAndShareStoolWhatsApp==='function') setTimeout(()=>saveAndShareStoolWhatsApp(),300);
-        out.push({cls:'ok', msg:'إرسال تقرير البراز عبر واتساب ✅'});
-      } else {
-        if(typeof shareWhatsApp==='function') setTimeout(()=>shareWhatsApp(),300);
-        out.push({cls:'ok', msg:'مشاركة PDF عبر واتساب ✅'});
-      }
+    // ② حفظ وطباعة — زر "🖨️ حفظ وطباعة"
+    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
+      if(typeof finalizeAndPrint==='function'){setTimeout(()=>finalizeAndPrint(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}
+      else{const b=document.querySelector('#sec-results button[onclick*="finalizeAndPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
       return out;
     }
-    // تأكيد النتائج / حفظ نهائي
-    if(/تأكيد النتائج|تأكيد|حفظ نهائي|حفظ اكتمل|اكتمل|finalize/.test(t)){
-      if(typeof finalizeResult==='function') setTimeout(()=>finalizeResult(),300);
-      out.push({cls:'ok', msg:'تأكيد النتائج ✅'}); return out;
-    }
-    // حفظ مسودة
-    if(/مسودة|draft|حفظ مؤقت/.test(t)){
-      if(typeof saveDraft==='function') saveDraft();
-      out.push({cls:'ok', msg:'تم حفظ المسودة ✅'}); return out;
-    }
-    // إضافة تحليل جديد
-    if(/اضافة تحليل|تحليل جديد|add test|اضف تحليل/.test(t)){
-      // ابحث عن زر إضافة تحليل في الواجهة الحالية
-      const addBtn = document.querySelector('[onclick*="addTestToReq"],[onclick*="showAddTest"],[onclick*="addTest"]');
-      if(addBtn){ addBtn.click(); out.push({cls:'ok', msg:'فتح قائمة إضافة تحليل ✅'}); }
-      else { out.push({cls:'err', msg:'لم أجد زر إضافة تحليل في هذه الواجهة'}); }
+    // ③ تحميل PDF — زر "📄 تحميل PDF"
+    if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
+      if(typeof downloadPDF==='function'){setTimeout(()=>downloadPDF(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
+      else{const b=document.querySelector('#sec-results button[onclick*="downloadPDF"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}}
       return out;
     }
-    // طباعة فقط
-    if(/(?:^|\s)طباعة(?:\s|$)|print only/.test(t)){
-      if(typeof finalizeAndPrint==='function') setTimeout(()=>finalizeAndPrint(),300);
-      out.push({cls:'ok', msg:'طباعة ✅'}); return out;
+    // ④ مشاركة واتساب — زر "📱 مشاركة PDF واتساب"
+    if(/واتس|واتساب|whatsapp|مشاركة|ارسل|إرسال/.test(t)){
+      if(typeof shareWhatsApp==='function'){setTimeout(()=>shareWhatsApp(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}
+      else{const b=document.querySelector('#sec-results button[onclick*="shareWhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}}
+      return out;
+    }
+    // ⑤ تعديل بيانات المريض — زر "✏️ تعديل بيانات المريض"
+    if(/تعديل بيانات|تعديل المريض|تعديل/.test(t)){
+      if(typeof editPatientFromResults==='function'){setTimeout(()=>editPatientFromResults(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}
+      else{const b=document.querySelector('#sec-results button[onclick*="editPatientFromResults"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}}
+      return out;
+    }
+    // ⑥ إضافة تحليل للطلب — حقل البحث في res-modify-bar
+    if(/اضافة تحليل|اضف تحليل|تحليل جديد|add test/.test(t)){
+      const srch=document.getElementById('res-add-test-srch');
+      const bar=document.getElementById('res-modify-bar');
+      if(srch&&bar){
+        bar.style.display='block';
+        setTimeout(()=>{srch.focus();},200);
+        out.push({cls:'ok',msg:'حقل إضافة تحليل جاهز — اكتب اسم التحليل'});
+      }else{out.push({cls:'err',msg:'إضافة التحاليل غير متاحة على هذا الطلب'});}
+      return out;
+    }
+    // ⑦ طباعة CBC فارغة
+    if(/طباعة cbc|cbc فارغة|طباعة سي بي سي/.test(t)){
+      if(typeof printCBCBlank==='function'){setTimeout(()=>printCBCBlank(),300);out.push({cls:'ok',msg:'طباعة CBC ✅'});}
+      return out;
     }
 
-    // إدخال نتيجة — "اسم_التحليل قيمة"
-    const qualMap = {
+    // ⑧ إدخال نتيجة تحليل — "اسم_التحليل + رقم أو نوعي"
+    const qualMap={
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
       'ايجابي':'Positive','موجب':'Positive','positive':'Positive','pos':'Positive',
       'تفاعلي':'Reactive','reactive':'Reactive',
       'غير تفاعلي':'Non-Reactive','non reactive':'Non-Reactive',
       'ضعيف':'Weak','weak':'Weak',
     };
-
-    const lines = raw.split(/[،\n]+/);
+    const lines=raw.split(/[،\n]+/);
     for(const line of lines){
-      const l = line.trim();
-      if(!l) continue;
-
-      let qualResult = null;
-      for(const [k,v] of Object.entries(qualMap)){
-        if(l.toLowerCase().includes(k)){ qualResult = v; break; }
-      }
-
-      let numResult = null;
-      const numPart = l.match(/(\d+(?:[.,]\d+)?)\s*$/);
-      if(numPart) numResult = numPart[1].replace(',','.');
+      const l=line.trim();if(!l)continue;
+      let qualResult=null;
+      for(const[k,v]of Object.entries(qualMap)){if(l.toLowerCase().includes(k)){qualResult=v;break;}}
+      let numResult=null;
+      const numPart=l.match(/(\d+(?:[.,]\d+)?)\s*$/);
+      if(numPart)numResult=numPart[1].replace(',','.');
       if(!numResult){
-        const arabicPart = l.replace(/^.*?(?=\s+(?:واحد|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مئة|مائة|مية|الف|ألف))/i,'');
-        numResult = _parseNum(arabicPart);
+        const arabicPart=l.replace(/^.*?(?=\s+(?:واحد|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مئة|مائة|مية|الف|ألف))/i,'');
+        numResult=_parseNum(arabicPart);
       }
-
-      const val = qualResult || numResult;
-      if(!val) continue;
-
-      let testPart = l;
-      if(numResult) testPart = l.replace(numPart[0],'').trim();
-      if(qualResult){
-        for(const k of Object.keys(qualMap)) testPart = testPart.replace(new RegExp(k,'gi'),'').trim();
-      }
-      testPart = testPart.replace(/^(?:قيمة|نتيجة|ال|value|result)\s*/i,'').trim();
-
-      const code = _findTestCode(testPart);
-      if(code){
-        const done = _setResult(code, val);
-        if(done) out.push({cls:'ok', msg:code+': '+val});
-        else     out.push({cls:'err', msg:'لم أجد حقل: '+code});
-      } else {
-        out.push({cls:'err', msg:'لم أعرف التحليل: '+testPart});
-      }
+      const val=qualResult||numResult;if(!val)continue;
+      let testPart=l;
+      if(numResult)testPart=l.replace(numPart[0],'').trim();
+      if(qualResult){for(const k of Object.keys(qualMap))testPart=testPart.replace(new RegExp(k,'gi'),'').trim();}
+      testPart=testPart.replace(/^(?:قيمة|نتيجة|ال|value|result)\s*/i,'').trim();
+      const code=_findTestCode(testPart);
+      if(code){const done=_setResult(code,val);if(done)out.push({cls:'ok',msg:code+': '+val});else out.push({cls:'err',msg:'لم أجد حقل: '+code});}
+      else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testPart});}
     }
-
     return out;
   }
 
-  // ── تعيين نتيجة تحليل ────────────────────────────────
-  function _setResult(code, value){
-    if(typeof tests==='undefined') return false;
-    const t = tests.find(x=>x.code===code||(x.nameShort||'').toUpperCase()===code.toUpperCase());
-    if(!t) return false;
-    const inp = document.getElementById('rv-'+t.id);
-    if(!inp) return false;
-    inp.value = value;
+  /* ── واجهة تحليل البول ── */
+  function _handleUA(t){
+    const out=[];
+    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
+      if(typeof saveAndPrintUA==='function'){setTimeout(()=>saveAndPrintUA(),300);out.push({cls:'ok',msg:'حفظ وطباعة تحليل البول ✅'});}
+      else{const b=document.querySelector('#m-ua button[onclick*="saveAndPrintUA"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
+      return out;
+    }
+    if(/حفظ النتيجة|حفظ/.test(t)){
+      if(typeof saveUAEntry==='function'){setTimeout(()=>saveUAEntry(),300);out.push({cls:'ok',msg:'حفظ النتيجة ✅'});}
+      else{const b=document.querySelector('#m-ua button[onclick*="saveUAEntry"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ ✅'});}}
+      return out;
+    }
+    if(/واتس|واتساب|مشاركة|ارسل/.test(t)){
+      if(typeof saveAndShareUAWhatsApp==='function'){setTimeout(()=>saveAndShareUAWhatsApp(),300);out.push({cls:'ok',msg:'إرسال عبر واتساب ✅'});}
+      else{const b=document.querySelector('#m-ua button[onclick*="WhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'واتساب ✅'});}}
+      return out;
+    }
+    if(/الغاء|إغلاق|اغلق|cancel|close/.test(t)){
+      const b=document.querySelector('#m-ua .mclose, button[onclick*="closeModal(\'m-ua\')"]');
+      if(b){b.click();out.push({cls:'ok',msg:'تم الإغلاق'});}
+      else if(typeof closeModal==='function'){closeModal('m-ua');out.push({cls:'ok',msg:'تم الإغلاق'});}
+      return out;
+    }
+    return [{cls:'inf',msg:'أوامر البول: "حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"'}];
+  }
+
+  /* ── واجهة تحليل البراز ── */
+  function _handleStool(t){
+    const out=[];
+    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
+      if(typeof saveAndPrintStool==='function'){setTimeout(()=>saveAndPrintStool(),300);out.push({cls:'ok',msg:'حفظ وطباعة تحليل البراز ✅'});}
+      else{const b=document.querySelector('#m-stool-exam button[onclick*="saveAndPrintStool"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
+      return out;
+    }
+    if(/حفظ النتيجة|حفظ/.test(t)){
+      if(typeof saveStoolEntry==='function'){setTimeout(()=>saveStoolEntry(),300);out.push({cls:'ok',msg:'حفظ النتيجة ✅'});}
+      else{const b=document.querySelector('#m-stool-exam button[onclick*="saveStoolEntry"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ ✅'});}}
+      return out;
+    }
+    if(/واتس|واتساب|مشاركة|ارسل/.test(t)){
+      if(typeof saveAndShareStoolWhatsApp==='function'){setTimeout(()=>saveAndShareStoolWhatsApp(),300);out.push({cls:'ok',msg:'إرسال عبر واتساب ✅'});}
+      else{const b=document.querySelector('#m-stool-exam button[onclick*="WhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'واتساب ✅'});}}
+      return out;
+    }
+    if(/الغاء|إغلاق|اغلق|cancel|close/.test(t)){
+      const b=document.querySelector('#m-stool-exam .mclose, button[onclick*="closeModal(\'m-stool-exam\')"]');
+      if(b){b.click();out.push({cls:'ok',msg:'تم الإغلاق'});}
+      else if(typeof closeModal==='function'){closeModal('m-stool-exam');out.push({cls:'ok',msg:'تم الإغلاق'});}
+      return out;
+    }
+    return [{cls:'inf',msg:'أوامر البراز: "حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"'}];
+  }
+
+  /* ── تعيين نتيجة في حقل ── */
+  function _setResult(code,value){
+    if(typeof tests==='undefined')return false;
+    const t=tests.find(x=>x.code===code||(x.nameShort||'').toUpperCase()===code.toUpperCase());
+    if(!t)return false;
+    const inp=document.getElementById('rv-'+t.id);
+    if(!inp)return false;
+    inp.value=value;
     inp.dispatchEvent(new Event('input',{bubbles:true}));
     inp.dispatchEvent(new Event('change',{bubbles:true}));
     inp.style.transition='background 0.4s';
     inp.style.background='rgba(0,232,122,0.22)';
-    setTimeout(()=>{ inp.style.background=''; }, 1200);
-    if(typeof _autoSaveResults==='function') _autoSaveResults();
+    setTimeout(()=>{inp.style.background='';},1200);
+    if(typeof _autoSaveResults==='function')_autoSaveResults();
     return true;
   }
 
-  // ── أوامر عامة ───────────────────────────────────────
+  /* ── أوامر عامة (التنقل بين الصفحات) ── */
   function _handleGeneral(t){
-    if(/مريض جديد|اضافة مريض|(?:^|\s)مريض(?:\s|$)/.test(t)){
-      if(typeof startNewPatient==='function') startNewPatient();
-      return [{cls:'ok', msg:'فتح نافذة مريض جديد'}];
+    if(/مريض جديد|اضافة مريض/.test(t)){
+      if(typeof startNewPatient==='function')startNewPatient();
+      return [{cls:'ok',msg:'فتح نافذة مريض جديد'}];
     }
-    if(/نتائج|ادخال نتائج|results/.test(t)){
-      if(typeof nav==='function') nav('results');
-      return [{cls:'ok', msg:'انتقال لإدخال النتائج'}];
+    if(/(?:^|\s)مريض(?:\s|$)|المرضى/.test(t)){
+      if(typeof nav==='function')nav('patients');return [{cls:'ok',msg:'صفحة المرضى'}];
     }
-    if(/(?:^|\s)طباعة(?:\s|$)|print/.test(t)){
-      if(typeof nav==='function') nav('print');
-      return [{cls:'ok', msg:'انتقال لطباعة النتائج'}];
+    if(/نتائج|ادخال نتائج/.test(t)){
+      if(typeof nav==='function')nav('results');return [{cls:'ok',msg:'صفحة إدخال النتائج'}];
+    }
+    if(/(?:^|\s)طلبات(?:\s|$)|الطلبات/.test(t)){
+      if(typeof nav==='function')nav('requests');return [{cls:'ok',msg:'صفحة الطلبات'}];
+    }
+    if(/فواتير|الفواتير/.test(t)){
+      if(typeof nav==='function')nav('invoices');return [{cls:'ok',msg:'صفحة الفواتير'}];
     }
     if(/لوحة التحكم|dashboard|الرئيسية/.test(t)){
-      if(typeof nav==='function') nav('dashboard');
-      return [{cls:'ok', msg:'لوحة التحكم'}];
+      if(typeof nav==='function')nav('dashboard');return [{cls:'ok',msg:'لوحة التحكم'}];
     }
-    if(/مرضى|المرضى|patients/.test(t)){
-      if(typeof nav==='function') nav('patients');
-      return [{cls:'ok', msg:'صفحة المرضى'}];
+    if(/اعدادات|إعدادات|settings/.test(t)){
+      if(typeof nav==='function')nav('settings');return [{cls:'ok',msg:'الإعدادات'}];
     }
-    if(/طلبات|الطلبات|requests/.test(t)){
-      if(typeof nav==='function') nav('requests');
-      return [{cls:'ok', msg:'صفحة الطلبات'}];
+    if(/تقارير|reports/.test(t)){
+      if(typeof nav==='function')nav('reports');return [{cls:'ok',msg:'التقارير'}];
     }
-    if(/فواتير|الفواتير|invoices/.test(t)){
-      if(typeof nav==='function') nav('invoices');
-      return [{cls:'ok', msg:'صفحة الفواتير'}];
+    if(/زرع|culture/.test(t)){
+      if(typeof nav==='function')nav('culture');return [{cls:'ok',msg:'نتائج الزرع'}];
     }
-    if(/ضبط|اعدادات|الإعدادات|settings/.test(t)){
-      if(typeof nav==='function') nav('settings');
-      return [{cls:'ok', msg:'الإعدادات'}];
+    if(/بول|ua/.test(t)){
+      if(typeof nav==='function')nav('ua');return [{cls:'ok',msg:'تحليل البول'}];
     }
-    return [{cls:'inf', msg:'افتح نافذة مريض أو انتقل لإدخال النتائج أولاً'}];
+    if(/براز|stool/.test(t)){
+      if(typeof nav==='function')nav('stool');return [{cls:'ok',msg:'تحليل البراز'}];
+    }
+    return [{cls:'inf',msg:'قل: "مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير"'}];
   }
 
-  // ── واجهة المستخدم ───────────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // معالجة الأمر الصوتي
+  // ══════════════════════════════════════════════════════
+  function _process(txt){
+    const ctx=_ctx();
+    _setCtxLabel(ctx);
+    const t=txt.toLowerCase().trim();
+    let results=[];
+
+    // أمر إغلاق عالمي
+    if(/(?:^|\s)(اغلق المساعد|أغلق المساعد|stop assistant)(?:\s|$)/.test(t)){
+      close();return;
+    }
+
+    if(ctx==='patient')       results=_handlePatient(t,txt);
+    else if(ctx==='tests')    results=_handleTests(t,txt);
+    else if(ctx==='results')  results=_handleResults(t,txt);
+    else if(ctx==='ua')       results=_handleUA(t);
+    else if(ctx==='stool')    results=_handleStool(t);
+    else                      results=_handleGeneral(t);
+
+    // إذا لم يُفهم الأمر — جرب الأوامر العامة كبديل
+    if(!results.length||(results.length===1&&results[0].cls==='err'&&ctx!=='general')){
+      const gen=_handleGeneral(t);
+      if(gen.length&&gen[0].cls!=='inf')results=gen;
+    }
+    if(!results.length)results=[{cls:'err',msg:'لم أفهم — جرب: "حفظ وطباعة" أو "تأكيد النتائج"'}];
+
+    _showReply(results);
+    _speak(results.map(r=>r.msg).join('، '));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // واجهة المساعد
+  // ══════════════════════════════════════════════════════
   function _setCtxLabel(ctx){
-    const map = {patient:'📝 بيانات مريض', tests:'🧪 تحاليل', results:'📊 نتائج', ua:'🧪 تحليل بول', stool:'🧫 تحليل براز', general:'—'};
-    const el = document.getElementById('va-hdr-ctx');
-    if(el) el.textContent = map[ctx]||'—';
+    const map={patient:'📝 بيانات مريض',tests:'🧪 اختيار تحاليل',results:'📊 نتائج',ua:'🧪 تحليل بول',stool:'🧫 تحليل براز',semen:'🔬 تحليل مني',patients:'👥 المرضى',requests:'📋 الطلبات',general:'—'};
+    const el=document.getElementById('va-hdr-ctx');
+    if(el)el.textContent=map[ctx]||'—';
   }
-
   function _showHeard(txt){
-    const el = document.getElementById('va-heard');
-    if(el) el.innerHTML = '<b>🎤 سمعت:</b> ' + txt;
+    const el=document.getElementById('va-heard');
+    if(el)el.innerHTML='<b>🎤 سمعت:</b> '+txt;
   }
-
   function _showReply(items){
-    const el = document.getElementById('va-reply');
-    if(!el) return;
-    el.innerHTML = items.map(i=>`<span class="${i.cls}">${i.msg}</span>`).join('<br>');
+    const el=document.getElementById('va-reply');
+    if(!el)return;
+    el.innerHTML=items.map(i=>`<span class="${i.cls}">${i.msg}</span>`).join('<br>');
   }
-
   function _setHint(ctx){
-    const hints = {
-      patient: 'أمثلة: "اسمه أحمد علي" — "عمره 35" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
-      tests:   'أمثلة: "TSH و FT4" — "كوليسترول ودهون ثلاثية" — "cbc" — "إنشاء" — "امسح الكل"',
-      results: 'أمثلة: "TSH واحد فاصل خمسة" — "تأكيد النتائج" — "حفظ وطباعة" — "واتساب" — "تحميل PDF" — "إضافة تحليل"',
-      ua:      'أمثلة: "حفظ وطباعة" — "واتساب" — "إغلاق"',
-      stool:   'أمثلة: "حفظ وطباعة" — "واتساب" — "إغلاق"',
-      general: 'أمثلة: "مريض جديد" — "إدخال نتائج" — "لوحة التحكم" — "مرضى" — "فواتير"',
+    const hints={
+      patient: '"اسمه أحمد" — "عمره 30" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
+      tests:   '"CBC" — "كوليسترول ودهون ثلاثية" — "حفظ وإنشاء" — "امسح الكل" — "رجوع"',
+      results: '"تأكيد النتائج" — "حفظ وطباعة" — "تحميل PDF" — "واتساب" — "إضافة تحليل" — "TSH واحد فاصل خمسة"',
+      ua:      '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
+      stool:   '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
+      general: '"مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير" — "تقارير"',
     };
-    const el = document.getElementById('va-hint');
-    if(el) el.textContent = hints[ctx]||'';
+    const el=document.getElementById('va-hint');
+    if(el)el.textContent=hints[ctx]||'';
   }
 
-  // ── موجة صوتية متحركة ────────────────────────────────
+  // موجة صوتية
   function _startWave(){
-    const w = document.getElementById('va-wave');
-    const bars = w ? w.querySelectorAll('span') : [];
-    if(w) w.classList.add('active');
-    _waveTimer = setInterval(()=>{
-      bars.forEach(b=>{ b.style.height = (4+Math.random()*22)+'px'; });
-    }, 90);
+    const w=document.getElementById('va-wave');
+    const bars=w?w.querySelectorAll('span'):[];
+    if(w)w.classList.add('active');
+    _waveTimer=setInterval(()=>{bars.forEach(b=>{b.style.height=(4+Math.random()*22)+'px';});},90);
   }
   function _stopWave(){
     clearInterval(_waveTimer);
-    const w = document.getElementById('va-wave');
-    const bars = w ? w.querySelectorAll('span') : [];
-    if(w) w.classList.remove('active');
-    bars.forEach(b=>{ b.style.height='6px'; });
+    const w=document.getElementById('va-wave');
+    const bars=w?w.querySelectorAll('span'):[];
+    if(w)w.classList.remove('active');
+    bars.forEach(b=>{b.style.height='6px';});
   }
 
-  // ── تحدث بصوت عالٍ ───────────────────────────────────
+  // نطق
   function _speak(txt){
-    if(!txt || !window.speechSynthesis) return;
+    if(!txt||!window.speechSynthesis)return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(txt.replace(/<[^>]+>/g,'').substring(0,150));
-    u.lang='ar-SA'; u.rate=1.1; u.pitch=1;
-    const voices = window.speechSynthesis.getVoices();
-    const arV = voices.find(v=>v.lang.startsWith('ar'));
-    if(arV) u.voice=arV;
+    const u=new SpeechSynthesisUtterance(txt.replace(/<[^>]+>/g,'').substring(0,150));
+    u.lang='ar-SA';u.rate=1.1;u.pitch=1;
+    const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
+    if(arV)u.voice=arV;
     window.speechSynthesis.speak(u);
   }
 
-  // ── بدء/إيقاف الاستماع ──────────────────────────────
+  // ══════════════════════════════════════════════════════
+  // الاستماع المستمر
+  // ══════════════════════════════════════════════════════
   function toggle(){
-    const box = document.getElementById('va-box');
-    if(box && !box.classList.contains('va-open')){
+    const box=document.getElementById('va-box');
+    if(box&&!box.classList.contains('va-open')){
       box.classList.add('va-open');
       _setHint(_ctx());
     }
     if(!SpeechRec){
-      _showReply([{cls:'err', msg:'المتصفح لا يدعم الصوت — استخدم Chrome'}]);
-      return;
+      _showReply([{cls:'err',msg:'المتصفح لا يدعم الصوت — استخدم Chrome'}]);return;
     }
-    if(_on){ stop(); return; }
+    if(_on){stop();return;}
     _startListening();
   }
 
   function _startListening(){
-    if(_on) return;
-    if(!SpeechRec) return;
-
-    // أنشئ instance جديد في كل مرة لتجنب حالات الخطأ
-    _rec = new SpeechRec();
+    if(_on)return;
+    if(!SpeechRec)return;
+    _rec=new SpeechRec();
     _rec.lang='ar-IQ';
-    _rec.continuous=false;      // false أكثر استقراراً من true
+    _rec.continuous=false;
     _rec.interimResults=false;
     _rec.maxAlternatives=5;
 
-    _rec.onresult = e => {
-      const tx = Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
+    _rec.onresult=e=>{
+      const tx=Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
       _showHeard(tx);
       _process(tx);
       _setHint(_ctx());
     };
-
-    _rec.onerror = e => {
+    _rec.onerror=e=>{
       _stopWave();
       document.getElementById('va-fab').classList.remove('va-on');
-      if(e.error==='no-speech'){
-        // لا شيء — أعد الاستماع تلقائياً
-      } else if(e.error==='not-allowed'){
-        _on=false;
-        _showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
-        return;
-      } else if(e.error==='aborted'){
-        // تم الإلغاء يدوياً — لا تُعد
-        _on=false; return;
-      }
-      // أعد الاستماع بعد تأخير قصير
-      if(_on){
-        _restartTimer = setTimeout(()=>{ if(_on) _startListening(); }, 400);
-      }
+      if(e.error==='not-allowed'){_on=false;_showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);return;}
+      if(e.error==='aborted'){_on=false;return;}
+      // أعد الاستماع تلقائياً
+      if(_on)_restartTimer=setTimeout(()=>{if(_on)_startListening();},400);
     };
-
-    _rec.onend = () => {
+    _rec.onend=()=>{
       _stopWave();
       document.getElementById('va-fab').classList.remove('va-on');
-      // أعد الاستماع تلقائياً ما دام المساعد مفعّلاً
       if(_on){
         document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>';
-        _restartTimer = setTimeout(()=>{ if(_on) _startListening(); }, 350);
+        _restartTimer=setTimeout(()=>{if(_on)_startListening();},350);
       }
     };
-
-    try {
-      _rec.start();
-      _on=true;
-      _startWave();
+    try{
+      _rec.start();_on=true;_startWave();
       document.getElementById('va-fab').classList.add('va-on');
       document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.4)">🎤 اتكلم الآن...</span>';
       _setCtxLabel(_ctx());
-    } catch(e){
-      _on=false;
-      _rec=null;
-    }
+    }catch(e){_on=false;_rec=null;}
   }
 
   function stop(){
-    clearTimeout(_restartTimer);
-    _on=false;
-    if(_rec){ try{_rec.abort();}catch(e){} _rec=null; }
+    clearTimeout(_restartTimer);_on=false;
+    if(_rec){try{_rec.abort();}catch(e){}_rec=null;}
     _stopWave();
-    const fab=document.getElementById('va-fab');
-    if(fab) fab.classList.remove('va-on');
-    const heard=document.getElementById('va-heard');
-    if(heard) heard.innerHTML='اضغط الزر للتفعيل...';
+    const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
+    const heard=document.getElementById('va-heard');if(heard)heard.innerHTML='اضغط الزر للتفعيل...';
   }
-
   function close(){
     stop();
-    const box=document.getElementById('va-box');
-    if(box) box.classList.remove('va-open');
+    const box=document.getElementById('va-box');if(box)box.classList.remove('va-open');
   }
 
-  // تحميل الأصوات
-  if(window.speechSynthesis) window.speechSynthesis.getVoices();
-  if(window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined)
-    window.speechSynthesis.onvoiceschanged = ()=>window.speechSynthesis.getVoices();
+  if(window.speechSynthesis)window.speechSynthesis.getVoices();
+  if(window.speechSynthesis&&window.speechSynthesis.onvoiceschanged!==undefined)
+    window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 
-  return { toggle, close, stop };
-
+  return{toggle,close,stop};
 })();
 </script>
+
