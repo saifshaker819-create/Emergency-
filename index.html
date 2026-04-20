@@ -3770,6 +3770,69 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
           </div>
         </div>
 
+        <!-- 🎙️ إعدادات المساعد الصوتي -->
+        <div class="st-card" id="stc-voice-assistant">
+          <div class="st-card-hdr" onclick="toggleStCard('stc-voice-assistant')">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:22px">🎙️</span>
+              <div><div class="st-card-title">المساعد الصوتي</div><div class="st-card-sub">تشغيل / إيقاف — بصمات النطق المخصصة للتحاليل</div></div>
+            </div>
+            <span class="st-card-arrow" id="arr-stc-voice-assistant">▼</span>
+          </div>
+          <div class="st-card-body" id="body-stc-voice-assistant" style="display:none">
+
+            <!-- ① تشغيل / إيقاف المساعد -->
+            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:4px">🔘 حالة المساعد الصوتي</div>
+                <div style="font-size:11px;color:var(--text2)">عند الإيقاف، لن تظهر أداة المساعد ولن يستجيب لأي أوامر</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span id="va-enabled-label" style="font-size:12px;font-weight:800;color:var(--success)">مفعّل ✅</span>
+                <div id="va-toggle-btn" onclick="vaToggleEnabled()" style="width:52px;height:28px;background:linear-gradient(90deg,var(--success),#00c470);border-radius:14px;position:relative;cursor:pointer;transition:all 0.3s;border:1px solid rgba(0,232,122,0.4)">
+                  <div id="va-toggle-dot" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:all 0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ② قاموس البصمات الصوتية المخصصة -->
+            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+              <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:4px">🗣️ بصمات النطق المخصصة</div>
+              <div style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.8">
+                أضف نطقك الخاص لأسماء التحاليل — مثلاً: اكتب <b style="color:var(--accent)">ار بي اس</b> في خانة "ما أقوله" والكود <b style="color:var(--accent)">RBS</b> في خانة "كود التحليل"<br>
+                ⚡ هذا القاموس يُعطى أولوية قصوى على القاموس الافتراضي
+              </div>
+
+              <!-- حقول الإضافة -->
+              <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
+                <div style="flex:1;min-width:140px">
+                  <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px">🎤 ما أقوله (النطق)</label>
+                  <input class="fc" id="va-dict-phrase" placeholder="مثال: ار بي اس" style="margin-bottom:0">
+                </div>
+                <div style="flex:1;min-width:120px">
+                  <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px">🔬 كود التحليل</label>
+                  <input class="fc" id="va-dict-code" placeholder="مثال: RBS" style="margin-bottom:0;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+                </div>
+                <button class="btn btn-p" onclick="vaAddDictEntry()" style="white-space:nowrap;padding:10px 18px;margin-bottom:1px">➕ إضافة</button>
+              </div>
+
+              <!-- قائمة البصمات المحفوظة -->
+              <div id="va-dict-list" style="display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto">
+                <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">لا توجد بصمات مخصصة بعد — أضف أول بصمة أعلاه</div>
+              </div>
+            </div>
+
+            <!-- ③ استيراد / تصدير القاموس -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-sm" onclick="vaExportDict()" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--primary)">📤 تصدير القاموس</button>
+              <button class="btn btn-sm" onclick="document.getElementById('va-dict-import').click()" style="background:rgba(139,63,255,0.1);border:1px solid rgba(139,63,255,0.3);color:var(--secondary)">📥 استيراد قاموس</button>
+              <input type="file" id="va-dict-import" accept=".json" style="display:none" onchange="vaImportDict(this)">
+              <button class="btn btn-sm btn-d" onclick="vaClearDict()" style="margin-right:auto">🗑️ مسح الكل</button>
+            </div>
+
+          </div>
+        </div>
+
     </div><!-- end settings-accordion outer -->
 
   </div><!-- end .page -->
@@ -26367,6 +26430,38 @@ const VA = (function(){
   let _rec = null, _on = false, _waveTimer = null, _restartTimer = null;
 
   // ══════════════════════════════════════════════════════
+  // ① قاموس البصمات المخصصة — يُقرأ من localStorage
+  // ══════════════════════════════════════════════════════
+  function _loadCustomDict(){
+    try{ return JSON.parse(localStorage.getItem('va_custom_dict')||'{}'); }
+    catch(e){ return {}; }
+  }
+  function _saveCustomDict(d){
+    localStorage.setItem('va_custom_dict', JSON.stringify(d));
+  }
+
+  // ② حالة التفعيل
+  function _isEnabled(){
+    const v = localStorage.getItem('va_enabled');
+    return v === null ? true : v === '1';
+  }
+  function _setEnabled(val){
+    localStorage.setItem('va_enabled', val ? '1' : '0');
+    _applyEnabledState(val);
+  }
+  function _applyEnabledState(enabled){
+    const fab = document.getElementById('va-fab');
+    if(fab) fab.style.display = enabled ? '' : 'none';
+    const lbl = document.getElementById('va-enabled-label');
+    const btn = document.getElementById('va-toggle-btn');
+    const dot = document.getElementById('va-toggle-dot');
+    if(lbl){ lbl.textContent = enabled ? 'مفعّل ✅' : 'موقوف ❌'; lbl.style.color = enabled ? 'var(--success)' : 'var(--danger)'; }
+    if(btn){ btn.style.background = enabled ? 'linear-gradient(90deg,var(--success),#00c470)' : 'rgba(255,34,68,0.3)'; btn.style.borderColor = enabled ? 'rgba(0,232,122,0.4)' : 'rgba(255,34,68,0.4)'; }
+    if(dot){ dot.style.right = enabled ? '2px' : 'calc(100% - 24px)'; }
+    if(!enabled && _on) stop();
+  }
+
+  // ══════════════════════════════════════════════════════
   // كشف السياق الحالي — يعتمد على القسم النشط في DOM
   // ══════════════════════════════════════════════════════
   function _ctx(){
@@ -26658,6 +26753,13 @@ const VA = (function(){
 
   function _findTestCode(word){
     const w=word.toLowerCase().trim();
+    // ⓪ القاموس المخصص — أعلى أولوية دائماً
+    const customDict=_loadCustomDict();
+    for(const[phrase,code] of Object.entries(customDict)){
+      if(w===phrase.toLowerCase()||w.includes(phrase.toLowerCase())||phrase.toLowerCase().includes(w)){
+        return code;
+      }
+    }
     // ① مطابقة مباشرة من القاموس
     if(TEST_MAP[w])return TEST_MAP[w];
     // ② مطابقة الأكواد القصيرة (3 أحرف أو أقل) بشكل دقيق فقط — لمنع الخلط بين RBC/CRP/CBC
@@ -26892,29 +26994,51 @@ const VA = (function(){
     if(addMatch){
       const testName=addMatch[1].trim();
       const code=_findTestCode(testName.toLowerCase());
-      if(code&&typeof tests!=='undefined'&&typeof addTestToReq==='function'){
+      if(code&&typeof tests!=='undefined'){
         const t2=tests.find(x=>x.code===code);
         if(t2){
-          setTimeout(()=>addTestToReq(t2.id),300);
-          out.push({cls:'ok',msg:'إضافة تحليل '+code+' للطلب ✅'});
-        }else{out.push({cls:'err',msg:'لم أجد التحليل: '+code});}
+          // الحصول على الطلب الحالي من واجهة النتائج
+          const reqSel=document.getElementById('res-req-sel');
+          const reqId=reqSel?reqSel.value:null;
+          if(typeof addTestToReq==='function'){
+            setTimeout(()=>addTestToReq(t2.id),300);
+            out.push({cls:'ok',msg:'✅ تمت إضافة '+code+' للطلب'});
+          } else {
+            // بديل: استخدم حقل البحث وانتقِ التحليل تلقائياً
+            const srch=document.getElementById('res-add-test-srch');
+            const bar=document.getElementById('res-modify-bar');
+            if(srch&&bar){
+              bar.style.display='block';
+              setTimeout(()=>{
+                srch.value=code;
+                srch.dispatchEvent(new Event('input',{bubbles:true}));
+                // محاولة النقر على أول نتيجة بعد 400ms
+                setTimeout(()=>{
+                  const firstResult=document.querySelector('#res-add-test-dropdown div[onclick*="addTestToReq"],#res-add-test-results div[onclick]');
+                  if(firstResult) firstResult.click();
+                },400);
+              },200);
+              out.push({cls:'ok',msg:'إضافة تحليل '+code+' ✅'});
+            }else{out.push({cls:'err',msg:'لم أتمكن من إضافة التحليل'});}
+          }
+        }else{out.push({cls:'err',msg:'التحليل "'+code+'" غير موجود في قاعدة التحاليل'});}
       }else if(code){
-        // بديل: استخدم حقل البحث
+        // كود موجود لكن tests غير معرّف — استخدم حقل البحث
         const srch=document.getElementById('res-add-test-srch');
         const bar=document.getElementById('res-modify-bar');
         if(srch&&bar){
           bar.style.display='block';
-          setTimeout(()=>{srch.value=testName;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
-          out.push({cls:'ok',msg:'بحث عن: '+testName+' — اختر من القائمة'});
+          setTimeout(()=>{srch.value=code;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
+          out.push({cls:'ok',msg:'بحث عن: '+code+' — اختر من القائمة'});
         }else{out.push({cls:'err',msg:'لم أتمكن من إضافة التحليل'});}
       }else{
-        // فتح حقل البحث وكتابة الاسم
+        // لم يُعرف الكود — ابحث بالاسم الأصلي
         const srch=document.getElementById('res-add-test-srch');
         const bar=document.getElementById('res-modify-bar');
         if(srch&&bar){
           bar.style.display='block';
           setTimeout(()=>{srch.value=testName;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
-          out.push({cls:'ok',msg:'بحث عن تحليل: '+testName});
+          out.push({cls:'inf',msg:'لم أعرف "'+testName+'" — جارٍ البحث، اختر من القائمة'});
         }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
       }
       return out;
@@ -27430,6 +27554,10 @@ const VA = (function(){
   // الاستماع المستمر
   // ══════════════════════════════════════════════════════
   function toggle(){
+    if(!_isEnabled()){
+      // إذا كان موقوفاً من الإعدادات، لا تفعل شيئاً
+      return;
+    }
     const box=document.getElementById('va-box');
     if(box&&!box.classList.contains('va-open')){
       box.classList.add('va-open');
@@ -27512,7 +27640,126 @@ const VA = (function(){
   if(window.speechSynthesis&&window.speechSynthesis.onvoiceschanged!==undefined)
     window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 
-  return{toggle,close,stop};
+  // تطبيق حالة التفعيل عند التحميل
+  setTimeout(()=>_applyEnabledState(_isEnabled()), 300);
+
+  return{toggle,close,stop,
+    isEnabled:_isEnabled,
+    setEnabled:_setEnabled,
+    loadCustomDict:_loadCustomDict,
+    saveCustomDict:_saveCustomDict
+  };
+})();
+
+// ══════════════════════════════════════════════════════════════
+// 🎙️ دوال إدارة إعدادات المساعد الصوتي
+// ══════════════════════════════════════════════════════════════
+function vaToggleEnabled(){
+  const cur = VA.isEnabled();
+  VA.setEnabled(!cur);
+}
+
+function vaRenderDict(){
+  const dict = VA.loadCustomDict();
+  const container = document.getElementById('va-dict-list');
+  if(!container) return;
+  const entries = Object.entries(dict);
+  if(!entries.length){
+    container.innerHTML = '<div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">لا توجد بصمات مخصصة بعد — أضف أول بصمة أعلاه</div>';
+    return;
+  }
+  container.innerHTML = entries.map(([phrase,code])=>`
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.18);border-radius:10px;padding:10px 14px">
+      <span style="font-size:18px">🎤</span>
+      <div style="flex:1;min-width:0">
+        <span style="font-size:13px;font-weight:800;color:var(--text)">${phrase}</span>
+        <span style="margin:0 8px;color:var(--text2)">→</span>
+        <span style="font-size:13px;font-weight:900;color:var(--accent);font-family:monospace">${code}</span>
+      </div>
+      <button onclick="vaRemoveDictEntry(${JSON.stringify(phrase)})" style="background:rgba(255,34,68,0.1);border:1px solid rgba(255,34,68,0.3);color:var(--danger);border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif;font-weight:700;flex-shrink:0">🗑️ حذف</button>
+    </div>
+  `).join('');
+}
+
+function vaAddDictEntry(){
+  const phraseEl = document.getElementById('va-dict-phrase');
+  const codeEl   = document.getElementById('va-dict-code');
+  if(!phraseEl||!codeEl) return;
+  const phrase = phraseEl.value.trim().toLowerCase();
+  const code   = codeEl.value.trim().toUpperCase();
+  if(!phrase){ showNotif('خطأ','أدخل النطق الذي تقوله','error'); return; }
+  if(!code){   showNotif('خطأ','أدخل كود التحليل','error'); return; }
+  const dict = VA.loadCustomDict();
+  dict[phrase] = code;
+  VA.saveCustomDict(dict);
+  phraseEl.value = '';
+  codeEl.value   = '';
+  vaRenderDict();
+  showNotif('تم','تمت إضافة البصمة: "'+phrase+'" → '+code+' ✅','success');
+}
+
+function vaRemoveDictEntry(phrase){
+  const dict = VA.loadCustomDict();
+  delete dict[phrase];
+  VA.saveCustomDict(dict);
+  vaRenderDict();
+  showNotif('تم','تم حذف البصمة ✅','success');
+}
+
+function vaClearDict(){
+  if(!confirm('هل تريد حذف جميع البصمات المخصصة؟')) return;
+  VA.saveCustomDict({});
+  vaRenderDict();
+  showNotif('تم','تم مسح القاموس المخصص','success');
+}
+
+function vaExportDict(){
+  const dict = VA.loadCustomDict();
+  const blob = new Blob([JSON.stringify(dict,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'va_custom_dict.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function vaImportDict(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const imported = JSON.parse(e.target.result);
+      if(typeof imported !== 'object' || Array.isArray(imported)) throw new Error();
+      const cur = VA.loadCustomDict();
+      const merged = Object.assign({},cur,imported);
+      VA.saveCustomDict(merged);
+      vaRenderDict();
+      showNotif('تم','تم استيراد '+Object.keys(imported).length+' بصمة ✅','success');
+    }catch(err){ showNotif('خطأ','ملف القاموس غير صحيح','error'); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+// تحديث واجهة الإعدادات عند فتح بطاقة المساعد الصوتي
+(function(){
+  const origToggle = window.toggleStCard;
+  window.toggleStCard = function(id){
+    if(typeof origToggle==='function') origToggle(id);
+    if(id==='stc-voice-assistant'){
+      setTimeout(()=>{
+        // تحديث حالة زر التشغيل/الإيقاف
+        const enabled = VA.isEnabled();
+        const lbl = document.getElementById('va-enabled-label');
+        const btn = document.getElementById('va-toggle-btn');
+        const dot = document.getElementById('va-toggle-dot');
+        if(lbl){ lbl.textContent = enabled ? 'مفعّل ✅' : 'موقوف ❌'; lbl.style.color = enabled ? 'var(--success)' : 'var(--danger)'; }
+        if(btn){ btn.style.background = enabled ? 'linear-gradient(90deg,var(--success),#00c470)' : 'rgba(255,34,68,0.3)'; btn.style.borderColor = enabled ? 'rgba(0,232,122,0.4)' : 'rgba(255,34,68,0.4)'; }
+        if(dot){ dot.style.right = enabled ? '2px' : 'calc(100% - 24px)'; }
+        vaRenderDict();
+      }, 80);
+    }
+  };
 })();
 </script>
 
