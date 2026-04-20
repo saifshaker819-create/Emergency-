@@ -27683,15 +27683,12 @@ const VA = (function(){
   // دالة مساعدة لتجربة النص وإرجاع النتيجة دون تنفيذ
   function _tryProcess(txt){
     const ctx=_ctx();
-    // تحويل نطق الحروف الإنجليزية بالعربية (مثلاً "سي بي سي" → "CBC")
-    const converted = _arabicLettersToEn(txt.toLowerCase().trim());
-    const t = converted.toLowerCase().trim();
-    const raw = converted;
-    if(ctx==='patient')         return _handlePatient(t,raw);
-    else if(ctx==='tests')      return _handleTests(t,raw);
-    else if(ctx==='results')    return _handleResults(t,raw);
-    else if(ctx==='viewresults') return _handleViewResults(t,raw);
-    else if(ctx==='requests')   return _handleRequests(t,raw);
+    const t=txt.toLowerCase().trim();
+    if(ctx==='patient')         return _handlePatient(t,txt);
+    else if(ctx==='tests')      return _handleTests(t,txt);
+    else if(ctx==='results')    return _handleResults(t,txt);
+    else if(ctx==='viewresults') return _handleViewResults(t,txt);
+    else if(ctx==='requests')   return _handleRequests(t,txt);
     else if(ctx==='ua')         return _handleUA(t);
     else if(ctx==='stool')      return _handleStool(t);
     else                        return _handleGeneral(t);
@@ -27703,9 +27700,7 @@ const VA = (function(){
   function _process(txt){
     const ctx=_ctx();
     _setCtxLabel(ctx);
-    // تحويل نطق الحروف الإنجليزية بالعربية قبل المعالجة
-    const converted = _arabicLettersToEn(txt.toLowerCase().trim());
-    const t=converted.toLowerCase().trim();
+    const t=txt.toLowerCase().trim();
     let results=[];
 
     // أمر إغلاق عالمي
@@ -27716,11 +27711,11 @@ const VA = (function(){
     // في السياق العام، إذا كان الأمر يخص النتائج يُحوَّل لـ _handleResults مباشرة
     const isResultsCmd = /تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|confirm results|حفظ وطباعة|حفظ وطبع|احفظ وطبع|save.*print|print.*save|تحميل pdf|واتساب.*نتائج|نتائج.*واتساب/.test(t);
 
-    if(ctx==='patient')         results=_handlePatient(t,converted);
-    else if(ctx==='tests')      results=_handleTests(t,converted);
-    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,converted);
-    else if(ctx==='viewresults') results=_handleViewResults(t,converted);
-    else if(ctx==='requests')   results=_handleRequests(t,converted);
+    if(ctx==='patient')         results=_handlePatient(t,txt);
+    else if(ctx==='tests')      results=_handleTests(t,txt);
+    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,txt);
+    else if(ctx==='viewresults') results=_handleViewResults(t,txt);
+    else if(ctx==='requests')   results=_handleRequests(t,txt);
     else if(ctx==='ua')         results=_handleUA(t);
     else if(ctx==='stool')      results=_handleStool(t);
     else                        results=_handleGeneral(t);
@@ -27816,93 +27811,133 @@ const VA = (function(){
   }
 
   function _startListening(){
-    if(_on)return;
-    if(!SpeechRec)return;
-    _rec=new SpeechRec();
-    _rec.lang='ar-IQ';
-    _rec.continuous=false;
-    _rec.interimResults=false;
-    _rec.maxAlternatives=8;
+    if(_on) return;
+    if(!SpeechRec) return;
 
-    _rec.onresult=e=>{
-      // جمع كل البدائل لأفضل تعرف على اللهجات
-      const allTexts=[];
-      for(let i=0;i<e.results.length;i++){
-        for(let j=0;j<e.results[i].length;j++){
-          const txt=e.results[i][j].transcript.trim();
-          if(txt&&!allTexts.includes(txt))allTexts.push(txt);
+    _on = true;
+    _rec = new SpeechRec();
+    _rec.lang = 'ar-IQ';
+    _rec.continuous = true;      // ← الاستماع الدائم بدون انقطاع
+    _rec.interimResults = true;  // ← لكشف متى يتكلم المستخدم
+    _rec.maxAlternatives = 5;
+
+    let _finalBuf = '';          // تجميع النص النهائي
+    let _commitTimer = null;     // مؤقت تنفيذ الأمر بعد توقف الكلام
+    let _lastInterim = '';       // آخر نص مؤقت لعرضه
+
+    _rec.onresult = e => {
+      let interimText = '';
+      let newFinal = '';
+      for(let i = e.resultIndex; i < e.results.length; i++){
+        const txt = e.results[i][0].transcript;
+        if(e.results[i].isFinal){
+          newFinal += txt + ' ';
+        } else {
+          interimText += txt;
         }
       }
-      const tx=allTexts[0]||'';
-      _showHeard(tx+(allTexts.length>1?' <small style="opacity:0.5">('+allTexts.slice(1,3).join(' / ')+')</small>':''));
 
-      // تنفيذ الأمر — نُبقي _on=true حتى لا يُوقف onend الاستماع
-      let processed=false;
-      for(const alt of allTexts){
-        const r=_tryProcess(alt);
-        if(r&&r.length&&r[0].cls!=='err'&&r[0].cls!=='inf'){
-          _showReply(r);
-          // تشغيل الصوت بدون تعطيل الاستماع (لا نستخدم cancel لأنه يُوقف الـ recognition)
-          if(!_isSilent()&&window.speechSynthesis){
-            const u=new SpeechSynthesisUtterance(r.map(x=>x.msg).join('، ').replace(/<[^>]+>/g,'').substring(0,80));
-            u.lang='ar-SA';u.rate=1.2;u.pitch=1;
-            const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
-            if(arV)u.voice=arV;
-            window.speechSynthesis.speak(u);
+      // إضافة النص النهائي للمخزن المؤقت
+      if(newFinal.trim()){
+        _finalBuf += newFinal;
+        _showHeard('🎤 ' + _finalBuf.trim());
+      } else if(interimText){
+        _showHeard('🎤 ' + _finalBuf.trim() + ' <span style="opacity:0.5">' + interimText + '</span>');
+      }
+
+      // بعد 800ms من توقف الكلام → نفّذ الأمر
+      clearTimeout(_commitTimer);
+      _commitTimer = setTimeout(()=>{
+        const tx = (_finalBuf + ' ' + interimText).trim();
+        _finalBuf = '';
+        _lastInterim = '';
+        if(!tx) return;
+
+        // تحويل الحروف الإنجليزية المنطوقة بالعربية
+        const converted = _arabicLettersToEn(tx.toLowerCase().trim());
+
+        _showHeard('<b>🎤 سمعت:</b> ' + tx);
+
+        let processed = false;
+        for(const alt of [converted, tx]){
+          const r = _tryProcess(alt);
+          if(r && r.length && r[0].cls !== 'err' && r[0].cls !== 'inf'){
+            _showReply(r);
+            if(!_isSilent() && window.speechSynthesis){
+              window.speechSynthesis.cancel();
+              const u = new SpeechSynthesisUtterance(r.map(x=>x.msg).join('، ').replace(/<[^>]+>/g,'').substring(0,80));
+              u.lang='ar-SA'; u.rate=1.2; u.pitch=1;
+              const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
+              if(arV) u.voice=arV;
+              window.speechSynthesis.speak(u);
+            }
+            processed = true;
+            break;
           }
-          processed=true;
-          break;
         }
-      }
-      if(!processed){ _process(tx); }
-      _setHint(_ctx());
-      // جدد مؤقت الخمول بعد كل كلام مسموع
-      _resetIdleTimer();
+        if(!processed){ _process(tx); }
+        _setHint(_ctx());
+        _resetIdleTimer();
+      }, 800);
     };
 
-    _rec.onerror=e=>{
-      _stopWave();
-      const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
-      if(e.error==='not-allowed'){_on=false;clearTimeout(_idleTimer);_showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);return;}
-      if(e.error==='aborted'){
-        // aborted يعني أننا أوقفناه بشكل مقصود، لا تعد الاستماع
-        if(!_on) return;
+    _rec.onerror = e => {
+      if(e.error === 'not-allowed'){
+        _on = false; clearTimeout(_idleTimer); clearTimeout(_commitTimer);
+        _stopWave();
+        _showReply([{cls:'err', msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
+        return;
       }
-      // أعد الاستماع تلقائياً بعد أي خطأ آخر
-      if(_on) _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 400);
-    };
-
-    _rec.onend=()=>{
-      _stopWave();
-      const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
+      if(e.error === 'no-speech') return; // صمت طبيعي — لا شيء
+      if(e.error === 'aborted' && !_on) return; // أوقفناه بشكل مقصود
+      // أي خطأ آخر → أعد التشغيل
       if(_on){
-        // إعادة تشغيل فورية للاستماع المستمر — هذا هو قلب الاستماع الدائم
-        const heard=document.getElementById('va-heard');
-        if(heard) heard.innerHTML='<span style="color:rgba(255,255,255,0.35)">\u{1F3A4} يستمع... تكلم</span>';
+        _on = false;
         clearTimeout(_restartTimer);
-        _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 200);
+        _restartTimer = setTimeout(()=>{ if(!_on) _startListening(); }, 500);
+      }
+    };
+
+    _rec.onend = () => {
+      _stopWave();
+      const fab = document.getElementById('va-fab'); if(fab) fab.classList.remove('va-on');
+      if(_on){
+        // انتهى بشكل غير متوقع → أعد التشغيل فوراً
+        _on = false;
+        clearTimeout(_restartTimer);
+        _restartTimer = setTimeout(()=>{
+          const heard = document.getElementById('va-heard');
+          if(heard) heard.innerHTML = '<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>';
+          _startListening();
+        }, 300);
       }
     };
 
     try{
-      _rec.start(); _on=true; _startWave();
-      document.getElementById('va-fab').classList.add('va-on');
-      document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.4)">\u{1F3A4} اتكلم الآن...</span>';
+      _rec.start();
+      _startWave();
+      const fab = document.getElementById('va-fab'); if(fab) fab.classList.add('va-on');
+      const heard = document.getElementById('va-heard');
+      if(heard) heard.innerHTML = '<span style="color:rgba(255,255,255,0.4)">🎤 اتكلم الآن...</span>';
       _setCtxLabel(_ctx());
-      // ① ابدأ مؤقت الخمول عند بدء الاستماع
       _resetIdleTimer();
-    }catch(e){ _on=false; _rec=null; }
+    } catch(e){
+      _on = false; _rec = null;
+    }
   }
 
   function stop(){
     clearTimeout(_restartTimer);
-    clearTimeout(_idleTimer);   // ① أوقف مؤقت الخمول
-    _on=false;
-    if(_rec){try{_rec.abort();}catch(e){}_rec=null;}
+    clearTimeout(_idleTimer);
+    _on = false;
+    if(_rec){
+      try{ _rec.stop(); }catch(e){}  // stop() أفضل من abort() في continuous mode
+      _rec = null;
+    }
     _stopWave();
     if(window.speechSynthesis) window.speechSynthesis.cancel();
-    const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
-    const heard=document.getElementById('va-heard');if(heard)heard.innerHTML='اضغط الزر للتفعيل...';
+    const fab=document.getElementById('va-fab'); if(fab) fab.classList.remove('va-on');
+    const heard=document.getElementById('va-heard'); if(heard) heard.innerHTML='اضغط الزر للتفعيل...';
   }
   function close(){
     stop();
