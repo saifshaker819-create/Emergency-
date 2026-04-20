@@ -1942,6 +1942,59 @@ body.light-mode .fr-accent{color:#059669 !important;}
   direction:rtl; white-space:nowrap;
 }
 body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
+
+/* ══════════════════════════════════════════════════════════════
+   🎙️ المساعد الصوتي — Voice Assistant CSS
+══════════════════════════════════════════════════════════════ */
+#va-fab{position:fixed;bottom:28px;left:28px;z-index:9800;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(139,63,255,0.45);transition:all 0.3s;font-size:24px;}
+#va-fab:hover{transform:scale(1.08);}
+#va-fab.va-listening{animation:va-pulse 1.2s infinite;background:linear-gradient(135deg,#ff2244,#ff6b00);}
+#va-fab.va-hidden{display:none!important;}
+@keyframes va-pulse{0%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 0 rgba(255,34,68,0.5);}70%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 18px rgba(255,34,68,0);}100%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 0 rgba(255,34,68,0);}}
+#va-panel{position:fixed;bottom:96px;left:16px;z-index:9801;width:300px;background:rgba(7,13,28,0.97);border:1.5px solid rgba(139,63,255,0.5);border-radius:18px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,0.7);display:none;animation:va-slideUp 0.25s ease;backdrop-filter:blur(16px);}
+#va-panel.va-open{display:block;}
+@keyframes va-slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+#va-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:40px;margin:10px 0;}
+#va-wave span{display:inline-block;width:4px;border-radius:4px;background:linear-gradient(180deg,#8b3fff,#00d4ff);animation:va-wave-bar 0.9s ease-in-out infinite;}
+#va-wave span:nth-child(1){height:12px;animation-delay:0s;}#va-wave span:nth-child(2){height:22px;animation-delay:0.1s;}#va-wave span:nth-child(3){height:32px;animation-delay:0.2s;}#va-wave span:nth-child(4){height:20px;animation-delay:0.3s;}#va-wave span:nth-child(5){height:28px;animation-delay:0.15s;}#va-wave span:nth-child(6){height:14px;animation-delay:0.25s;}#va-wave span:nth-child(7){height:24px;animation-delay:0.05s;}
+@keyframes va-wave-bar{0%,100%{transform:scaleY(0.4);opacity:0.5;}50%{transform:scaleY(1);opacity:1;}}
+#va-wave.va-idle span{animation:none;height:4px!important;opacity:0.3;}
+#va-transcript{font-size:13px;color:#fff;text-align:center;min-height:20px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:8px;border:1px solid rgba(255,255,255,0.08);line-height:1.5;}
+#va-status{font-size:10px;color:rgba(255,255,255,0.5);text-align:center;margin-top:8px;}
+#va-cmd-result{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;display:none;}
+#va-cmd-result.va-ok{background:rgba(0,232,122,0.15);color:#00e87a;border:1px solid rgba(0,232,122,0.3);}
+#va-cmd-result.va-err{background:rgba(255,34,68,0.12);color:#ff2244;border:1px solid rgba(255,34,68,0.2);}
+.va-picker-active *{cursor:crosshair!important;}
+.va-picker-active *:hover{outline:2.5px dashed #8b3fff!important;outline-offset:2px!important;background:rgba(139,63,255,0.07)!important;}
+#va-picker-bar{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#8b3fff,#00d4ff);color:#fff;font-size:13px;font-weight:800;padding:10px 20px;align-items:center;gap:12px;box-shadow:0 2px 20px rgba(139,63,255,0.5);display:none;}
+#va-picker-bar.va-active{display:flex;}
+#va-settings-modal{position:fixed;inset:0;z-index:99900;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;padding:16px;}
+#va-settings-modal.va-open{display:flex;animation:fadeInBg 0.25s ease;}
+#va-settings-modal-box{background:linear-gradient(135deg,#07091a,#0d1230);border:1.5px solid rgba(139,63,255,0.4);border-radius:18px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 0 60px rgba(139,63,255,0.2),0 20px 60px rgba(0,0,0,0.8);animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
+.va-cmd-card{background:rgba(255,255,255,0.04);border:1px solid rgba(139,63,255,0.25);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all 0.2s;}
+.va-cmd-card:hover{border-color:rgba(139,63,255,0.5);background:rgba(139,63,255,0.05);}
+.va-cmd-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
+.va-cmd-info{flex:1;min-width:0;}
+.va-cmd-phrase{font-size:12px;font-weight:800;color:#a78bfa;}
+.va-cmd-target{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.va-cmd-del{background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.25);color:#ff2244;border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.va-cmd-del:hover{background:rgba(255,34,68,0.25);}
+.va-fp-card{background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.va-fp-name{font-size:13px;font-weight:800;color:var(--primary);}
+.va-fp-samples{font-size:10px;color:var(--text2);}
+.va-rec-btn{display:flex;align-items:center;gap:6px;background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.3);color:#ff2244;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.va-rec-btn:hover{background:rgba(255,34,68,0.22);}
+.va-rec-btn.recording{background:rgba(255,34,68,0.25);animation:va-pulse-sm 0.8s infinite;}
+@keyframes va-pulse-sm{0%,100%{opacity:1}50%{opacity:0.6}}
+.va-section-title{font-size:11px;font-weight:900;color:rgba(139,63,255,0.85);letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(139,63,255,0.2);}
+#va-listening-chip{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9900;background:rgba(255,34,68,0.9);color:#fff;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px;display:none;box-shadow:0 4px 20px rgba(255,34,68,0.4);backdrop-filter:blur(10px);}
+#va-listening-chip.show{display:flex;align-items:center;gap:6px;}
+body.light-mode #va-panel{background:rgba(255,255,255,0.97);border-color:rgba(139,63,255,0.4);}
+body.light-mode #va-transcript{background:rgba(0,0,0,0.04);color:#0d1b2a;border-color:rgba(0,0,0,0.1);}
+body.light-mode #va-settings-modal-box{background:linear-gradient(135deg,#ffffff,#f0f4f8);}
+body.light-mode .va-cmd-card{background:#fff;border-color:rgba(139,63,255,0.2);}
+body.light-mode .va-cmd-target{color:#5a6a7a;}
+body.light-mode .va-fp-card{background:#fff;}
 </style>
 </head>
 <body>
@@ -3715,6 +3768,7 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
         </div>
       </div>
 
+    </div><!-- end accordion -->
 
         <!-- ■ شاشة الانتظار -->
         <div class="st-card" id="stc-waitscreen">
@@ -3769,101 +3823,127 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
           </div>
         </div>
 
-        <!-- 🎙️ إعدادات المساعد الصوتي -->
-        <div class="st-card" id="stc-voice-assistant">
-          <div class="st-card-hdr" onclick="toggleStCard('stc-voice-assistant')">
+
+        <!-- 🎙️ المساعد الصوتي -->
+        <div class="st-card" id="stc-voice">
+          <div class="st-card-hdr" onclick="toggleStCard('stc-voice')">
             <div style="display:flex;align-items:center;gap:12px">
               <span style="font-size:22px">🎙️</span>
-              <div><div class="st-card-title">المساعد الصوتي</div><div class="st-card-sub">تشغيل / إيقاف — بصمات النطق المخصصة للتحاليل</div></div>
+              <div>
+                <div class="st-card-title">المساعد الصوتي</div>
+                <div class="st-card-sub">تحكم بأي حقل أو زر بصوتك — ربط ذكي وبصمات صوتية</div>
+              </div>
             </div>
-            <span class="st-card-arrow" id="arr-stc-voice-assistant">▼</span>
+            <span class="st-card-arrow" id="arr-stc-voice">▼</span>
           </div>
-          <div class="st-card-body" id="body-stc-voice-assistant" style="display:none">
+          <div class="st-card-body" id="body-stc-voice" style="display:none">
 
-            <!-- ① تشغيل / إيقاف المساعد -->
-            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <!-- تفعيل / تعطيل -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(139,63,255,0.08);border:1px solid rgba(139,63,255,0.3);border-radius:12px;margin-bottom:16px">
               <div>
-                <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:4px">🔘 حالة المساعد الصوتي</div>
-                <div style="font-size:11px;color:var(--text2)">عند الإيقاف، لن تظهر أداة المساعد ولن يستجيب لأي أوامر</div>
+                <div style="font-size:14px;font-weight:800;color:#fff">🎙️ تفعيل المساعد الصوتي</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">يظهر زر الميكروفون العائم في الشاشة</div>
               </div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span id="va-enabled-label" style="font-size:12px;font-weight:800;color:var(--success)">مفعّل ✅</span>
-                <div id="va-toggle-btn" onclick="vaToggleEnabled()" style="width:52px;height:28px;background:linear-gradient(90deg,var(--success),#00c470);border-radius:14px;position:relative;cursor:pointer;transition:all 0.3s;border:1px solid rgba(0,232,122,0.4)">
-                  <div id="va-toggle-dot" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:all 0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>
+              <div class="perm-tog" id="va-toggle-btn" onclick="vaToggleEnabled()" title="تفعيل/تعطيل">
+                <div class="perm-tog-t"></div>
+              </div>
+            </div>
+
+            <!-- اللغة -->
+            <div class="fg" style="margin-bottom:16px">
+              <label class="fl">🌐 لغة التعرف على الكلام</label>
+              <select class="fc" id="va-lang-sel" onchange="vaSaveLang()">
+                <option value="ar-IQ">العربية (العراق)</option>
+                <option value="ar-SA">العربية (السعودية)</option>
+                <option value="ar">العربية (عام)</option>
+                <option value="en-US">الإنجليزية (US)</option>
+              </select>
+            </div>
+
+            <!-- قسم: ربط الأوامر -->
+            <div class="va-section-title">🔗 أوامر مربوطة بعناصر البرنامج</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.7">
+              اضغط <b style="color:#a78bfa">+ إضافة أمر جديد</b> ثم اختر العنصر بالنقر عليه في أي مكان في البرنامج، ثم حدد الأمر الصوتي الذي سيتحكم به.
+            </div>
+            <div id="va-cmds-list" style="margin-bottom:10px">
+              <!-- تُحشى ديناميكياً -->
+              <div id="va-cmds-empty" style="text-align:center;padding:16px;color:var(--text2);font-size:12px">لا توجد أوامر مضافة بعد</div>
+            </div>
+            <button class="btn btn-p" style="width:100%" onclick="vaStartPicker()">＋ إضافة أمر صوتي جديد</button>
+
+            <!-- قسم: أوامر التنقل المدمجة -->
+            <div class="va-section-title">🗺️ أوامر التنقل المدمجة</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px" id="va-builtin-list">
+              <!-- تُحشى ديناميكياً -->
+            </div>
+
+            <!-- قسم: القاموس والبصمات -->
+            <div class="va-section-title">📖 القاموس الطبي والبصمات الصوتية</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.7">
+              أضف كلمات طبية أو أسماء مرضى ليتعرف عليها المساعد بدقة. يمكنك تسجيل بصمة صوتية لكل اسم (3 عينات) لتحسين دقة التعرف.
+            </div>
+
+            <!-- إضافة كلمة للقاموس -->
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <input class="fc" id="va-dict-word" placeholder="كلمة أو اسم..." style="flex:1">
+              <button class="btn btn-s" onclick="vaAddDictWord()">＋ إضافة</button>
+            </div>
+            <div id="va-dict-list" style="margin-bottom:14px">
+              <div id="va-dict-empty" style="text-align:center;padding:12px;color:var(--text2);font-size:12px">القاموس فارغ</div>
+            </div>
+
+            <!-- بصمات صوتية -->
+            <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:14px;margin-bottom:14px">
+              <div style="font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px">🎤 تسجيل بصمة صوتية لاسم</div>
+              <div style="font-size:11px;color:var(--text2);margin-bottom:10px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات لأفضل دقة</div>
+              <div style="display:flex;gap:8px;margin-bottom:10px">
+                <input class="fc" id="va-fp-name-input" placeholder="اسم المريض أو الطبيب..." style="flex:1">
+                <button class="btn btn-s va-rec-btn" id="va-fp-rec-btn" onclick="vaStartFingerprint()">🎤 تسجيل</button>
+              </div>
+              <div id="va-fp-status" style="font-size:11px;color:var(--text2);text-align:center;min-height:16px"></div>
+              <div id="va-fp-list" style="margin-top:10px"></div>
+            </div>
+
+            <!-- إعدادات متقدمة -->
+            <div class="va-section-title">⚙️ إعدادات متقدمة</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:12px;font-weight:700;color:var(--text)">رد صوتي (Text-to-Speech)</div>
+                  <div style="font-size:10px;color:var(--text2)">ينطق المساعد باسم الأمر المنفّذ</div>
+                </div>
+                <div class="perm-tog" id="va-tts-toggle" onclick="vaToggleTTS()" title="رد صوتي">
+                  <div class="perm-tog-t"></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:12px;font-weight:700;color:var(--text)">الاستماع المستمر</div>
+                  <div style="font-size:10px;color:var(--text2)">يستمر الاستماع بعد كل أمر بدون الضغط مجدداً</div>
+                </div>
+                <div class="perm-tog" id="va-continuous-toggle" onclick="vaToggleContinuous()" title="مستمر">
+                  <div class="perm-tog-t"></div>
                 </div>
               </div>
             </div>
 
-            <!-- ② وضع الصمت -->
-            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-              <div>
-                <div style="font-size:13px;font-weight:800;color:var(--warning);margin-bottom:4px">🔇 وضع الصمت</div>
-                <div style="font-size:11px;color:var(--text2)">المساعد يسمع وينفذ الأوامر بصمت — بدون أي رد صوتي</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span id="va-silent-label" style="font-size:12px;font-weight:800;color:var(--success)">🔊 يتكلم</span>
-                <div id="va-silent-btn" onclick="vaToggleSilent()" style="width:52px;height:28px;background:linear-gradient(90deg,var(--success),#00c470);border-radius:14px;position:relative;cursor:pointer;transition:all 0.3s;border:1px solid rgba(0,232,122,0.4)">
-                  <div id="va-silent-dot" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:all 0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>
-                </div>
-              </div>
+            <!-- سجل الأوامر -->
+            <div class="va-section-title">📋 سجل آخر الأوامر</div>
+            <div id="va-history-list" style="max-height:200px;overflow-y:auto;font-size:11px;color:var(--text2)">
+              <div style="text-align:center;padding:12px">لا يوجد سجل بعد</div>
             </div>
 
-            <!-- ③ مهلة الخمول -->
-            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-              <div>
-                <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:2px">⏱️ مهلة الخمول</div>
-                <div style="font-size:11px;color:var(--text2)">يُغلق المساعد تلقائياً إذا لم يتلقَّ أوامر خلال المدة المحددة</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <select id="va-idle-timeout" onchange="vaSaveIdleTimeout(this.value)" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
-                  <option value="10000">10 ثوانٍ</option>
-                  <option value="15000" selected>15 ثانية</option>
-                  <option value="30000">30 ثانية</option>
-                  <option value="60000">دقيقة</option>
-                  <option value="0">بدون إيقاف</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- ④ قاموس البصمات الصوتية المخصصة -->
-            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
-              <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:4px">🗣️ بصمات النطق المخصصة</div>
-              <div style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.8">
-                أضف نطقك الخاص لأسماء التحاليل — مثلاً: اكتب <b style="color:var(--accent)">ار بي اس</b> في خانة "ما أقوله" والكود <b style="color:var(--accent)">RBS</b> في خانة "كود التحليل"<br>
-                ⚡ هذا القاموس يُعطى أولوية قصوى على القاموس الافتراضي
-              </div>
-
-              <!-- حقول الإضافة -->
-              <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
-                <div style="flex:1;min-width:140px">
-                  <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px">🎤 ما أقوله (النطق)</label>
-                  <input class="fc" id="va-dict-phrase" placeholder="مثال: ار بي اس" style="margin-bottom:0">
-                </div>
-                <div style="flex:1;min-width:120px">
-                  <label style="font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px">🔬 كود التحليل</label>
-                  <input class="fc" id="va-dict-code" placeholder="مثال: RBS" style="margin-bottom:0;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
-                </div>
-                <button class="btn btn-p" onclick="vaAddDictEntry()" style="white-space:nowrap;padding:10px 18px;margin-bottom:1px">➕ إضافة</button>
-              </div>
-
-              <!-- قائمة البصمات المحفوظة -->
-              <div id="va-dict-list" style="display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto">
-                <div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">لا توجد بصمات مخصصة بعد — أضف أول بصمة أعلاه</div>
-              </div>
-            </div>
-
-            <!-- ③ استيراد / تصدير القاموس -->
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn btn-sm" onclick="vaExportDict()" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--primary)">📤 تصدير القاموس</button>
-              <button class="btn btn-sm" onclick="document.getElementById('va-dict-import').click()" style="background:rgba(139,63,255,0.1);border:1px solid rgba(139,63,255,0.3);color:var(--secondary)">📥 استيراد قاموس</button>
-              <input type="file" id="va-dict-import" accept=".json" style="display:none" onchange="vaImportDict(this)">
-              <button class="btn btn-sm btn-d" onclick="vaClearDict()" style="margin-right:auto">🗑️ مسح الكل</button>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-sm" style="flex:1;background:rgba(255,34,68,0.1);border-color:rgba(255,34,68,0.3);color:var(--danger)" onclick="vaResetAll()">🗑️ مسح كل الإعدادات</button>
+              <button class="btn btn-p btn-sm" style="flex:1" onclick="vaOpenFullSettings()">🖥️ واجهة الإعدادات الكاملة</button>
             </div>
 
           </div>
         </div>
 
     </div><!-- end settings-accordion outer -->
+
+  </div><!-- end .page -->
 
 
     <!-- DATABASE SECTION -->
@@ -5629,6 +5709,7 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
 
   document.addEventListener('DOMContentLoaded', applyAll);
   setTimeout(applyAll, 600);
+  setTimeout(applyAll, 2000);
 
   if(window.MutationObserver){
     var mo = new MutationObserver(function(muts){
@@ -5706,6 +5787,7 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
   _run();
   document.addEventListener('DOMContentLoaded', _run);
   setTimeout(_run, 600);
+  setTimeout(_run, 2000);
   // مراقبة إضافة عناصر جديدة للـ DOM (مودالات ديناميكية)
   if(window.MutationObserver){
     var _mo = new MutationObserver(function(muts){
@@ -7356,7 +7438,7 @@ function deleteReqFromPanel(reqId, pid){
   if(!confirm('حذف هذا الطلب؟'))return;
   requests=requests.filter(r=>r.id!==reqId);
   save('requests',requests);
-  renderRequests();updateBadges();updateDashboard();
+  renderAll();updateBadges();updateDashboard();
   showNotif('تم الحذف','تم حذف الطلب','success');
   const modal=document.getElementById('m-pt-quick');if(modal)modal.remove();
   openPatientQuickPanel(pid);
@@ -7439,15 +7521,9 @@ function openPrintModal(rid){
   requestAnimationFrame(function(){
     const iframe=document.getElementById('print-prev-iframe');
     if(iframe){
-      // حقن الخطوط المحملة مسبقاً في الصفحة الرئيسية بدلاً من إعادة تحميلها
-      const parentFonts=[...document.fonts].map(f=>{try{return f;}catch(e){return null;}}).filter(Boolean);
       iframe.contentDocument.open();
       iframe.contentDocument.write(combined);
       iframe.contentDocument.close();
-      // نسخ الخطوط من الصفحة الرئيسية إلى iframe
-      try{
-        parentFonts.forEach(function(f){ try{iframe.contentDocument.fonts.add(f);}catch(e){} });
-      }catch(e){}
     }
   });
 }
@@ -8233,27 +8309,14 @@ function wizFinish(){
   });
   save('invoices',invoices);
 
-  closeModal('m-wizard'); renderRequests(); renderPatients(); updateBadges(); updateDashboard();
+  closeModal('m-wizard');
+  // تحديث مستهدف فقط بدلاً من renderAll() الثقيل — أسرع بكثير
+  renderRequests(); updateBadges(); updateDashboard();
   showNotif('تم الإنشاء',`${rqid} — ${pt.name} | ${total} ${settings.currency||''} — ${payStatus} ✅`,'success');
-  // فتح إدخال النتائج مباشرةً للطلب الجديد — بدون تأخير
+  // فتح إدخال النتائج مباشرةً للطلب الجديد
   currentReqId=rqid;
   window._goToResultCalled=true;
   nav('results');
-  // تحديث القائمة وتحديد الطلب الجديد مباشرة
-  const _sel=document.getElementById('res-req-sel');
-  if(_sel){
-    // أضف الطلب للقائمة فوراً بدون إعادة بناء كاملة
-    const opt=document.createElement('option');
-    opt.value=rqid; opt.textContent=rqid+' - '+pt.name;
-    _sel.appendChild(opt);
-    _sel.value=rqid;
-  }
-  loadResultEntry();
-  // تمرير للأعلى ليرى المستخدم واجهة الإدخال
-  requestAnimationFrame(()=>{
-    const area=document.getElementById('res-entry-area');
-    if(area) area.scrollIntoView({behavior:'smooth',block:'start'});
-  });
 }
 
 // ── حساب مجموع التحاليل في المعالج ──────────────────────────
@@ -8334,14 +8397,8 @@ function renderPatients(filter='all',srch='',_overridePts=null){
     </div></td>
   </tr>`).join('');
 }
-// كاش مرضى الطلبات المكتملة — يتجدد عند تغير requests
-let _donePatientCache=null, _donePatientCacheLen=-1;
 function _ptHasDoneReq(patientId){
-  if(!_donePatientCache||_donePatientCacheLen!==requests.length){
-    _donePatientCache=new Set(requests.filter(r=>r.status==='done').map(r=>r.patientId));
-    _donePatientCacheLen=requests.length;
-  }
-  return _donePatientCache.has(patientId);
+  return requests.some(r=>r.patientId===patientId&&r.status==='done');
 }
 function openPatientPortalByPatient(patientId){
   // إيجاد آخر طلب مكتمل للمريض
@@ -8380,7 +8437,7 @@ function searchPatients(v){
     }
   },200);
 }
-function deletePatient(id){if(confirm('هل أنت متأكد من حذف هذا المريض؟')){patients=patients.filter(p=>p.id!==id);save('patients',patients);renderPatients();renderRequests();updateBadges();showNotif('تم الحذف','تم حذف المريض','success');}}
+function deletePatient(id){if(confirm('هل أنت متأكد من حذف هذا المريض؟')){patients=patients.filter(p=>p.id!==id);save('patients',patients);renderAll();updateBadges();showNotif('تم الحذف','تم حذف المريض','success');}}
 function editPatient(id){const p=patients.find(x=>x.id===id);if(!p)return;wizPatient={...p};wizSelectedTests=[];wizStep=1;_wizEditPatientOnly=false;renderWizStep();openModal('m-wizard');}
 
 // ── دوال التقويم ────────────────────────────────────────────
@@ -8676,12 +8733,6 @@ function renderRequestsFiltered(filter='today',srch=''){
   </tr>`).join('');
 }
 function renderRequests(filter='all',srch=''){renderRequestsFiltered(filter,srch);}
-// نسخة debounced من renderRequests — لتجنب الاستدعاءات المتتالية
-let _rrTimer=null;
-function renderRequestsDebounced(){
-  if(_rrTimer) clearTimeout(_rrTimer);
-  _rrTimer=setTimeout(function(){renderRequestsFiltered('today','');},50);
-}
 function filterReq(f,el){document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
 function searchReq(v){
   if(window._srTimer)clearTimeout(window._srTimer);
@@ -9077,10 +9128,6 @@ function vrSavePatientEdit(pid, rid){
 // ============================================================
 function loadResultsDropdown(){
   const sel=document.getElementById('res-req-sel');if(!sel)return;
-  // تجاهل إعادة البناء إذا لم يتغير عدد الطلبات
-  const _rLen=requests.filter(r=>r.status!=='done').length;
-  if(sel._lastLen===_rLen&&sel.options.length>1){return;}
-  sel._lastLen=_rLen;
   sel.innerHTML='<option value="">-- اختر طلب --</option>'+requests.filter(r=>r.status!=='done').map(r=>`<option value="${r.id}">${r.id} - ${r.patientName}</option>`).join('');
   // فقط حدد الطلب إذا currentReqId موجود فعلاً في القائمة
   if(currentReqId){
@@ -9320,8 +9367,12 @@ function loadResultEntry(){
       if(next){next.focus();if(next.select)next.select();}
     };
     tbody.addEventListener('keydown',tbody._resNavHandler,true);
-    // ── تركيز تلقائي على أول حقل إدخال — مع تأخير لتجنب تعارض language observer ──
+    // ── تركيز تلقائي على أول حقل إدخال — فقط إذا لم يكن المستخدم يكتب في حقل آخر ──
     setTimeout(function(){
+      // لا تسرق التركيز إذا كان المستخدم يكتب في حقل بالفعل
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.tagName==='INPUT'||activeEl.tagName==='TEXTAREA'||activeEl.tagName==='SELECT') && document.getElementById('res-entry-tbody')?.contains(activeEl);
+      if(isTyping) return;
       var fi=Array.from(document.querySelectorAll('#res-entry-tbody .res-input')).find(function(el){return el.type!=='hidden'&&el.offsetParent!==null;});
       if(fi){fi.focus();if(fi.select)fi.select();}
     }, 200);
@@ -9397,7 +9448,9 @@ function _autoSaveResults(){
     if(allFilled) req.status='done';
     else if(req.status!=='done') req.status='inprogress';
     save('requests',requests);
-    renderRequests(); updateDashboard(); updateBadges();
+    // أثناء إدخال النتائج: تحديث الـ badges فقط بدون renderRequests
+    // renderRequests تُسبِّب إعادة بناء DOM وتعطيل التركيز على الحقول
+    updateDashboard(); updateBadges();
   }, 500);
 }
 function checkResult(tid,val){
@@ -9607,11 +9660,7 @@ function saveDraft(){const req=collectResults();if(!req)return;req.status='inpro
 function finalizeResult(){
   const req=collectResults();if(!req)return;
   req.status='done';
-  window._criticalCacheLen=-1; // إعادة حساب التنبيهات
-  window._donePatientCache=null; // إعادة حساب كاش المرضى
-  save('requests',requests);renderRequests();updateDashboard();updateBadges();
-  // إعادة بناء القوائم بعد لحظة (لا تؤخر حفظ النتيجة)
-  setTimeout(function(){loadResultsDropdown();loadPrintDropdown();},200);
+  save('requests',requests);renderRequests();updateDashboard();updateBadges();loadResultsDropdown();loadPrintDropdown();
 }
 function finalizeAndPrint(){
   // ── فحص صلاحية الطباعة ──────────────────────────────
@@ -9620,7 +9669,7 @@ function finalizeAndPrint(){
     // حفظ النتائج فقط بدون طباعة
     const reqOnly = collectResults(); if(!reqOnly) return;
     reqOnly.status = 'done';
-    save('requests',requests); renderRequests(); updateDashboard(); updateBadges(); 
+    save('requests',requests); renderRequests(); updateDashboard(); updateBadges(); loadResultsDropdown(); loadPrintDropdown();
     return;
   }
   // ────────────────────────────────────────────────────
@@ -9646,7 +9695,7 @@ function finalizeAndPrint(){
   }
   req.status='done';
   save('requests',requests);
-  renderRequests();updateDashboard();updateBadges();
+  renderRequests();updateDashboard();updateBadges();loadResultsDropdown();loadPrintDropdown();
   currentReqId=id;
   doPrint(id);
 }
@@ -9996,7 +10045,7 @@ function _startLocalNotifPolling(username){
       if(latest) showNotif('📢 '+latest.title, latest.body||'', 'info');
     }
     _lastNotifCount=unread;
-  },30000);
+  },15000);
 }
 
 function getMyNotifs(){
@@ -10236,13 +10285,6 @@ function buildPrintHTML(req, opts){
     if(!grouped[key]) grouped[key]=[];
     grouped[key].push(t);
   });
-  // ── ترتيب مخصص للمجاميع الفرعية ──────────────────────────────
-  const SUBCAT_ORDER = [
-    'Kidney Functions',
-    'Liver Functions',
-    'Thyroid Hormones',
-    'Lipid Profile',
-  ];
   // ── ترتيب مخصص للتحاليل داخل كل مجموعة (بالكود) ────────────
   const TEST_ORDER_BY_SUBCAT = {
     'Kidney Functions':  ['UREA','CREAT','UA'],
@@ -10263,12 +10305,8 @@ function buildPrintHTML(req, opts){
       return ai - bi;
     });
   }
-  // ترتيب المجاميع: المخصصة أولاً بالترتيب المحدد، ثم الباقي أبجدياً
-  const allGroupKeys = Object.keys(grouped);
-  const sortedGroupKeys = [
-    ...SUBCAT_ORDER.filter(k => allGroupKeys.includes(k)),
-    ...allGroupKeys.filter(k => !SUBCAT_ORDER.includes(k)).sort((a,b)=>a.localeCompare(b))
-  ];
+  // ترتيب جميع المجاميع الفرعية أبجدياً
+  const sortedGroupKeys = Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
   // تطبيق الترتيب الداخلي على كل مجموعة
   sortedGroupKeys.forEach(k=>{ grouped[k]=sortTestsInGroup(k, grouped[k]); });
   const ptAge    = parseFloat(pt.ageVal)||Math.floor((Date.now()-new Date(pt.dob||0).getTime())/31557600000)||0;
@@ -10282,7 +10320,7 @@ function buildPrintHTML(req, opts){
   const pfsN = parseInt(pfs);
   const subcatFsN = parseInt(settings.subcatFontSize||'12');
   const subcatFs  = subcatFsN+'px';
-  const reportFontFamily = settings.printFontFamily || "'Inter',Arial,sans-serif";
+  const reportFontFamily = settings.printFontFamily || "Arial,sans-serif";
   const reportFontWeight = settings.printFontWeight || '700';
 
   // ─── CSS ──────────────────────────────────────────────
@@ -10297,7 +10335,7 @@ function buildPrintHTML(req, opts){
   // هامش سفلي للصفحة = إجمالي ارتفاع الذيل + 6mm احتياطي
   const pageBottomMm = totalFooterH>0 ? Math.ceil(totalFooterH*0.265+6) : 4;
   const css=`
-    /* Inter font inherited from parent document via JS injection */
+    /* Google Fonts removed for faster print — using system fonts */
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{background:#ffffff !important;margin:0;padding:0;}
     @page{margin:0 !important;size:A4 portrait;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
@@ -12151,7 +12189,7 @@ function deductInventoryOnPrint(req){
       }
     }
   });
-  if(changed){ save('inventory',inventory); setTimeout(function(){ renderInventory(); checkInventoryAlerts(); },1500); }
+  if(changed){ save('inventory',inventory); renderInventory(); checkInventoryAlerts(); }
 }
 
 function checkInventoryAlerts(){
@@ -12605,20 +12643,12 @@ function updateDashboard(){
     </div></td>
   </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">لا توجد طلبات بعد</td></tr>';
   const alertsDiv=document.getElementById('dash-alerts');
-  // كاش للتنبيهات الحرجة — يتجدد فقط عند تغير عدد الطلبات
-  if(!window._criticalCache||window._criticalCacheLen!==requests.length){
-    window._criticalCache=[];
-    const today=new Date().toISOString().split('T')[0];
-    // فحص آخر 200 طلب فقط بدلاً من الكل لتحسين الأداء
-    const recentDone=[...requests].reverse().filter(r=>r.status==='done').slice(0,200);
-    recentDone.forEach(r=>{
-      r.tests.forEach(tid=>{const t=tests.find(x=>x.id===tid);const val=r.results&&r.results[tid];
-        if(t&&val&&t.minVal!==null){const v=parseFloat(val);if(v>t.maxVal*1.2||v<t.minVal*0.8)window._criticalCache.push({req:r,test:t,val});}
-      });
+  const criticals=[];
+  requests.filter(r=>r.status==='done').forEach(r=>{
+    r.tests.forEach(tid=>{const t=tests.find(x=>x.id===tid);const val=r.results[tid];
+      if(t&&val&&t.minVal!==null){const v=parseFloat(val);if(v>t.maxVal*1.2||v<t.minVal*0.8)criticals.push({req:r,test:t,val});}
     });
-    window._criticalCacheLen=requests.length;
-  }
-  const criticals=window._criticalCache;
+  });
   // Arabic critical alerts - sorted newest first, show ALL
   criticals.sort(function(a,b){ return new Date(b.req.resultDate||b.req.date)-new Date(a.req.resultDate||a.req.date); });
   if(criticals.length===0){
@@ -20498,8 +20528,7 @@ function _printViaIframe(html){
   const iDoc=iframe.contentWindow.document;
   iDoc.open(); iDoc.write(html); iDoc.close();
 
-  // حقن الخطوط من الصفحة الرئيسية قبل الطباعة
-  try{[...document.fonts].forEach(function(f){try{iframe.contentWindow.document.fonts.add(f);}catch(e){}});}catch(e){}
+  // بدون تأخير — الطباعة فورية
   setTimeout(function(){
     try{
       iframe.contentWindow.focus();
@@ -20755,6 +20784,8 @@ function toggleInputLang(inputId, btnId){
 
   document.addEventListener('DOMContentLoaded', injectAll);
   setTimeout(injectAll, 500);
+  setTimeout(injectAll, 1500);
+  setTimeout(injectAll, 3000);
 
   if(window.MutationObserver){
     var mo = new MutationObserver(function(muts){
@@ -21678,6 +21709,845 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     🎙️ واجهة المساعد الصوتي — HTML
+═══════════════════════════════════════════════════════ -->
+
+<!-- شريط وضع الاختيار -->
+<div id="va-picker-bar">
+  <span style="font-size:20px">🎯</span>
+  <div style="flex:1">
+    <div>انقر على أي عنصر لربطه بأمر صوتي</div>
+    <div style="font-size:10px;opacity:0.8">اضغط إلغاء للخروج</div>
+  </div>
+  <button onclick="vaCancelPicker()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">✕ إلغاء</button>
+</div>
+
+<!-- زر الميكروفون العائم -->
+<button id="va-fab" class="va-hidden" onclick="vaToggleListen()" title="المساعد الصوتي">🎙️</button>
+
+<!-- مؤشر الاستماع -->
+<div id="va-listening-chip">
+  <span style="width:8px;height:8px;background:#fff;border-radius:50%;animation:va-pulse-sm 0.8s infinite;display:inline-block;flex-shrink:0"></span>
+  <span id="va-chip-text">جاري الاستماع...</span>
+</div>
+
+<!-- لوحة الصوت العائمة -->
+<div id="va-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.85)">🎙️ المساعد الصوتي</div>
+    <button onclick="vaClosePanel()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;line-height:1">✕</button>
+  </div>
+  <div id="va-wave" class="va-idle">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div id="va-transcript">قل أمراً...</div>
+  <div id="va-status">اضغط زر الميكروفون للبدء</div>
+  <div id="va-cmd-result"></div>
+  <div style="margin-top:10px;display:flex;gap:6px">
+    <button onclick="vaToggleListen()" id="va-listen-btn" style="flex:1;padding:8px;border-radius:9px;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;color:#fff;font-size:12px;font-weight:800;cursor:pointer">🎙️ استمع</button>
+    <button onclick="vaOpenFullSettings()" style="padding:8px 12px;border-radius:9px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer">⚙️</button>
+  </div>
+</div>
+
+<!-- مودال الإعدادات الكاملة -->
+<div id="va-settings-modal">
+  <div id="va-settings-modal-box">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid rgba(139,63,255,0.2);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:28px">🎙️</span>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#fff">إعدادات المساعد الصوتي</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45)">ربط الأوامر · القاموس · البصمات الصوتية</div>
+        </div>
+      </div>
+      <button onclick="vaCloseFullSettings()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:0 20px">
+      <div style="display:flex;gap:4px;padding:12px 0 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:16px">
+        <button id="va-tab-cmds" onclick="vaModalTab('cmds',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:rgba(139,63,255,0.2);border:1px solid rgba(139,63,255,0.4);border-bottom:none;color:#a78bfa;font-size:11px;font-weight:800;cursor:pointer">🔗 الأوامر</button>
+        <button id="va-tab-dict" onclick="vaModalTab('dict',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">📖 القاموس</button>
+        <button id="va-tab-fp" onclick="vaModalTab('fp',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">🎤 البصمات</button>
+        <button id="va-tab-hist" onclick="vaModalTab('hist',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">📋 السجل</button>
+      </div>
+      <!-- تبويب الأوامر -->
+      <div id="va-modal-cmds" style="padding-bottom:20px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;line-height:1.7">اضغط <b style="color:#a78bfa">+ أمر جديد</b> ثم انقر على أي زر أو حقل في الصفحة لربطه بأمر صوتي.</div>
+        <div id="va-modal-cmds-list"></div>
+        <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="vaStartPicker()">＋ إضافة أمر صوتي جديد</button>
+        <div style="margin-top:18px;font-size:11px;font-weight:900;color:rgba(0,212,255,0.7);padding-bottom:8px;border-bottom:1px solid rgba(0,212,255,0.15)">🗺️ أوامر التنقل المدمجة</div>
+        <div id="va-modal-builtin-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px"></div>
+      </div>
+      <!-- تبويب القاموس -->
+      <div id="va-modal-dict" style="display:none;padding-bottom:20px">
+        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;line-height:1.7">أضف كلمات طبية أو أسماء يتعرف عليها المساعد بدقة أكبر.</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input class="fc" id="va-modal-dict-word" placeholder="كلمة أو اسم طبي..." style="flex:1">
+          <select class="fc" id="va-modal-dict-cat" style="width:120px">
+            <option value="name">اسم شخص</option>
+            <option value="test">تحليل طبي</option>
+            <option value="cmd">أمر</option>
+            <option value="other">أخرى</option>
+          </select>
+          <button class="btn btn-p btn-sm" onclick="vaModalAddDict()">＋</button>
+        </div>
+        <div id="va-modal-dict-list"></div>
+      </div>
+      <!-- تبويب البصمات -->
+      <div id="va-modal-fp" style="display:none;padding-bottom:20px">
+        <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:16px;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:6px">🎤 تسجيل بصمة صوتية جديدة</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات متتالية</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input class="fc" id="va-modal-fp-name" placeholder="الاسم المراد تسجيله..." style="flex:1">
+            <button class="btn btn-s va-rec-btn" id="va-modal-fp-btn" onclick="vaModalStartFP()">🎤 تسجيل</button>
+          </div>
+          <div id="va-modal-fp-status" style="font-size:11px;text-align:center;color:rgba(255,255,255,0.5);min-height:16px"></div>
+          <div id="va-modal-fp-samples" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"></div>
+        </div>
+        <div id="va-modal-fp-list"></div>
+      </div>
+      <!-- تبويب السجل -->
+      <div id="va-modal-hist" style="display:none;padding-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.7)">آخر الأوامر المنفذة</div>
+          <button onclick="vaClearHistory()" style="background:rgba(255,34,68,0.1);border:1px solid rgba(255,34,68,0.25);color:#ff2244;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">مسح</button>
+        </div>
+        <div id="va-modal-hist-list" style="max-height:380px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- مودال تأكيد ربط الأمر -->
+<div id="va-bind-modal" style="position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.82);display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="background:linear-gradient(135deg,#07091a,#0d1230);border:1.5px solid rgba(139,63,255,0.5);border-radius:16px;max-width:440px;width:100%;padding:24px;box-shadow:0 0 60px rgba(139,63,255,0.3)">
+    <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px">🔗 ربط أمر صوتي</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:14px">العنصر المحدد:</div>
+    <div id="va-bind-target-info" style="background:rgba(139,63,255,0.1);border:1px solid rgba(139,63,255,0.3);border-radius:10px;padding:12px;font-size:12px;color:#a78bfa;margin-bottom:16px;word-break:break-all"></div>
+    <div class="fg" style="margin-bottom:14px">
+      <label class="fl">🗣️ الأمر الصوتي</label>
+      <input class="fc" id="va-bind-phrase" placeholder="مثال: افتح المرضى، ابحث، احفظ...">
+      <div style="font-size:10px;color:var(--text2);margin-top:4px">قل هذا الأمر وسينفذ المساعد التفاعل مع العنصر</div>
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <label class="fl">🏷️ نوع التفاعل</label>
+      <select class="fc" id="va-bind-action" onchange="vaBindActionChange()">
+        <option value="click">نقر (click)</option>
+        <option value="focus">تركيز (focus) — للحقول النصية</option>
+        <option value="fill">ملء تلقائي (fill)</option>
+        <option value="toggle">تبديل checkbox/switch</option>
+      </select>
+    </div>
+    <div class="fg" id="va-bind-fill-row" style="display:none;margin-bottom:14px">
+      <label class="fl">📝 النص الذي سيُملأ تلقائياً</label>
+      <input class="fc" id="va-bind-fill-value" placeholder="النص الذي سيُكتب في الحقل...">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="vaCancelBind()" style="flex:1;padding:10px;border-radius:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);cursor:pointer;font-size:13px">إلغاء</button>
+      <button onclick="vaConfirmBind()" style="flex:2;padding:10px;border-radius:9px;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer">✅ حفظ وربط</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     🎙️ محرك المساعد الصوتي — JavaScript Engine
+═══════════════════════════════════════════════════════ -->
+<script>
+(function(){
+'use strict';
+
+/* ── ثوابت التخزين ── */
+const VA_KEYS = {
+  enabled:    'va_enabled',
+  lang:       'va_lang',
+  tts:        'va_tts',
+  continuous: 'va_continuous',
+  commands:   'va_commands',
+  dict:       'va_dict',
+  fingerprints:'va_fingerprints',
+  history:    'va_history'
+};
+
+/* ── الأوامر المدمجة لصفحات البرنامج ── */
+const VA_BUILTIN = [
+  {id:'nav-patients',  phrases:['المرضى','افتح المرضى','قائمة المرضى'],           icon:'👥', label:'المرضى',       action:()=>typeof nav==='function'&&nav('patients')},
+  {id:'nav-new-req',   phrases:['طلب جديد','أضف طلب','فحص جديد'],                icon:'➕', label:'طلب جديد',     action:()=>typeof nav==='function'&&nav('new-request')},
+  {id:'nav-results',   phrases:['النتائج','إدخال النتائج','ادخل نتيجة'],          icon:'🔬', label:'النتائج',       action:()=>typeof nav==='function'&&nav('results')},
+  {id:'nav-invoices',  phrases:['الفواتير','افتح الفواتير','الدفعات'],            icon:'💰', label:'الفواتير',      action:()=>typeof nav==='function'&&nav('invoices')},
+  {id:'nav-settings',  phrases:['الإعدادات','افتح الإعدادات','الضبط'],           icon:'⚙️', label:'الإعدادات',    action:()=>typeof nav==='function'&&nav('settings')},
+  {id:'nav-reports',   phrases:['التقارير','افتح التقارير','الإحصائيات'],        icon:'📊', label:'التقارير',      action:()=>typeof nav==='function'&&nav('reports')},
+  {id:'nav-tests-db',  phrases:['قاعدة التحاليل','التحاليل','قاعدة الفحوصات'],  icon:'🔬', label:'قاعدة التحاليل',action:()=>typeof nav==='function'&&nav('tests-db')},
+  {id:'nav-database',  phrases:['قاعدة البيانات','النسخ الاحتياطي','الداتا'],   icon:'💾', label:'قاعدة البيانات', action:()=>typeof nav==='function'&&nav('database')},
+  {id:'nav-queue',     phrases:['الطابور','قائمة الانتظار','الدور'],             icon:'🚶', label:'قائمة الانتظار',action:()=>typeof nav==='function'&&nav('queue')},
+  {id:'nav-ai',        phrases:['الذكاء الاصطناعي','المساعد الذكي','ذكاء'],     icon:'🤖', label:'الذكاء الاصطناعي',action:()=>typeof nav==='function'&&nav('ai')},
+  {id:'global-save',   phrases:['احفظ','حفظ','سيف'],                             icon:'💾', label:'حفظ',           action:()=>{const b=document.querySelector('.btn-p[onclick*="save"],button[onclick*="save"]');b&&b.click();}},
+  {id:'global-search', phrases:['ابحث','بحث','فتش'],                             icon:'🔍', label:'بحث',           action:()=>{const s=document.querySelector('#pt-search,#search,input[placeholder*="بحث"]');if(s){s.focus();s.select();}}},
+  {id:'global-print',  phrases:['اطبع','طباعة','پرنت'],                          icon:'🖨️', label:'طباعة',        action:()=>{const b=document.querySelector('button[onclick*="print"],button[onclick*="Print"]');b?b.click():window.print();}},
+  {id:'va-open-set',   phrases:['إعدادات الصوت','إعدادات المساعد','فتح الإعدادات الصوتية'],icon:'🎙️',label:'إعدادات الصوت',action:()=>vaOpenFullSettings()},
+];
+
+/* ── حالة المساعد ── */
+let _VA = {
+  enabled: false, tts: true, continuous: false, lang: 'ar-IQ',
+  listening: false, recognition: null,
+  commands: [], dict: [], fingerprints: [], history: [],
+  pickerActive: false, pendingEl: null,
+  fpSession: null,  // جلسة تسجيل البصمة
+  currentTab: 'cmds'
+};
+
+/* ── تحميل من localStorage ── */
+function vaLoad(){
+  _VA.enabled    = localStorage.getItem(VA_KEYS.enabled) === '1';
+  _VA.lang       = localStorage.getItem(VA_KEYS.lang)    || 'ar-IQ';
+  _VA.tts        = localStorage.getItem(VA_KEYS.tts)     !== '0';
+  _VA.continuous = localStorage.getItem(VA_KEYS.continuous) === '1';
+  try{ _VA.commands    = JSON.parse(localStorage.getItem(VA_KEYS.commands)    ||'[]'); }catch(e){_VA.commands=[];}
+  try{ _VA.dict        = JSON.parse(localStorage.getItem(VA_KEYS.dict)        ||'[]'); }catch(e){_VA.dict=[];}
+  try{ _VA.fingerprints= JSON.parse(localStorage.getItem(VA_KEYS.fingerprints)||'[]'); }catch(e){_VA.fingerprints=[];}
+  try{ _VA.history     = JSON.parse(localStorage.getItem(VA_KEYS.history)     ||'[]'); }catch(e){_VA.history=[];}
+}
+
+function vaSave(key){
+  if(key==='commands'||!key)    localStorage.setItem(VA_KEYS.commands,    JSON.stringify(_VA.commands));
+  if(key==='dict'||!key)        localStorage.setItem(VA_KEYS.dict,        JSON.stringify(_VA.dict));
+  if(key==='fingerprints'||!key)localStorage.setItem(VA_KEYS.fingerprints,JSON.stringify(_VA.fingerprints));
+  if(key==='history'||!key)     localStorage.setItem(VA_KEYS.history,     JSON.stringify(_VA.history));
+}
+
+/* ── تهيئة ── */
+function vaInit(){
+  vaLoad();
+  vaApplyEnabled();
+  vaApplyToggles();
+  vaRenderAll();
+  // اختصار لوحة المفاتيح: Alt+M
+  document.addEventListener('keydown',e=>{
+    if(e.altKey&&e.key==='m'){e.preventDefault();vaToggleListen();}
+    if(e.key==='Escape'&&_VA.pickerActive) vaCancelPicker();
+  });
+}
+
+function vaApplyEnabled(){
+  const fab = document.getElementById('va-fab');
+  if(!fab) return;
+  if(_VA.enabled){ fab.classList.remove('va-hidden'); }
+  else { fab.classList.add('va-hidden'); document.getElementById('va-panel').classList.remove('va-open'); }
+  // sync toggle in settings card
+  const tog = document.getElementById('va-toggle-btn');
+  if(tog){ tog.classList.toggle('on', _VA.enabled); }
+}
+
+function vaApplyToggles(){
+  const ttsTog = document.getElementById('va-tts-toggle');
+  const conTog = document.getElementById('va-continuous-toggle');
+  if(ttsTog) ttsTog.classList.toggle('on', _VA.tts);
+  if(conTog) conTog.classList.toggle('on', _VA.continuous);
+  const langSel = document.getElementById('va-lang-sel');
+  if(langSel) langSel.value = _VA.lang;
+}
+
+/* ── تفعيل / تعطيل ── */
+window.vaToggleEnabled = function(){
+  _VA.enabled = !_VA.enabled;
+  localStorage.setItem(VA_KEYS.enabled, _VA.enabled?'1':'0');
+  vaApplyEnabled();
+  if(!_VA.enabled && _VA.listening) vaStopListen();
+  if(typeof showNotif==='function')
+    showNotif(_VA.enabled?'المساعد الصوتي':'إيقاف','المساعد الصوتي '+ (_VA.enabled?'مفعّل 🎙️':'متوقف ⏹️'), _VA.enabled?'success':'info');
+};
+
+window.vaToggleTTS = function(){
+  _VA.tts = !_VA.tts;
+  localStorage.setItem(VA_KEYS.tts, _VA.tts?'1':'0');
+  vaApplyToggles();
+};
+
+window.vaToggleContinuous = function(){
+  _VA.continuous = !_VA.continuous;
+  localStorage.setItem(VA_KEYS.continuous, _VA.continuous?'1':'0');
+  vaApplyToggles();
+};
+
+window.vaSaveLang = function(){
+  const s = document.getElementById('va-lang-sel');
+  if(s){ _VA.lang = s.value; localStorage.setItem(VA_KEYS.lang, _VA.lang); }
+};
+
+/* ═══════════════════════════════════════
+   🎙️ محرك التعرف على الكلام
+═══════════════════════════════════════ */
+function vaBuildRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition) return null;
+  const r = new SpeechRecognition();
+  r.lang = _VA.lang;
+  r.interimResults = true;
+  r.maxAlternatives = 5;
+  r.continuous = false;
+
+  // حقن الكلمات في قاموس البرنامج (grammar)
+  if(window.SpeechGrammarList){
+    const gl = new SpeechGrammarList();
+    const words = [
+      ..._VA.dict.map(d=>d.word),
+      ..._VA.fingerprints.map(f=>f.name),
+      ...VA_BUILTIN.flatMap(b=>b.phrases),
+      ..._VA.commands.map(c=>c.phrase)
+    ].filter(Boolean);
+    if(words.length){
+      gl.addFromString('#JSGF V1.0; grammar custom; public <custom> = '+words.join(' | ')+';', 1);
+      r.grammars = gl;
+    }
+  }
+
+  r.onresult = e=>{
+    let interim='', final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const transcript = (final||interim).trim();
+    vaUpdateTranscript(transcript, !final);
+    if(final) vaProcessCommand(final.trim());
+  };
+  r.onerror = e=>{
+    console.warn('[VA] error:', e.error);
+    if(e.error==='no-speech') vaSetStatus('لا يوجد صوت — حاول مجدداً');
+    else vaSetStatus('خطأ: '+e.error);
+    vaSetListeningUI(false);
+    _VA.listening = false;
+  };
+  r.onend = ()=>{
+    if(_VA.continuous && _VA.listening){ r.start(); return; }
+    vaSetListeningUI(false);
+    _VA.listening = false;
+  };
+  return r;
+}
+
+window.vaToggleListen = function(){
+  if(!_VA.enabled){
+    if(typeof showNotif==='function') showNotif('تنبيه','فعّل المساعد الصوتي أولاً من الإعدادات 🎙️','info');
+    return;
+  }
+  if(_VA.listening){ vaStopListen(); return; }
+  vaStartListen();
+};
+
+function vaStartListen(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    vaSetStatus('المتصفح لا يدعم التعرف على الكلام');
+    if(typeof showNotif==='function') showNotif('غير مدعوم','متصفحك لا يدعم التعرف الصوتي — استخدم Chrome','error');
+    return;
+  }
+  _VA.recognition = vaBuildRecognition();
+  if(!_VA.recognition) return;
+  try{
+    _VA.recognition.start();
+    _VA.listening = true;
+    vaSetListeningUI(true);
+    vaSetTranscript('أستمع...');
+    vaSetStatus('جاري الاستماع — تكلم الآن');
+    // فتح اللوحة تلقائياً
+    document.getElementById('va-panel').classList.add('va-open');
+  }catch(e){ console.error('[VA]',e); }
+}
+
+function vaStopListen(){
+  _VA.listening = false;
+  if(_VA.recognition){ try{_VA.recognition.stop();}catch(e){} _VA.recognition=null; }
+  vaSetListeningUI(false);
+  vaSetStatus('توقف الاستماع');
+}
+
+function vaSetListeningUI(on){
+  const fab  = document.getElementById('va-fab');
+  const wave = document.getElementById('va-wave');
+  const chip = document.getElementById('va-listening-chip');
+  const btn  = document.getElementById('va-listen-btn');
+  if(fab)  fab.classList.toggle('va-listening', on);
+  if(wave) wave.classList.toggle('va-idle', !on);
+  if(chip){ chip.classList.toggle('show', on); }
+  if(btn)  btn.textContent = on ? '⏹️ إيقاف' : '🎙️ استمع';
+}
+
+function vaSetTranscript(txt){ const el=document.getElementById('va-transcript'); if(el) el.textContent=txt; }
+function vaUpdateTranscript(txt, interim){
+  const el=document.getElementById('va-transcript');
+  if(!el) return;
+  el.textContent = txt || (interim?'...':'قل أمراً...');
+  el.style.opacity = interim ? '0.6' : '1';
+}
+function vaSetStatus(txt){ const el=document.getElementById('va-status'); if(el) el.textContent=txt; }
+
+/* ═══════════════════════════════════════
+   🧠 معالجة الأوامر
+═══════════════════════════════════════ */
+function vaProcessCommand(text){
+  const clean = text.trim().toLowerCase().replace(/[.,،؟?!]/g,'');
+  vaSetStatus('تم التعرف: ' + text);
+
+  // ① تحقق من البصمات الصوتية (مطابقة الأسماء)
+  let matched = vaMatchFingerprint(clean);
+
+  // ② مطابقة الأوامر المخصصة
+  let cmd = vaMatchCommand(_VA.commands, clean);
+
+  // ③ مطابقة الأوامر المدمجة
+  let builtin = vaMatchCommand(VA_BUILTIN.map(b=>({phrase:b.phrases.join('|'), _b:b, id:b.id})), clean, true);
+
+  if(cmd){
+    vaExecuteCustomCmd(cmd, text);
+  } else if(builtin){
+    vaExecuteBuiltin(builtin._b||builtin, text);
+  } else {
+    vaShowResult('⚠️ لا يوجد أمر مطابق: "'+text+'"', false);
+    vaAddHistory(text, null, false);
+  }
+
+  if(!_VA.continuous) vaStopListen();
+}
+
+function vaMatchCommand(cmds, text, isBuiltin){
+  let best = null, bestScore = 0;
+  for(const c of cmds){
+    const phrases = isBuiltin ? c.phrase : c.phrase;
+    const list = typeof phrases==='string' ? phrases.split('|') : [phrases];
+    for(const p of list){
+      const score = vaSimilarity(text, p.toLowerCase().trim());
+      if(score > bestScore && score >= 0.6){ bestScore=score; best=c; }
+    }
+  }
+  return best;
+}
+
+// مقارنة شبه جمل (Jaccard-like)
+function vaSimilarity(a, b){
+  if(a===b) return 1;
+  if(a.includes(b)||b.includes(a)) return 0.9;
+  const sa = new Set(a.split(' ')), sb = new Set(b.split(' '));
+  let inter=0;
+  for(const w of sa) if(sb.has(w)) inter++;
+  const union = sa.size+sb.size-inter;
+  return union===0 ? 0 : inter/union;
+}
+
+function vaMatchFingerprint(text){
+  for(const fp of _VA.fingerprints){
+    if(text.includes(fp.name.toLowerCase())) return fp;
+    for(const s of (fp.samples||[])){
+      if(vaSimilarity(text, s.toLowerCase()) >= 0.8) return fp;
+    }
+  }
+  return null;
+}
+
+function vaExecuteCustomCmd(cmd, text){
+  const el = document.querySelector(cmd.selector);
+  if(!el){ vaShowResult('⚠️ العنصر لم يُعثر عليه (ربما تغيرت الصفحة)', false); return; }
+  try{
+    if(cmd.action==='click')        el.click();
+    else if(cmd.action==='focus')   { el.focus(); el.select&&el.select(); }
+    else if(cmd.action==='fill')    { el.value=cmd.fillValue||''; el.dispatchEvent(new Event('input',{bubbles:true})); el.focus(); }
+    else if(cmd.action==='toggle')  { el.click(); }
+    vaShowResult('✅ تم تنفيذ: '+cmd.phrase, true);
+    vaAddHistory(text, cmd.phrase, true);
+    if(_VA.tts) vaSpeak(cmd.phrase);
+  }catch(e){ vaShowResult('❌ خطأ في التنفيذ', false); }
+}
+
+function vaExecuteBuiltin(b, text){
+  try{
+    b.action();
+    vaShowResult('✅ '+b.label, true);
+    vaAddHistory(text, b.label, true);
+    if(_VA.tts) vaSpeak(b.label);
+  }catch(e){ vaShowResult('❌ خطأ', false); }
+}
+
+function vaShowResult(msg, ok){
+  const el=document.getElementById('va-cmd-result');
+  if(!el) return;
+  el.textContent=msg;
+  el.className='va-cmd-result '+(ok?'va-ok':'va-err');
+  el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},3000);
+}
+
+/* ── Text-to-Speech ── */
+function vaSpeak(text){
+  if(!_VA.tts||!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = _VA.lang; u.rate=1; u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+/* ── السجل ── */
+function vaAddHistory(input, matched, ok){
+  _VA.history.unshift({ input, matched, ok, t: Date.now() });
+  if(_VA.history.length>100) _VA.history.pop();
+  vaSave('history');
+  vaRenderHistory();
+}
+
+window.vaClearHistory = function(){
+  _VA.history=[];
+  vaSave('history');
+  vaRenderHistory();
+};
+
+/* ═══════════════════════════════════════
+   🎯 وضع اختيار العنصر (Picker Mode)
+═══════════════════════════════════════ */
+window.vaStartPicker = function(){
+  // إغلاق المودال مؤقتاً
+  document.getElementById('va-settings-modal').classList.remove('va-open');
+  document.getElementById('va-bind-modal').style.display='none';
+
+  _VA.pickerActive = true;
+  document.body.classList.add('va-picker-active');
+  document.getElementById('va-picker-bar').classList.add('va-active');
+  document.addEventListener('click', vaPickerClick, true);
+};
+
+function vaPickerClick(e){
+  if(e.target.closest('#va-picker-bar')) return;
+  e.preventDefault(); e.stopPropagation();
+  _VA.pendingEl = e.target;
+  vaCancelPicker();
+  vaShowBindModal(e.target);
+}
+
+window.vaCancelPicker = function(){
+  _VA.pickerActive = false;
+  document.body.classList.remove('va-picker-active');
+  document.getElementById('va-picker-bar').classList.remove('va-active');
+  document.removeEventListener('click', vaPickerClick, true);
+};
+
+/* ── مودال الربط ── */
+function vaShowBindModal(el){
+  const info = vaDescribeEl(el);
+  document.getElementById('va-bind-target-info').innerHTML =
+    '<b>العنصر:</b> '+info.tag+'<br>'+
+    (info.text?'<b>النص:</b> '+info.text+'<br>':'')+
+    (info.id?'<b>ID:</b> '+info.id+'<br>':'')+
+    '<b>المحدد:</b> <code style="font-size:10px;opacity:0.7">'+info.selector+'</code>';
+  document.getElementById('va-bind-phrase').value = info.text||'';
+  document.getElementById('va-bind-action').value = info.isInput?'focus':'click';
+  document.getElementById('va-bind-fill-row').style.display = info.isInput?'block':'none';
+  document.getElementById('va-bind-modal').style.display='flex';
+}
+
+window.vaBindActionChange = function(){
+  const act = document.getElementById('va-bind-action').value;
+  document.getElementById('va-bind-fill-row').style.display = act==='fill'?'block':'none';
+};
+
+window.vaCancelBind = function(){
+  document.getElementById('va-bind-modal').style.display='none';
+  _VA.pendingEl = null;
+};
+
+window.vaConfirmBind = function(){
+  const phrase = (document.getElementById('va-bind-phrase').value||'').trim();
+  if(!phrase){ alert('أدخل الأمر الصوتي أولاً'); return; }
+  if(!_VA.pendingEl){ vaCancelBind(); return; }
+  const info  = vaDescribeEl(_VA.pendingEl);
+  const action= document.getElementById('va-bind-action').value;
+  const fill  = document.getElementById('va-bind-fill-value').value;
+  const cmd = { id:'cmd_'+Date.now(), phrase, selector:info.selector, label:info.text||info.tag, action, fillValue:fill, icon: info.isInput?'⌨️':'🖱️' };
+  _VA.commands.push(cmd);
+  vaSave('commands');
+  vaRenderAll();
+  vaCancelBind();
+  document.getElementById('va-settings-modal').classList.add('va-open');
+  if(typeof showNotif==='function') showNotif('تم الربط','✅ الأمر "'+phrase+'" مربوط بـ "'+cmd.label+'"','success');
+};
+
+/* ── توصيف العنصر وإنشاء CSS selector ── */
+function vaDescribeEl(el){
+  const tag  = el.tagName.toLowerCase();
+  const text = (el.textContent||el.value||el.placeholder||el.title||el.getAttribute('aria-label')||'').trim().slice(0,50);
+  const id   = el.id;
+  const isInput = ['input','textarea','select'].includes(tag);
+  let selector = tag;
+  if(id) selector = '#'+id;
+  else if(el.className){
+    const cls = el.className.toString().trim().split(/\s+/).filter(c=>c&&!c.startsWith('va-')).slice(0,3).join('.');
+    if(cls) selector = tag+'.'+cls;
+  }
+  // إذا كان المحدد غير فريد نضيف nth-of-type
+  if(!id){
+    try{
+      const els = document.querySelectorAll(selector);
+      if(els.length>1){
+        const idx = Array.from(els).indexOf(el);
+        if(idx>=0) selector += ':nth-of-type('+(idx+1)+')';
+      }
+    }catch(e){}
+  }
+  return {tag, text, id, selector, isInput};
+}
+
+/* ═══════════════════════════════════════
+   📖 القاموس
+═══════════════════════════════════════ */
+window.vaAddDictWord = function(){
+  const inp = document.getElementById('va-dict-word');
+  if(!inp||!inp.value.trim()) return;
+  _VA.dict.push({word:inp.value.trim(), cat:'other', id:'d'+Date.now()});
+  inp.value='';
+  vaSave('dict');
+  vaRenderDict();
+};
+
+window.vaModalAddDict = function(){
+  const w = (document.getElementById('va-modal-dict-word')||{}).value||'';
+  const c = (document.getElementById('va-modal-dict-cat')||{}).value||'other';
+  if(!w.trim()) return;
+  _VA.dict.push({word:w.trim(), cat:c, id:'d'+Date.now()});
+  document.getElementById('va-modal-dict-word').value='';
+  vaSave('dict');
+  vaRenderDict();
+};
+
+window.vaRemoveDictWord = function(id){
+  _VA.dict = _VA.dict.filter(d=>d.id!==id);
+  vaSave('dict');
+  vaRenderDict();
+};
+
+/* ═══════════════════════════════════════
+   🎤 البصمة الصوتية
+═══════════════════════════════════════ */
+let _fpRec = null;
+
+function vaStartFPSession(nameInputId, statusId, samplesId, btnId){
+  const name = (document.getElementById(nameInputId)||{}).value||'';
+  if(!name.trim()){
+    const s=document.getElementById(statusId); if(s) s.textContent='أدخل الاسم أولاً';
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ alert('المتصفح لا يدعم التعرف الصوتي'); return; }
+
+  const btn = document.getElementById(btnId);
+  if(btn) btn.classList.add('recording');
+
+  let samples = [], sampleCount = 0;
+  const MAX = 3;
+
+  function nextSample(){
+    if(sampleCount >= MAX){ finalizeFP(name, samples, statusId, samplesId, btnId); return; }
+    const r = new SpeechRecognition();
+    r.lang = _VA.lang; r.interimResults=false; r.maxAlternatives=1;
+    const s=document.getElementById(statusId);
+    if(s) s.textContent = '🎙️ قل الاسم ('+((sampleCount+1))+'/'+MAX+')...';
+    r.onresult = ev=>{
+      const t = ev.results[0][0].transcript.trim();
+      samples.push(t); sampleCount++;
+      vaRenderFPSamples(samples, samplesId);
+      if(sampleCount<MAX) setTimeout(nextSample,800);
+      else nextSample();
+    };
+    r.onerror = ()=>{ const s2=document.getElementById(statusId); if(s2) s2.textContent='❌ خطأ في التسجيل — حاول مجدداً'; if(btn) btn.classList.remove('recording'); };
+    r.onend = ()=>{ if(sampleCount<MAX && _fpRec===r) setTimeout(nextSample,400); };
+    _fpRec = r;
+    r.start();
+  }
+  nextSample();
+}
+
+function finalizeFP(name, samples, statusId, samplesId, btnId){
+  const btn = document.getElementById(btnId);
+  if(btn) btn.classList.remove('recording');
+  const s = document.getElementById(statusId);
+  // تحقق إذا كان الاسم موجوداً
+  const existing = _VA.fingerprints.find(f=>f.name===name);
+  if(existing){ existing.samples = [...(existing.samples||[]), ...samples]; }
+  else { _VA.fingerprints.push({id:'fp'+Date.now(), name, samples}); }
+  vaSave('fingerprints');
+  // أضف للقاموس تلقائياً
+  if(!_VA.dict.find(d=>d.word===name)){
+    _VA.dict.push({word:name, cat:'name', id:'d'+Date.now()});
+    vaSave('dict');
+  }
+  if(s) s.textContent = '✅ تم حفظ البصمة الصوتية للاسم "'+name+'"';
+  vaRenderAll();
+  if(typeof showNotif==='function') showNotif('تم التسجيل','✅ بصمة صوتية محفوظة: '+name,'success');
+}
+
+function vaRenderFPSamples(samples, containerId){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  c.innerHTML = samples.map((s,i)=>'<span style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--primary)">✓ عينة '+(i+1)+': '+s+'</span>').join('');
+}
+
+window.vaStartFingerprint = function(){ vaStartFPSession('va-fp-name-input','va-fp-status','va-fp-samples-preview','va-fp-rec-btn'); };
+window.vaModalStartFP     = function(){ vaStartFPSession('va-modal-fp-name','va-modal-fp-status','va-modal-fp-samples','va-modal-fp-btn'); };
+
+window.vaRemoveFP = function(id){
+  _VA.fingerprints = _VA.fingerprints.filter(f=>f.id!==id);
+  vaSave('fingerprints');
+  vaRenderFP();
+};
+
+/* ═══════════════════════════════════════
+   🖥️ واجهة المستخدم — Render
+═══════════════════════════════════════ */
+function vaRenderAll(){
+  vaRenderCmds();
+  vaRenderBuiltin();
+  vaRenderDict();
+  vaRenderFP();
+  vaRenderHistory();
+}
+
+function vaRenderCmds(){
+  const targets = ['va-modal-cmds-list'];
+  targets.forEach(id=>{
+    const c=document.getElementById(id); if(!c) return;
+    if(!_VA.commands.length){ c.innerHTML='<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.35);font-size:12px">لا توجد أوامر مضافة بعد</div>'; return; }
+    c.innerHTML = _VA.commands.map(cmd=>`
+      <div class="va-cmd-card">
+        <div class="va-cmd-icon">${cmd.icon||'🎙️'}</div>
+        <div class="va-cmd-info">
+          <div class="va-cmd-phrase">"${cmd.phrase}"</div>
+          <div class="va-cmd-target">${vaActionLabel(cmd.action)} · ${cmd.label||cmd.selector}</div>
+        </div>
+        <button class="va-cmd-del" onclick="vaDeleteCmd('${cmd.id}')">✕</button>
+      </div>`).join('');
+  });
+}
+
+function vaActionLabel(a){ return {click:'نقر',focus:'تركيز',fill:'ملء',toggle:'تبديل'}[a]||a; }
+
+window.vaDeleteCmd = function(id){
+  _VA.commands = _VA.commands.filter(c=>c.id!==id);
+  vaSave('commands');
+  vaRenderCmds();
+};
+
+function vaRenderBuiltin(){
+  const targets = ['va-modal-builtin-list'];
+  targets.forEach(id=>{
+    const c=document.getElementById(id); if(!c) return;
+    c.innerHTML = VA_BUILTIN.map(b=>`
+      <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:8px 10px;font-size:11px">
+        <div style="font-weight:800;color:var(--primary);margin-bottom:3px">${b.icon} ${b.label}</div>
+        <div style="color:rgba(255,255,255,0.4);font-size:10px">${b.phrases[0]}</div>
+      </div>`).join('');
+  });
+}
+
+function vaRenderDict(){
+  const targets = ['va-modal-dict-list'];
+  targets.forEach(id=>{
+    const c=document.getElementById(id); if(!c) return;
+    if(!_VA.dict.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">القاموس فارغ</div>'; return; }
+    const catIcons = {name:'👤',test:'🔬',cmd:'🗣️',other:'📝'};
+    c.innerHTML = _VA.dict.map(d=>`
+      <div class="va-cmd-card" style="padding:8px 12px">
+        <span style="font-size:16px">${catIcons[d.cat]||'📝'}</span>
+        <div class="va-cmd-info"><div class="va-cmd-phrase" style="font-size:13px">${d.word}</div><div class="va-cmd-target">${{name:'اسم شخص',test:'تحليل طبي',cmd:'أمر',other:'أخرى'}[d.cat]||'أخرى'}</div></div>
+        <button class="va-cmd-del" onclick="vaRemoveDictWord('${d.id}')">✕</button>
+      </div>`).join('');
+  });
+}
+
+function vaRenderFP(){
+  const targets = ['va-modal-fp-list'];
+  targets.forEach(id=>{
+    const c=document.getElementById(id); if(!c) return;
+    if(!_VA.fingerprints.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">لا توجد بصمات مسجلة</div>'; return; }
+    c.innerHTML = _VA.fingerprints.map(fp=>`
+      <div class="va-fp-card">
+        <span style="font-size:22px">🎤</span>
+        <div style="flex:1">
+          <div class="va-fp-name">${fp.name}</div>
+          <div class="va-fp-samples">${(fp.samples||[]).length} عينة صوتية</div>
+          <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">
+            ${(fp.samples||[]).map((s,i)=>'<span style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--primary)">'+s+'</span>').join('')}
+          </div>
+        </div>
+        <button class="va-cmd-del" onclick="vaRemoveFP('${fp.id}')">✕</button>
+      </div>`).join('');
+  });
+}
+
+function vaRenderHistory(){
+  const targets = ['va-modal-hist-list'];
+  targets.forEach(id=>{
+    const c=document.getElementById(id); if(!c) return;
+    if(!_VA.history.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">لا يوجد سجل بعد</div>'; return; }
+    c.innerHTML = _VA.history.slice(0,60).map(h=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px">
+        <span>${h.ok?'✅':'⚠️'}</span>
+        <div style="flex:1">
+          <div style="color:#fff">${h.input}</div>
+          ${h.matched?'<div style="color:rgba(255,255,255,0.4);font-size:10px">→ '+h.matched+'</div>':''}
+        </div>
+        <div style="color:rgba(255,255,255,0.3);font-size:9px;white-space:nowrap">${new Date(h.t).toLocaleTimeString('ar-IQ')}</div>
+      </div>`).join('');
+  });
+}
+
+/* ═══════════════════════════════════════
+   🖥️ مودال الإعدادات الكاملة
+═══════════════════════════════════════ */
+window.vaOpenFullSettings = function(){
+  vaRenderAll();
+  document.getElementById('va-settings-modal').classList.add('va-open');
+  vaModalTab('cmds', document.getElementById('va-tab-cmds'));
+};
+
+window.vaCloseFullSettings = function(){
+  document.getElementById('va-settings-modal').classList.remove('va-open');
+};
+
+window.vaModalTab = function(name, btn){
+  _VA.currentTab = name;
+  ['cmds','dict','fp','hist'].forEach(t=>{
+    const el=document.getElementById('va-modal-'+t); if(el) el.style.display=(t===name?'block':'none');
+    const tb=document.getElementById('va-tab-'+t);
+    if(tb){
+      const active = t===name;
+      tb.style.background = active?'rgba(139,63,255,0.2)':'transparent';
+      tb.style.borderColor = active?'rgba(139,63,255,0.4)':'transparent';
+      tb.style.color       = active?'#a78bfa':'rgba(255,255,255,0.4)';
+    }
+  });
+  if(name==='fp')   vaRenderFP();
+  if(name==='hist') vaRenderHistory();
+  if(name==='dict') vaRenderDict();
+  if(name==='cmds') vaRenderCmds();
+};
+
+window.vaClosePanel = function(){
+  document.getElementById('va-panel').classList.remove('va-open');
+  if(_VA.listening) vaStopListen();
+};
+
+window.vaResetAll = function(){
+  if(!confirm('سيتم مسح جميع إعدادات المساعد الصوتي. متأكد؟')) return;
+  Object.values(VA_KEYS).forEach(k=>localStorage.removeItem(k));
+  vaLoad(); vaApplyEnabled(); vaApplyToggles(); vaRenderAll();
+  if(typeof showNotif==='function') showNotif('تم المسح','تم مسح جميع إعدادات المساعد الصوتي','info');
+};
+
+/* ── تهيئة عند تحميل الصفحة ── */
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', vaInit);
+else vaInit();
+
+})();
+</script>
+
 </body>
 </html>
 
@@ -25695,6 +26565,7 @@ if (typeof pages !== 'undefined' && !pages['esr']) {
   document.addEventListener('DOMContentLoaded',function(){
     restoreAll();
     setTimeout(restoreAll,600);
+    setTimeout(restoreAll,2000);
   });
 
   if(window.MutationObserver){
@@ -26321,1769 +27192,3 @@ async function _pmSendFile() {
   }
 }
 </script>
-
-<style>
-/* ══════════════════════════════════════════════
-   🎙️ VOICE ASSISTANT — LOCAL (NO API)
-══════════════════════════════════════════════ */
-#va-fab {
-  position: fixed;
-  bottom: 26px; left: 26px;
-  z-index: 2147483647;
-  width: 58px; height: 58px;
-  border-radius: 50%;
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
-  background: linear-gradient(135deg,#00d4ff,#7b2fff);
-  box-shadow: 0 4px 18px rgba(0,212,255,0.5);
-  transition: transform 0.2s; outline: none;
-  user-select: none;
-  pointer-events: all !important;
-}
-#va-fab:hover { transform: scale(1.1); }
-#va-fab.va-on {
-  background: linear-gradient(135deg,#ff2244,#ff8800);
-  animation: va-pulse 0.9s infinite;
-  box-shadow: 0 4px 22px rgba(255,34,68,0.7);
-}
-@keyframes va-pulse {
-  0%,100%{ transform:scale(1); }
-  50%    { transform:scale(1.13); }
-}
-#va-box {
-  position: fixed;
-  bottom: 94px; left: 14px;
-  z-index: 2147483646;
-  width: 298px;
-  background: linear-gradient(145deg,#070d1c,#0d1528);
-  border: 1.5px solid rgba(0,212,255,0.3);
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.85);
-  font-family: 'Cairo',sans-serif;
-  direction: rtl;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-}
-#va-box.va-open { display:flex; animation: va-up 0.2s ease; }
-@keyframes va-up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-#va-hdr {
-  background: rgba(0,212,255,0.1);
-  padding: 10px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(0,212,255,0.12);
-}
-#va-hdr-title { font-size:13px; font-weight:800; color:#00d4ff; }
-#va-hdr-ctx   { font-size:10px; color:rgba(255,255,255,0.45); background:rgba(255,255,255,0.06); border-radius:5px; padding:2px 7px; }
-#va-hdr-x     { background:none; border:none; color:rgba(255,255,255,0.35); font-size:17px; cursor:pointer; line-height:1; padding:0; }
-#va-hdr-x:hover { color:#ff2244; }
-#va-wave {
-  padding: 10px 14px 4px;
-  display: flex; align-items: center; gap:8px;
-  min-height: 42px;
-}
-#va-wave-bars {
-  display:flex; gap:3px; align-items:flex-end; height:28px;
-}
-#va-wave-bars span {
-  display:inline-block; width:4px; border-radius:2px;
-  background: rgba(0,212,255,0.4); height:6px;
-  transition: height 0.1s;
-}
-#va-wave.active #va-wave-bars span { background:#00d4ff; }
-#va-heard {
-  font-size:12px; color:rgba(255,255,255,0.6);
-  flex:1; line-height:1.4;
-}
-#va-heard b { color:#00d4ff; }
-#va-reply {
-  padding: 8px 14px;
-  font-size:11.5px; color:rgba(255,255,255,0.65);
-  min-height: 34px; line-height:1.6;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-#va-reply .ok  { color:#00e87a; font-weight:700; }
-#va-reply .err { color:#ff6680; }
-#va-reply .inf { color:#00d4ff; }
-#va-hint {
-  padding: 7px 14px 10px;
-  font-size:10px; color:rgba(255,255,255,0.28);
-  border-top: 1px solid rgba(255,255,255,0.04);
-  line-height:1.7;
-}
-/* light mode */
-body.light-mode #va-box {
-  background:linear-gradient(145deg,#fff,#f0f4f8);
-  border-color:#b0bfcc;
-}
-body.light-mode #va-hdr { background:rgba(0,95,153,0.07); border-bottom-color:#dde4ec; }
-body.light-mode #va-hdr-title { color:#005f99; }
-body.light-mode #va-heard { color:#2d3a4a; }
-body.light-mode #va-heard b { color:#005f99; }
-body.light-mode #va-reply { color:#444; border-top-color:#dde4ec; }
-body.light-mode #va-hint  { color:#aaa; border-top-color:#dde4ec; }
-body.light-mode #va-wave-bars span { background:rgba(0,95,153,0.35); }
-body.light-mode #va-wave.active #va-wave-bars span { background:#005f99; }
-</style>
-
-<!-- زر المساعد -->
-<button id="va-fab" onclick="VA.toggle()" title="المساعد الصوتي 🎙️">🎙️</button>
-
-<!-- لوحة المساعد -->
-<div id="va-box">
-  <div id="va-hdr">
-    <span id="va-hdr-title">🎙️ المساعد الصوتي</span>
-    <span id="va-hdr-ctx">—</span>
-    <button id="va-hdr-x" onclick="VA.close()">×</button>
-  </div>
-  <div id="va-wave">
-    <div id="va-wave-bars">
-      <span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span>
-    </div>
-    <div id="va-heard">اضغط الزر وتكلم...</div>
-  </div>
-  <div id="va-reply"><span style="color:rgba(255,255,255,0.2)">سأنفذ أوامرك ✨</span></div>
-  <div id="va-hint" id="va-hint-box"></div>
-</div>
-
-<script>
-// ══════════════════════════════════════════════════════════════
-// 🎙️ MEDLAB VOICE ASSISTANT — FULL REBUILD
-// ══════════════════════════════════════════════════════════════
-const VA = (function(){
-
-  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let _rec = null, _on = false, _waveTimer = null, _restartTimer = null;
-  let _idleTimer = null;         // ① مؤقت الخمول — يوقف بعد 15 ثانية بدون أوامر
-  const IDLE_TIMEOUT = 15000;   // 15 ثانية
-
-  // وضع الصمت — لا يرد صوتياً
-  function _isSilent(){
-    const v = localStorage.getItem('va_silent');
-    return v === '1';
-  }
-  function _setSilent(val){
-    localStorage.setItem('va_silent', val ? '1' : '0');
-    _applySilentState(val);
-  }
-  function _applySilentState(silent){
-    const lbl = document.getElementById('va-silent-label');
-    const btn = document.getElementById('va-silent-btn');
-    const dot = document.getElementById('va-silent-dot');
-    if(lbl){ lbl.textContent = silent ? '\u{1F507} صامت' : '\u{1F50A} يتكلم'; lbl.style.color = silent ? 'var(--warning)' : 'var(--success)'; }
-    if(btn){ btn.style.background = silent ? 'rgba(255,204,0,0.3)' : 'linear-gradient(90deg,var(--success),#00c470)'; btn.style.borderColor = silent ? 'rgba(255,204,0,0.5)' : 'rgba(0,232,122,0.4)'; }
-    if(dot){ dot.style.right = silent ? 'calc(100% - 24px)' : '2px'; }
-    if(silent && window.speechSynthesis) window.speechSynthesis.cancel();
-  }
-
-  // اعادة ضبط مؤقت الخمول (يقرأ المهلة من الاعدادات)
-  function _resetIdleTimer(){
-    clearTimeout(_idleTimer);
-    if(!_on) return;
-    const stored = localStorage.getItem('va_idle_timeout');
-    const timeout = stored !== null ? parseInt(stored) : IDLE_TIMEOUT;
-    if(timeout === 0) return; // بدون إيقاف تلقائي
-    _idleTimer = setTimeout(()=>{
-      if(_on){
-        const heard = document.getElementById('va-heard');
-        if(heard) heard.innerHTML = '<span style="color:var(--warning)">⏱️ انتهت مهلة الانتظار...</span>';
-        setTimeout(()=>{ stop(); }, 800);
-      }
-    }, timeout);
-  }
-
-  // ══════════════════════════════════════════════════════
-  // ① قاموس البصمات المخصصة — يُقرأ من localStorage
-  // ══════════════════════════════════════════════════════
-  function _loadCustomDict(){
-    try{ return JSON.parse(localStorage.getItem('va_custom_dict')||'{}'); }
-    catch(e){ return {}; }
-  }
-  function _saveCustomDict(d){
-    localStorage.setItem('va_custom_dict', JSON.stringify(d));
-  }
-
-  // ② حالة التفعيل
-  function _isEnabled(){
-    const v = localStorage.getItem('va_enabled');
-    return v === null ? true : v === '1';
-  }
-  function _setEnabled(val){
-    localStorage.setItem('va_enabled', val ? '1' : '0');
-    _applyEnabledState(val);
-  }
-  function _applyEnabledState(enabled){
-    const fab = document.getElementById('va-fab');
-    if(fab) fab.style.display = enabled ? '' : 'none';
-    const lbl = document.getElementById('va-enabled-label');
-    const btn = document.getElementById('va-toggle-btn');
-    const dot = document.getElementById('va-toggle-dot');
-    if(lbl){ lbl.textContent = enabled ? 'مفعّل ✅' : 'موقوف ❌'; lbl.style.color = enabled ? 'var(--success)' : 'var(--danger)'; }
-    if(btn){ btn.style.background = enabled ? 'linear-gradient(90deg,var(--success),#00c470)' : 'rgba(255,34,68,0.3)'; btn.style.borderColor = enabled ? 'rgba(0,232,122,0.4)' : 'rgba(255,34,68,0.4)'; }
-    if(dot){ dot.style.right = enabled ? '2px' : 'calc(100% - 24px)'; }
-    if(!enabled && _on) stop();
-  }
-
-  // ══════════════════════════════════════════════════════
-  // كشف السياق الحالي — يعتمد على القسم النشط في DOM
-  // ══════════════════════════════════════════════════════
-  function _ctx(){
-    // 1) نافذة الويزارد (مريض جديد)
-    const wiz = document.getElementById('m-wizard');
-    if(wiz && (wiz.style.display==='flex' || wiz.classList.contains('open'))){
-      if(typeof wizStep !== 'undefined'){
-        if(wizStep === 1) return 'patient';
-        if(wizStep === 2) return 'tests';
-      }
-      return 'patient';
-    }
-    // 2) نافذة تحليل البول
-    const uaModal = document.getElementById('m-ua');
-    if(uaModal && uaModal.style.display==='flex') return 'ua';
-    // 3) نافذة تحليل البراز
-    const stoolModal = document.getElementById('m-stool-exam');
-    if(stoolModal && stoolModal.style.display==='flex') return 'stool';
-    // 4) نافذة تحليل المني
-    const semenModal = document.getElementById('m-semen-exam');
-    if(semenModal && semenModal.style.display==='flex') return 'semen';
-    // 5) قسم إدخال النتائج نشط
-    const rs = document.getElementById('sec-results');
-    if(rs && rs.classList.contains('active')) return 'results';
-    // 5b) نافذة عرض النتائج (m-view-results) مفتوحة
-    const vrModal = document.getElementById('m-view-results');
-    if(vrModal && (vrModal.style.display==='flex' || vrModal.classList.contains('open'))) return 'viewresults';
-    // 6) قسم المرضى نشط
-    const pts = document.getElementById('sec-patients');
-    if(pts && pts.classList.contains('active')) return 'patients';
-    // 7) قسم الطلبات
-    const req = document.getElementById('sec-requests');
-    if(req && req.classList.contains('active')) return 'requests';
-    return 'general';
-  }
-
-  // ══════════════════════════════════════════════════════
-  // قاموس التحاليل
-  // ══════════════════════════════════════════════════════
-  const TEST_MAP = {
-    // CBC - صورة دم
-    'cbc':'CBC','سي بي سي':'CBC','دم كامل':'CBC','صورة دم':'CBC','صورة دم كاملة':'CBC',
-    'سيبيسي':'CBC','سي بي سي':'CBC','تعداد دم':'CBC','عد دم':'CBC','عدد الدم':'CBC',
-    'سي بي':'CBC','سيبي':'CBC','صي بي سي':'CBC',
-    // HGB - هيموغلوبين
-    'hgb':'HGB','هيموغلوبين':'HGB','hemoglobin':'HGB','هيموجلوبين':'HGB',
-    'هيموكلوبين':'HGB','هيموغلبين':'HGB','خضاب الدم':'HGB','الهيموغلوبين':'HGB',
-    // WBC - كريات بيضاء
-    'wbc':'WBC','كريات بيضاء':'WBC','خلايا بيضاء':'WBC','كريات بيض':'WBC',
-    'خلية بيضاء':'WBC','كرات بيضاء':'WBC','الكريات البيضاء':'WBC',
-    'دبليو بي سي':'WBC','دبليوبيسي':'WBC',
-    // RBC - كريات حمراء
-    'rbc':'RBC','كريات حمراء':'RBC','خلايا حمراء':'RBC','كرات حمراء':'RBC',
-    'كريات حمر':'RBC','الكريات الحمراء':'RBC',
-    'ار بي سي':'RBC','اربيسي':'RBC','ار بي':'RBC','آربيسي':'RBC',
-    'ار بي سى':'RBC','ربي سي':'RBC',
-    // PLT - صفائح
-    'plt':'PLT','صفائح':'PLT','platelets':'PLT','صفيحات':'PLT',
-    'الصفائح':'PLT','الصفيحات الدموية':'PLT','صفائح دموية':'PLT',
-    // HCT - هيماتوكريت
-    'hct':'HCT','هيماتوكريت':'HCT','هيمتوكريت':'HCT','الهيماتوكريت':'HCT',
-    // ESR - ترسيب
-    'esr':'ESR','ايزر':'ESR','ترسب':'ESR','ترسيب':'ESR',
-    'ترسب الدم':'ESR','سرعة الترسب':'ESR','سرعة الترسيب':'ESR',
-    // MCV, MCH, MCHC, RDW
-    'mcv':'MCV','mch':'MCH','mchc':'MCHC','rdw':'RDW',
-    // UREA - يوريا
-    'urea':'UREA','يوريا':'UREA','يوريه':'UREA','اليوريا':'UREA',
-    'بولة':'UREA','نيتروجين اليوريا':'UREA','bun':'UREA',
-    // CREATININE
-    'creatinine':'CREAT','كرياتينين':'CREAT','creat':'CREAT',
-    'كرياتنين':'CREAT','كرياتينين الدم':'CREAT','الكرياتينين':'CREAT',
-    // URIC ACID
-    'uric acid':'UA','حمض يوريك':'UA','يوريك':'UA',
-    'حمض البول':'UA','حمض اليوريك':'UA','يوريك اسيد':'UA',
-    // eGFR
-    'egfr':'EGFR','تصفية الكلى':'EGFR','وظائف الكلى':'EGFR',
-    // ALT/AST - وظائف الكبد
-    'alt':'ALT','sgpt':'ALT','ast':'AST','sgot':'AST',
-    'البديل':'ALT','انزيم الكبد':'ALT','الانزيمات الكبدية':'ALT',
-    'اس جي بي تي':'ALT','اس جي او تي':'AST',
-    // ALP, GGT
-    'alp':'ALP','ggt':'GGT',
-    // BILIRUBIN
-    'tbil':'TBIL','bilirubin':'TBIL','بيليروبين':'TBIL',
-    'بيليروبين كلي':'TBIL','بلروبين':'TBIL','البيليروبين':'TBIL',
-    'dbil':'DBIL','بيليروبين مباشر':'DBIL',
-    'ibil':'IBIL','بيليروبين غير مباشر':'IBIL',
-    // TP, ALB
-    'tp':'TP','albumin':'ALB','البومين':'ALB','alb':'ALB',
-    'بروتين':'TP','البروتين الكلي':'TP','الالبومين':'ALB',
-    // LDH
-    'ldh':'LDH',
-    // GLUCOSE - سكر
-    'glucose':'GLU','سكر':'GLU','جلوكوز':'GLU','كلوكوز':'GLU',
-    'سكر عشوائي':'GLU','سكر في الدم':'GLU',
-    'fbs':'FBS','سكر صائم':'FBS','سكر الصيام':'FBS','صائم':'FBS',
-    'rbs':'RBS','سكر عشوائي':'RBS','سكر راندوم':'RBS',
-    'hba1c':'HBA1C','a1c':'HBA1C','سكر تراكمي':'HBA1C',
-    'هيموغلوبين سكري':'HBA1C','اي ون سي':'HBA1C','a1 c':'HBA1C',
-    // INSULIN
-    'insulin':'INSU-F','انسولين':'INSU-F','الانسولين':'INSU-F',
-    // CHOLESTEROL - كوليسترول
-    'cholesterol':'CHOL','كوليسترول':'CHOL','chol':'CHOL',
-    'كولسترول':'CHOL','الكوليسترول':'CHOL','كولستيرول':'CHOL',
-    // TRIGLYCERIDES
-    'triglycerides':'TG','tg':'TG','تريغليسيريد':'TG','دهون ثلاثية':'TG','تي جي':'TG',
-    'ثلاثي الغليسريد':'TG','تريجلسريد':'TG','تريغليسرايد':'TG','الدهون الثلاثية':'TG',
-    // HDL, LDL, VLDL
-    'hdl':'HDL','ldl':'LDL','vldl':'VLDL',
-    'اتش دي ال':'HDL','ال دي ال':'LDL',
-    'دهن جيد':'HDL','دهن نافع':'HDL','دهن حميد':'HDL',
-    'دهن ضار':'LDL','دهن سيء':'LDL',
-    // TSH - الغدة الدرقية
-    'tsh':'TSH','تي اس اتش':'TSH','تي إس إتش':'TSH','تي اس ايتش':'TSH',
-    'الغدة الدرقية':'TSH','هرمون الغدة':'TSH','درقية':'TSH',
-    't4':'TT4','تي فور':'TT4','t3':'TT3','تي ثري':'TT3',
-    'ft4':'FT4','اف تي فور':'FT4','ft3':'FT3','اف تي ثري':'FT3',
-    'ثيروكسين':'TT4','ثيروكسين حر':'FT4',
-    // CORTISOL
-    'cortisol':'CORT','كورتيزول':'CORT','كورتيزول الدم':'CORT',
-    'هرمون التوتر':'CORT','الكورتيزول':'CORT',
-    // PROGESTERONE
-    'progesterone':'PROG','بروجسترون':'PROG','بروجسترون':'PROG',
-    'هرمون الحمل':'PROG','البروجسترون':'PROG',
-    // TESTOSTERONE
-    'testosterone':'TEST','تيستوستيرون':'TEST','تستوستيرون':'TEST',
-    'هرمون الذكورة':'TEST','التيستوستيرون':'TEST',
-    // FSH, LH, PROLACTIN, ESTRADIOL
-    'fsh':'FSH','اف اس اتش':'FSH','هرمون البصيلات':'FSH',
-    'lh':'LH','اتش ال':'LH','هرمون ال اتش':'LH',
-    'prolactin':'PRL','برولاكتين':'PRL','prl':'PRL','البرولاكتين':'PRL',
-    'estradiol':'E2','استراديول':'E2','استروجين':'E2','الاستراديول':'E2',
-    // HCG - حمل
-    'hcg':'β-HCG','حمل':'β-HCG','بيتا اتش سي جي':'β-HCG','اختبار حمل':'β-HCG',
-    'pregnancy test':'β-HCG','بيتا':'β-HCG',
-    // CRP
-    'crp':'CRP','سي ار بي':'CRP','سي أر بي':'CRP','البروتين التفاعلي':'CRP',
-    'سي ار بي':'CRP','الالتهاب':'CRP',
-    'سي آر بي':'CRP','سي.ار.بي':'CRP','cرp':'CRP','c r p':'CRP',
-    'بروتين التهابي':'CRP','بروتين مفاعل':'CRP','سيربي':'CRP','سيرب':'CRP',
-    // RA, ANA, ASO
-    'ra':'RA','روماتيزم':'RA','روماتويد':'RA','عامل الروماتويد':'RA',
-    'ana':'ANA','aso':'ASO','عقدية':'ASO',
-    // VITAMINS
-    'vitamin d':'VITD','فيتامين دي':'VITD','فيتامين د':'VITD','vitd':'VITD',
-    'فيتامين d':'VITD','فيتامين الشمس':'VITD','فتمين دي':'VITD',
-    'b12':'VB12','فيتامين ب12':'VB12','فيتامين ب 12':'VB12','b 12':'VB12',
-    'فيتامين بي 12':'VB12','كوبالامين':'VB12',
-    // FERRITIN, IRON, FOLATE
-    'ferritin':'FERR','فيريتين':'FERR','ferr':'FERR','الفيريتين':'FERR',
-    'فريتين':'FERR','فيرتين':'FERR',
-    'iron':'FE','حديد':'FE','حديد الدم':'FE','الحديد':'FE',
-    'folate':'FOLATE','حمض فوليك':'FOLATE','فولات':'FOLATE','فوليك':'FOLATE',
-    // HEPATITIS
-    'hbsag':'HBsAg','hbs':'HBsAg','التهاب كبد ب':'HBsAg','كبد ب':'HBsAg',
-    'هيباتيتس ب':'HBsAg','تهاب كبد بائي':'HBsAg',
-    'hcv':'Anti-HCV','التهاب كبد سي':'Anti-HCV','كبد سي':'Anti-HCV',
-    'هيباتيتس سي':'Anti-HCV','سي':'Anti-HCV',
-    // HIV, VDRL, COVID, TYPHOID, BRUCELLA, H.PYLORI
-    'hiv':'HIV','ايدز':'HIV','فيروس نقص المناعة':'HIV',
-    'vdrl':'VDRL','سيفلس':'VDRL','زهري':'VDRL',
-    'covid':'COVID-AG','كوفيد':'COVID-AG','كورونا':'COVID-AG',
-    'typhoid':'TYPH','تيفويد':'TYPH','تيفوئيد':'TYPH','تيفس':'TYPH','حمى التيفوئيد':'TYPH',
-    'brucella':'BRUC','بروسيلا':'BRUC','مالطية':'BRUC','حمى مالطا':'BRUC',
-    'h pylori':'HPYL','هيليكوباكتر':'HPYL','هيليكو':'HPYL','جرثومة المعدة':'HPYL',
-    'ملوية بوابية':'HPYL','جرثومة':'HPYL',
-    // TUMOR MARKERS
-    'cea':'CEA','psa':'PSA','بروستات':'PSA','هرمون البروستات':'PSA',
-    'afp':'AFP','ca125':'CA125','ca19':'CA19-9','ca 125':'CA125','ca 19':'CA19-9',
-    // BLOOD GROUP
-    'blood group':'BLOOD-GRP','فصيلة دم':'BLOOD-GRP','فصيلة الدم':'BLOOD-GRP',
-    'زمرة الدم':'BLOOD-GRP','زمرة دم':'BLOOD-GRP','فصيلة':'BLOOD-GRP',
-    // ══ لهجة عراقية إضافية ══
-    // سكر
-    'گلوكوز':'GLU','كلوكز':'GLU','شوگر':'GLU','شوكر':'GLU',
-    'السكر الصايم':'FBS','صايم':'FBS','الصايم':'FBS',
-    'سكر عالفاضي':'FBS','فاضي':'FBS',
-    'سكر راندم':'RBS','راندم':'RBS','عشوائي':'RBS',
-    'سگر':'GLU','سگر صايم':'FBS',
-    // دم
-    'صورة الدم':'CBC','صورت الدم':'CBC','سي بي':'CBC',
-    'دبليو بي':'WBC','وايت':'WBC','وايت بلد':'WBC',
-    'ريد بلد':'RBC','ريد سيل':'RBC',
-    // كلى
-    'كلاوي':'CREAT','وظايف الكلاوي':'CREAT','الكلاوي':'CREAT',
-    'فضلات الكلى':'UREA','بقايا الكلى':'UREA',
-    // كبد
-    'كبدية':'ALT','وظايف الچبد':'ALT','چبد':'ALT','الچبد':'ALT',
-    'انزيم':'ALT','انزيمات':'ALT',
-    // دهون
-    'دهنيات':'CHOL','دهن الدم':'CHOL','الدهنيات':'TG',
-    'ثلاثيات':'TG','تلاتيات':'TG',
-    // الغدة
-    'الغده':'TSH','غده':'TSH','درقيه':'TSH','الدرقيه':'TSH',
-    'تي اس':'TSH','تي اس ايج':'TSH',
-    // هرمونات
-    'هرمون الذكر':'TEST','ذكورة':'TEST',
-    'هرمون الأنثى':'E2','هرمون الأنوثة':'E2',
-    'حليب':'PRL','هرمون الحليب':'PRL',
-    'بصيلات':'FSH','هرمون بصيلة':'FSH',
-    // فيتامينات
-    'فتمين دي':'VITD','فيتمين دي':'VITD','الشمسية':'VITD',
-    'فتمين بي':'VB12','فيتمين بي':'VB12',
-    // التهابات
-    'التهاب':'CRP','ترسب':'ESR','ترسيب الدم':'ESR',
-    // حمل
-    'حامل':'β-HCG','هرمون الأمومة':'β-HCG','تحليل الحمل':'β-HCG',
-    // براز
-    'تحليل براز':'Stoole','تحليل البراز':'Stoole','فحص براز':'Stoole',
-    // بول
-    'تحليل البول':'UA','فحص البول':'UA','تحليل بول':'UA',
-    // زرع
-    'زرعة':'CULTURE','مزرعة':'CULTURE','زرع بكتيري':'CULTURE',
-    // ملاريا
-    'ملاريا':'MALARIA-RDT','حمى':'MALARIA-RDT',
-    // تيفوئيد
-    'تيفه':'TYPH','تيف':'TYPH','حمى التيف':'TYPH',
-    // بروسيلا
-    'مالطا':'BRUC','حمى مالطه':'BRUC',
-    // كورونا
-    'كرونا':'COVID-AG','كوفيت':'COVID-AG','كوفد':'COVID-AG',
-    // ايدز
-    'الايدز':'HIV','ايج':'HIV',
-    // حديد
-    'حديديات':'FE','نقص حديد':'FERR','خزين الحديد':'FERR',
-    // كالسيوم وكهارل
-    'كالسيوم':'Ca','صوديوم':'Na','بوتاسيوم':'K','ملح الدم':'Na',
-    'معادن':'Ca','كهارل':'Na',
-    // بروستات
-    'البروستات':'PSA','هرمون بروستات':'PSA','غدة البروستات':'PSA',
-    // كوليسترول
-    'كولسترول':'CHOL','كولستيرول':'CHOL','چولسترول':'CHOL',
-    // ترانسامنيز
-    'ترانسامنيز':'ALT','سجبت':'AST','سجبت ':'AST',
-  };
-
-  // ══════════════════════════════════════════════════════
-  // قاموس الأرقام العربية
-  // ══════════════════════════════════════════════════════
-  const NUM_MAP = {
-    'صفر':0,'واحد':1,'اثنين':2,'اثنان':2,'ثلاثة':3,'ثلاث':3,'أربعة':4,'اربعة':4,
-    'خمسة':5,'خمس':5,'ستة':6,'ست':6,'سبعة':7,'سبع':7,'ثمانية':8,'ثمان':8,'ثماني':8,
-    'تسعة':9,'تسع':9,'عشرة':10,'عشر':10,'عشرين':20,'ثلاثين':30,'أربعين':40,'اربعين':40,
-    'خمسين':50,'ستين':60,'سبعين':70,'ثمانين':80,'تسعين':90,
-    'مئة':100,'مائة':100,'مية':100,'ميه':100,'مئتين':200,
-    'ألف':1000,'الف':1000,'فاصل':'.','نقطة':'.','فاصلة':'.',
-    // لهجة عراقية/خليجية/مصرية
-    'وحدة':1,'وحد':1,'اثنتين':2,'اتنين':2,'تلاثة':3,'تلاث':3,'اربع':4,
-    'خمس':5,'سبع':7,'ثمن':8,'تسع':9,'عشر':10,'خمستاش':15,'ستاش':16,
-    'سبعتاش':17,'ثمنتاش':18,'تسعتاش':19,'عشرين':20,'تلاتين':30,
-    'خمستين':50,'سبعين':70,'ثمانين':80,'تسعين':90,'مئه':100,'ميه':100,
-    'نص':0.5,'ربع':0.25,'ونص':0.5,
-    // عراقي إضافي
-    'گلووس':0,'چهار':4,'بيست':20,'سي':30,'چل':40,'پنجا':50,
-    'احدعش':11,'اثنعش':12,'ثلطعش':13,'اربعطعش':14,'خمسطعش':15,
-    'ستطعش':16,'سبعطعش':17,'ثمنطعش':18,'تسعطعش':19,
-    'احد عشر':11,'اثنا عشر':12,'ثلاثة عشر':13,'أربعة عشر':14,'خمسة عشر':15,
-    'ستة عشر':16,'سبعة عشر':17,'ثمانية عشر':18,'تسعة عشر':19,
-    'نقطة خمسة':0.5,'صفر فاصل خمسة':0.5,
-  };
-
-  function _parseNum(txt){
-    const direct = txt.match(/[\d]+(?:[.,]\d+)?/);
-    if(direct) return direct[0].replace(',','.');
-    let s = txt.toLowerCase().trim();
-    let result = '', cur = 0;
-    const words = s.split(/\s+/);
-    for(let w of words){
-      if(w==='فاصل'||w==='نقطة'||w==='فاصلة'){
-        result += cur>0?cur.toString():'';cur=0;result+='.';continue;
-      }
-      const n=NUM_MAP[w];
-      if(n!==undefined){if(n>=100&&cur>0)cur*=n;else cur+=n;}
-      else if(result||cur){break;}
-    }
-    if(cur>0)result+=cur.toString();
-    return result||null;
-  }
-
-  function _sim(a,b){
-    a=a.toLowerCase();b=b.toLowerCase();
-    if(a===b)return 1;
-    if(b.includes(a)||a.includes(b))return 0.85;
-    let m=0;
-    for(let c of a)if(b.includes(c))m++;
-    return m/Math.max(a.length,b.length);
-  }
-
-  // ══════════════════════════════════════════════════════
-  // قاموس نطق الحروف الإنجليزية بالعربية
-  // مثال: "ار" = R, "سي" = C, "تي اس اتش" = TSH
-  // ══════════════════════════════════════════════════════
-  const LETTER_MAP = {
-    // A
-    'ايه':'A','إيه':'A','آيه':'A','اي':'A',
-    // B
-    'بي':'B','بيه':'B',
-    // C
-    'سي':'C','سيه':'C',
-    // D
-    'دي':'D','ديه':'D',
-    // E
-    'إي':'E','إيه':'E',
-    // F
-    'اف':'F','إف':'F','ايف':'F',
-    // G
-    'جي':'G','جيه':'G',
-    // H
-    'اتش':'H','إتش':'H','هيتش':'H','هاتش':'H','ايتش':'H','ايج':'H',
-    // I
-    'آي':'I',
-    // J
-    'جاي':'J',
-    // K
-    'كيه':'K','كاي':'K',
-    // L
-    'ال':'L','ايل':'L','ايلي':'L',
-    // M
-    'ام':'M','إم':'M','ايم':'M',
-    // N
-    'ان':'N','إن':'N','اين':'N',
-    // O
-    'او':'O','أوه':'O',
-    // P
-    'بيه':'P','پي':'P',
-    // Q
-    'كيو':'Q',
-    // R
-    'ار':'R','آر':'R','إر':'R',
-    // S
-    'اس':'S','إس':'S','ايس':'S',
-    // T
-    'تي':'T','تيه':'T',
-    // U
-    'يو':'U','يوه':'U',
-    // V
-    'في':'V','فيه':'V','في':'V',
-    // W
-    'دبليو':'W','دبليوه':'W',
-    // X
-    'اكس':'X','إكس':'X','ايكس':'X',
-    // Y
-    'واي':'Y','وايه':'Y',
-    // Z
-    'زد':'Z','زيه':'Z','زي':'Z',
-  };
-
-  // تحويل النص الذي يحتوي على حروف إنجليزية منطوقة بالعربية إلى الحروف نفسها
-  // مثال: "سي بي سي" → "CBC"، "تي اس اتش" → "TSH"، "ار بي سي" → "RBC"
-  function _arabicLettersToEn(txt){
-    // نقسم النص على فراغات ونحاول تحويل كل كلمة أو مجموعة كلمات إلى حرف إنجليزي
-    const words = txt.trim().split(/\s+/);
-    const result = [];
-    let i = 0;
-    while(i < words.length){
-      // جرب مطابقة كلمتين أو ثلاث كلمات أولاً (للكلمات المركبة مثل "دبليو بي سي")
-      let matched = false;
-      for(let len = 3; len >= 1; len--){
-        if(i + len > words.length) continue;
-        const chunk = words.slice(i, i+len).join(' ');
-        if(LETTER_MAP[chunk]){
-          result.push(LETTER_MAP[chunk]);
-          i += len;
-          matched = true;
-          break;
-        }
-      }
-      if(!matched){ result.push(words[i]); i++; }
-    }
-    // إذا كانت النتيجة كلها حروف إنجليزية، ادمجها بدون فراغات
-    const allLetters = result.every(r => /^[A-Z]$/.test(r));
-    if(allLetters && result.length > 1) return result.join('');
-    // وإلا أعد النص الأصلي مع استبدال الحروف المحوّلة
-    return result.join(' ');
-  }
-
-  function _findTestCode(word){
-    const w=word.toLowerCase().trim();
-    // ⓪ القاموس المخصص — أعلى أولوية دائماً
-    const customDict=_loadCustomDict();
-    for(const[phrase,code] of Object.entries(customDict)){
-      if(w===phrase.toLowerCase()||w.includes(phrase.toLowerCase())||phrase.toLowerCase().includes(w)){
-        return code;
-      }
-    }
-    // ① مطابقة مباشرة من القاموس
-    if(TEST_MAP[w])return TEST_MAP[w];
-    // ①-ب تحويل نطق الحروف الإنجليزية بالعربية ثم البحث مجدداً
-    // مثال: "ار بي سي" → "RBC"، "سي بي سي" → "CBC"، "تي اس اتش" → "TSH"
-    const converted = _arabicLettersToEn(word.toLowerCase().trim());
-    if(converted !== w){
-      const convUpper = converted.toUpperCase().trim();
-      // مطابقة مباشرة للكود المحوَّل
-      if(typeof tests!=='undefined'){
-        const exact=tests.find(t=>t.code.toUpperCase()===convUpper);
-        if(exact)return exact.code;
-      }
-      const dictKey=Object.keys(TEST_MAP).find(k=>k.toUpperCase()===convUpper);
-      if(dictKey)return TEST_MAP[dictKey];
-      // مطابقة جزئية
-      for(const[k,v]of Object.entries(TEST_MAP)){if(convUpper===k.toUpperCase()||convUpper.includes(k.toUpperCase()))return v;}
-    }
-    // ② مطابقة الأكواد القصيرة (3 أحرف أو أقل) بشكل دقيق فقط — لمنع الخلط بين RBC/CRP/CBC
-    const upper=w.toUpperCase();
-    if(w.length<=4){
-      // جرب مطابقة مباشرة للكود
-      if(typeof tests!=='undefined'){
-        const exact=tests.find(t=>t.code.toUpperCase()===upper);
-        if(exact)return exact.code;
-      }
-      // جرب القاموس بالضبط
-      const directKey=Object.keys(TEST_MAP).find(k=>k.toUpperCase()===upper);
-      if(directKey)return TEST_MAP[directKey];
-    }
-    // ③ بحث بالاحتواء — لكن بشرط ألا يكون الكلمة قصيرة جداً
-    if(w.length>3){
-      for(const[k,v]of Object.entries(TEST_MAP)){if(w.includes(k)||k.includes(w))return v;}
-    }
-    // ④ مطابقة تقريبية — فقط للكلمات الطويلة (> 4 أحرف) لتجنب الخلط
-    if(w.length>4){
-      let best=null,bestScore=0;
-      for(const[k,v]of Object.entries(TEST_MAP)){
-        const s=_sim(w,k);if(s>bestScore&&s>0.78){bestScore=s;best=v;}
-      }
-      if(best)return best;
-    }
-    // ⑤ بحث في قاعدة التحاليل المحلية
-    if(typeof tests!=='undefined'){
-      const t=tests.find(t=>t.code.toLowerCase()===w||(t.nameShort||'').toLowerCase().includes(w)||t.nameEn.toLowerCase().includes(w));
-      if(t)return t.code;
-    }
-    return null;
-  }
-
-  // ══════════════════════════════════════════════════════
-  // معالجات كل واجهة
-  // ══════════════════════════════════════════════════════
-
-  /* ── واجهة بيانات المريض (الخطوة 1) ── */
-  function _handlePatient(t, raw){
-    const out=[];
-    // اللقب
-    const titles=['السيد','السيدة','الآنسة','الحاج','الحاجة','الاستاذ','الاستاذة','الطفل','الطفلة','الدكتور','الدكتورة'];
-    const titleGender={'السيد':'male','الحاج':'male','الاستاذ':'male','الطفل':'male','الدكتور':'male','السيدة':'female','الآنسة':'female','الحاجة':'female','الاستاذة':'female','الطفلة':'female','الدكتورة':'female'};
-    for(const tv of titles){
-      if(t.includes(tv)){
-        if(typeof selectTitle==='function')selectTitle(tv,titleGender[tv]||'male');
-        out.push({cls:'ok',msg:'اللقب: '+tv});
-      }
-    }
-    // الجنس
-    if(/\b(أنثى|بنت|انثى|female)\b/.test(t)){
-      const el=document.getElementById('wp-gender');if(el){el.value='female';el.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof wizPatient!=='undefined')wizPatient.gender='female';
-      out.push({cls:'ok',msg:'الجنس: أنثى'});
-    }else if(/\b(ذكر|ولد|رجل|male)\b/.test(t)){
-      const el=document.getElementById('wp-gender');if(el){el.value='male';el.dispatchEvent(new Event('change',{bubbles:true}));}
-      if(typeof wizPatient!=='undefined')wizPatient.gender='male';
-      out.push({cls:'ok',msg:'الجنس: ذكر'});
-    }
-    // الاسم — يُعيَّن مرة واحدة فقط
-    const nameMatch=raw.match(/(?:اسمه|اسمها|الاسم|اسم المريض|المريض|اسم)\s+([^\d،,]+?)(?:\s+عمره|\s+عمرها|\s+العمر|\s+رقم|\s+الطبيب|$)/i);
-    if(nameMatch){
-      const name=nameMatch[1].trim().replace(/\s+/g,' ');
-      if(name.length > 1){
-        const el=document.getElementById('wp-name');
-        if(el && el.value !== name){
-          el.value = name;
-          el.dispatchEvent(new Event('input',{bubbles:true}));
-        }
-        if(typeof wizPatient!=='undefined') wizPatient.name=name;
-        out.push({cls:'ok',msg:'الاسم: '+name});
-      }
-    }
-    // العمر
-    const ageMatch=t.match(/(?:عمره|عمرها|العمر|عمر)\s+(.+?)(?:\s+سنة|\s+سنوات|$)/i)||t.match(/(\d+)\s+سن/i);
-    if(ageMatch){
-      const ageStr=ageMatch[1]||ageMatch[0];
-      const ageNum=_parseNum(ageStr)||ageStr.match(/\d+/)?.[0];
-      if(ageNum){
-        const el=document.getElementById('wp-age-y');
-        if(el){el.value=ageNum;el.dispatchEvent(new Event('input',{bubbles:true}));if(typeof calcAgeCompound==='function')calcAgeCompound();}
-        out.push({cls:'ok',msg:'العمر: '+ageNum+' سنة'});
-      }
-    }
-    // رقم الهاتف
-    const phoneMatch=raw.match(/(?:رقمه|رقمها|الرقم|هاتفه|موبايله|تلفونه|رقم الهاتف)\s*([\d\s\-]+)/i)||raw.match(/(07\d[\d\s]{8,})/);
-    if(phoneMatch){
-      const phone=(phoneMatch[1]||phoneMatch[0]).replace(/\s+/g,'').trim();
-      const el=document.getElementById('wp-phone');
-      if(el){el.value=phone;if(typeof wizPatient!=='undefined')wizPatient.phone=phone;}
-      out.push({cls:'ok',msg:'الهاتف: '+phone});
-    }
-    // الطبيب
-    const docMatch=raw.match(/(?:الطبيب|طبيب المحول|المحول|دكتور|دكتورة|الدكتور|الدكتورة|د\.)\s+([^\d،,]+?)(?:\s+رقم|\s+عمر|\s+اسم|$)/i);
-    if(docMatch&&typeof doctors!=='undefined'){
-      const dName=docMatch[1].trim().toLowerCase().replace(/\s+/g,' ');
-      // أولوية: 1) تطابق تام، 2) احتواء، 3) تشابه عالٍ فقط
-      const found=
-        doctors.find(d=>d.name.toLowerCase()===dName) ||
-        doctors.find(d=>d.name.toLowerCase().includes(dName)||dName.includes(d.name.toLowerCase())) ||
-        doctors.find(d=>{
-          // تطابق الاسم الأول على الأقل
-          const firstName=d.name.toLowerCase().split(' ')[0];
-          return firstName.length>2 && dName.includes(firstName);
-        }) ||
-        doctors.find(d=>_sim(d.name.toLowerCase(),dName)>0.80);
-      if(found){
-        const el=document.getElementById('wp-doctor');
-        if(el && el.value!==found.id){
-          el.value=found.id;
-          el.dispatchEvent(new Event('change',{bubbles:true}));
-        }
-        if(typeof wizPatient!=='undefined'){wizPatient.doctorId=found.id;wizPatient.doctorName=found.name;}
-        out.push({cls:'ok',msg:'الطبيب: '+found.name});
-      }else{out.push({cls:'err',msg:'لم أجد الطبيب: '+docMatch[1]});}
-    }
-    // التالي → واجهة اختيار التحاليل
-    if(/(?:^|\s)(التالي|اكمل|انتقل|تالي|next)(?:\s|$)/.test(t)){
-      if(typeof wizNext==='function')setTimeout(()=>wizNext(),250);
-      out.push({cls:'ok',msg:'انتقال لاختيار التحاليل ✅'});
-    }
-    // إلغاء / أغلق
-    if(/(?:^|\s)(الغاء|إلغاء|اغلق|إغلاق|cancel|close)(?:\s|$)/.test(t)){
-      const btn=document.querySelector('#m-wizard .mclose');
-      if(btn)btn.click();else if(typeof closeModal==='function')closeModal('m-wizard');
-      out.push({cls:'ok',msg:'تم الإغلاق'});
-    }
-    return out;
-  }
-
-  // ══════════════════════════════════════════════════════
-  // تقطيع ذكي لتحاليل متعددة منطوقة بدون فواصل
-  // مثال: "سي بي سي دهون ثلاثية سكر صائم" → ['سي بي سي','دهون ثلاثية','سكر صائم']
-  // ══════════════════════════════════════════════════════
-  function _splitMultipleTests(raw){
-    // الكلمات الفاصلة الشائعة في النطق
-    const separators = /\s+(?:و|مع|ثم|بعدين|كذلك|أيضا|ايضا|كمان)\s+/g;
-    const bySep = raw.split(separators).map(p=>p.trim()).filter(Boolean);
-    if(bySep.length > 1) return bySep;
-
-    // محاولة تقطيع بناءً على جميع المفاتيح المعروفة في TEST_MAP
-    // نرتّب المفاتيح تنازلياً حسب الطول لنطابق الأطول أولاً
-    const keys = Object.keys(TEST_MAP).sort((a,b)=>b.length-a.length);
-    const text = raw.toLowerCase().trim();
-    const found = [];
-    let remaining = text;
-    let maxIter = 20;
-    while(remaining.length > 1 && maxIter-- > 0){
-      let bestMatch = null, bestKey = null, bestIdx = Infinity;
-      for(const k of keys){
-        const idx = remaining.indexOf(k);
-        if(idx !== -1 && idx < bestIdx){
-          bestIdx = idx;
-          bestKey = k;
-          bestMatch = k;
-        }
-      }
-      if(!bestMatch) break;
-      found.push(bestMatch);
-      remaining = remaining.slice(bestIdx + bestMatch.length).trim();
-    }
-    return found.length > 1 ? found : [raw];
-  }
-
-  /* ── واجهة اختيار التحاليل (الخطوة 2) ── */
-  function _handleTests(t, raw){
-    const out=[];
-    // مسح الكل
-    if(/امسح الكل|مسح كل|clear all|حذف كل/.test(t)){
-      if(typeof wizSelectedTests!=='undefined'){
-        wizSelectedTests=[];
-        if(typeof renderWizTestList==='function')renderWizTestList();
-        if(typeof renderWizRightPanel==='function')renderWizRightPanel();
-        out.push({cls:'ok',msg:'تم مسح جميع التحاليل'});
-      }
-      return out;
-    }
-    // تأكيد / إنشاء الطلب → زر "حفظ وإنشاء الطلب"
-    if(/(?:^|\s)(انشاء|إنشاء|تأكيد|اكمل|تم|انتهيت|next|confirm|done|حفظ وإنشاء|حفظ وانشاء)(?:\s|$)/.test(t)){
-      if(typeof wizFinish==='function'){setTimeout(()=>wizFinish(),250);out.push({cls:'ok',msg:'حفظ وإنشاء الطلب ✅'});}
-      else if(typeof wizNext==='function'){setTimeout(()=>wizNext(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
-      else{
-        const finBtn=document.querySelector('#wiz-ftr button.btn-p');
-        if(finBtn){setTimeout(()=>finBtn.click(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
-      }
-      return out;
-    }
-    // رجوع → الخطوة الأولى
-    if(/(?:^|\s)(رجوع|السابق|back)(?:\s|$)/.test(t)){
-      if(typeof wizBack==='function')wizBack();
-      out.push({cls:'ok',msg:'رجوع لبيانات المريض'});return out;
-    }
-    // إلغاء
-    if(/(?:^|\s)(الغاء|إلغاء|اغلق|إغلاق|cancel)(?:\s|$)/.test(t)){
-      const btn=document.querySelector('#m-wizard .mclose');
-      if(btn)btn.click();else if(typeof closeModal==='function')closeModal('m-wizard');
-      out.push({cls:'ok',msg:'تم الإغلاق'});return out;
-    }
-    // حذف تحليل
-    const removeMatch=t.match(/(?:احذف|حذف|ازل|إزالة|remove)\s+(.+)/);
-    if(removeMatch){
-      const code=_findTestCode(removeMatch[1]);
-      if(code&&typeof wizSelectedTests!=='undefined'){
-        wizSelectedTests=wizSelectedTests.filter(x=>x.code!==code);
-        if(typeof renderWizTestList==='function')renderWizTestList();
-        if(typeof renderWizRightPanel==='function')renderWizRightPanel();
-        out.push({cls:'ok',msg:'تم حذف: '+code});
-      }
-      return out;
-    }
-    // ── إضافة تحاليل متعددة ──
-    // أولاً: قسّم بالفاصلات والواو والفصل الصريح
-    let parts = raw.split(/[،,\+&]+|(?:\s+و\s+)|(?:\s+مع\s+)/g).map(p=>p.trim()).filter(Boolean);
-    // إذا لم ينقسم (قيل بدون فواصل)، حاول كشف التحاليل المتعددة من النص المتسلسل
-    if(parts.length === 1){
-      parts = _splitMultipleTests(raw);
-    }
-    let added=0;
-    for(const part of parts){
-      const code=_findTestCode(part.trim().toLowerCase());
-      if(code&&typeof tests!=='undefined'){
-        const t2=tests.find(x=>x.code===code);
-        if(t2&&typeof wizSelectedTests!=='undefined'){
-          if(!wizSelectedTests.find(x=>x.id===t2.id)){wizSelectedTests.push(t2);added++;out.push({cls:'ok',msg:'✅ '+code});}
-          else{out.push({cls:'inf',msg:'موجود: '+code});}
-        }else{out.push({cls:'err',msg:'كود غير موجود: '+code});}
-      }else if(part.trim()&&part.trim().length>1){out.push({cls:'err',msg:'لم أعرف: '+part.trim()});}
-    }
-    if(added>0){
-      if(typeof renderWizTestList==='function')renderWizTestList();
-      if(typeof renderWizRightPanel==='function')renderWizRightPanel();
-    }
-    return out;
-  }
-
-  /* ── واجهة إدخال النتائج ── */
-  function _handleResults(t, raw){
-    const out=[];
-
-    // ① تأكيد النتائج
-    if(/تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|تأكيد نتائج|تاكيد نتايج|اكد النتائج|اكد النتيجة|confirm results|confirm|تأكيد(?:\s|$)|تاكيد(?:\s|$)/.test(t)){
-      if(typeof finalizeResult==='function'){setTimeout(()=>finalizeResult(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="finalizeResult"]')||document.querySelector('button[onclick*="finalizeResult"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}}
-      if(out.length)return out;
-    }
-
-    // ② حفظ وطباعة
-    if(/حفظ وطباعة|حفظ وطبع|احفظ وطبع|احفظ وطباعة|حفظ.*طباع|طباع.*حفظ|خزن وطبع|اطبع وخزن|save.*print|print.*save/.test(t)){
-      if(typeof finalizeAndPrint==='function'){setTimeout(()=>finalizeAndPrint(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="finalizeAndPrint"]')||document.querySelector('button[onclick*="finalizeAndPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
-      if(out.length)return out;
-    }
-
-    // ③ طباعة CBC فارغة — كلمات عراقية/عربية
-    if(/طباعة cbc|اطبع cbc|طبع cbc|cbc فارغ|طباعة سي بي سي|اطبع سي بي سي|طبع سي بي سي|cbc blank|طباعة.*دم.*فارغ/.test(t)){
-      if(typeof printCBCBlank==='function'){setTimeout(()=>printCBCBlank(),300);out.push({cls:'ok',msg:'طباعة CBC فارغة ✅'});}
-      else{const b=document.querySelector('button[onclick*="printCBCBlank"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة CBC ✅'});}}
-      return out;
-    }
-
-    // ④ تحميل PDF
-    if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
-      if(typeof downloadPDF==='function'){setTimeout(()=>downloadPDF(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="downloadPDF"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}}
-      return out;
-    }
-
-    // ⑤ مشاركة واتساب
-    if(/واتس|واتساب|whatsapp|مشاركة|ارسل|إرسال/.test(t)){
-      if(typeof shareWhatsApp==='function'){setTimeout(()=>shareWhatsApp(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="shareWhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}}
-      return out;
-    }
-
-    // ⑥ تعديل بيانات المريض
-    if(/تعديل بيانات|تعديل المريض|تعديل/.test(t)){
-      if(typeof editPatientFromResults==='function'){setTimeout(()=>editPatientFromResults(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="editPatientFromResults"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تعديل بيانات المريض ✅'});}}
-      return out;
-    }
-
-    // ⑦ إضافة تحليل للطلب بالاسم مباشرة
-    // صيغ: "اضف تحليل كوليسترول" / "اضيف سكر للطلب" / "حط تحليل TSH" / "ضيف كرياتينين"
-    const addMatch=raw.match(/(?:اضف|اضيف|ضيف|حط|زيد|أضف|add)\s+(?:تحليل\s+)?(.+?)(?:\s+للطلب|\s+للمريض|$)/i);
-    if(addMatch){
-      const testName=addMatch[1].trim();
-      const code=_findTestCode(testName.toLowerCase());
-      if(code&&typeof tests!=='undefined'){
-        const t2=tests.find(x=>x.code===code);
-        if(t2){
-          // الحصول على الطلب الحالي من واجهة النتائج
-          const reqSel=document.getElementById('res-req-sel');
-          const reqId=reqSel?reqSel.value:null;
-          if(typeof addTestToReq==='function'){
-            setTimeout(()=>addTestToReq(t2.id),300);
-            out.push({cls:'ok',msg:'✅ تمت إضافة '+code+' للطلب'});
-          } else {
-            // بديل: استخدم حقل البحث وانتقِ التحليل تلقائياً
-            const srch=document.getElementById('res-add-test-srch');
-            const bar=document.getElementById('res-modify-bar');
-            if(srch&&bar){
-              bar.style.display='block';
-              setTimeout(()=>{
-                srch.value=code;
-                srch.dispatchEvent(new Event('input',{bubbles:true}));
-                // محاولة النقر على أول نتيجة بعد 400ms
-                setTimeout(()=>{
-                  const firstResult=document.querySelector('#res-add-test-dropdown div[onclick*="addTestToReq"],#res-add-test-results div[onclick]');
-                  if(firstResult) firstResult.click();
-                },400);
-              },200);
-              out.push({cls:'ok',msg:'إضافة تحليل '+code+' ✅'});
-            }else{out.push({cls:'err',msg:'لم أتمكن من إضافة التحليل'});}
-          }
-        }else{out.push({cls:'err',msg:'التحليل "'+code+'" غير موجود في قاعدة التحاليل'});}
-      }else if(code){
-        // كود موجود لكن tests غير معرّف — استخدم حقل البحث
-        const srch=document.getElementById('res-add-test-srch');
-        const bar=document.getElementById('res-modify-bar');
-        if(srch&&bar){
-          bar.style.display='block';
-          setTimeout(()=>{srch.value=code;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
-          out.push({cls:'ok',msg:'بحث عن: '+code+' — اختر من القائمة'});
-        }else{out.push({cls:'err',msg:'لم أتمكن من إضافة التحليل'});}
-      }else{
-        // لم يُعرف الكود — ابحث بالاسم الأصلي
-        const srch=document.getElementById('res-add-test-srch');
-        const bar=document.getElementById('res-modify-bar');
-        if(srch&&bar){
-          bar.style.display='block';
-          setTimeout(()=>{srch.value=testName;srch.dispatchEvent(new Event('input',{bubbles:true}));},200);
-          out.push({cls:'inf',msg:'لم أعرف "'+testName+'" — جارٍ البحث، اختر من القائمة'});
-        }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
-      }
-      return out;
-    }
-    // فتح حقل الإضافة بدون اسم
-    if(/اضافة تحليل|اضف تحليل|تحليل جديد|add test|ضيف تحليل|زيد تحليل/.test(t)){
-      const srch=document.getElementById('res-add-test-srch');
-      const bar=document.getElementById('res-modify-bar');
-      if(srch&&bar){
-        bar.style.display='block';
-        setTimeout(()=>srch.focus(),200);
-        out.push({cls:'ok',msg:'اكتب أو قل اسم التحليل للإضافة'});
-      }else{out.push({cls:'err',msg:'إضافة التحاليل غير متاحة'});}
-      return out;
-    }
-
-    // ⑧ حذف تحليل من الطلب الحالي
-    // صيغ: "احذف كوليسترول" / "امسح TSH" / "شيل سكر" / "حذف كرياتينين"
-    const delMatch=raw.match(/(?:احذف|حذف|امسح|مسح|شيل|شيّل|ازل|إزالة|remove|delete)\s+(?:تحليل\s+)?(.+?)(?:\s+من الطلب|$)/i);
-    if(delMatch){
-      const testName=delMatch[1].trim();
-      const code=_findTestCode(testName.toLowerCase());
-      if(code&&typeof tests!=='undefined'&&typeof removeTestFromReq==='function'){
-        const t2=tests.find(x=>x.code===code);
-        const id=document.getElementById('res-req-sel')?.value;
-        if(t2&&id){
-          // تجاوز confirm عبر تعديل مؤقت للـ confirm
-          const origConfirm=window.confirm;
-          window.confirm=()=>true;
-          setTimeout(()=>{removeTestFromReq(t2.id,id);window.confirm=origConfirm;},300);
-          out.push({cls:'ok',msg:'حذف تحليل '+code+' من الطلب ✅'});
-        }else if(!t2){out.push({cls:'err',msg:'لم أجد التحليل: '+code});}
-        else{out.push({cls:'err',msg:'لم أجد الطلب الحالي'});}
-      }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
-      return out;
-    }
-
-    // ⑨ إدخال نتيجة تحليل — "اسم_التحليل + قيمة" — يدعم أكثر من تحليل دفعة واحدة
-    const qualMap={
-      'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
-      'سلب':'Negative','نيكاتيف':'Negative','ما موجود':'Negative','مو موجود':'Negative',
-      'ما لكيت':'Negative','مالكيت':'Negative','ما طلع':'Negative','ما طلعت':'Negative',
-      'ايجابي':'Positive','موجب':'Positive','positive':'Positive','pos':'Positive',
-      'ايجاب':'Positive','بوزيتيف':'Positive','موجود':'Positive',
-      'طلع':'Positive','طلعت':'Positive','لكيت':'Positive','لقيت':'Positive',
-      'تفاعلي':'Reactive','reactive':'Reactive','ريآكتيف':'Reactive',
-      'غير تفاعلي':'Non-Reactive','non reactive':'Non-Reactive','نون ريآكتيف':'Non-Reactive',
-      'مو تفاعلي':'Non-Reactive','ماهو تفاعلي':'Non-Reactive',
-      'ضعيف':'Weak','weak':'Weak','حادم':'Weak',
-      'طبيعي':'Normal','نورمال':'Normal','normal':'Normal','عادي':'Normal','زين':'Normal',
-      'غير طبيعي':'Abnormal','abnormal':'Abnormal','مو طبيعي':'Abnormal','مو زين':'Abnormal',
-    };
-
-    // دالة لمعالجة سطر واحد (تحليل + قيمة)
-    function _processResultLine(l){
-      const lc=l.toLowerCase().trim();
-      if(!l)return null;
-      let qualResult=null;
-      for(const[k,v]of Object.entries(qualMap)){if(lc.includes(k)){qualResult=v;break;}}
-      let numResult=null;
-      const numPart=l.match(/(\d+(?:[.,]\d+)?)\s*$/);
-      if(numPart)numResult=numPart[1].replace(',','.');
-      if(!numResult){
-        const arabicPart=l.replace(/^.*?(?=\s+(?:واحد|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مئة|مائة|مية|الف|ألف))/i,'');
-        numResult=_parseNum(arabicPart);
-      }
-      const val=qualResult||numResult;if(!val)return null;
-      let testPart=l;
-      if(numResult&&numPart)testPart=l.replace(numPart[0],'').trim();
-      if(qualResult){for(const k of Object.keys(qualMap))testPart=testPart.replace(new RegExp(k,'gi'),'').trim();}
-      testPart=testPart.replace(/^(?:قيمة|نتيجة|ال|value|result)\s*/i,'').trim();
-      const code=_findTestCode(testPart);
-      if(code){
-        const done=_setResult(code,val);
-        return done?{cls:'ok',msg:code+': '+val}:{cls:'err',msg:'لم أجد حقل: '+code};
-      }
-      return{cls:'err',msg:'لم أعرف التحليل: '+testPart};
-    }
-
-    // تقطيع ذكي للنص: بالفاصلة أو "و" أو بالكشف التلقائي عن حدود التحليل+القيمة
-    function _splitResultLines(raw){
-      // أولاً: قسّم بالفاصلة أو سطر جديد
-      const bySep = raw.split(/[،,\n]+/).map(p=>p.trim()).filter(Boolean);
-      if(bySep.length > 1) return bySep;
-      // ثانياً: قسّم بـ "و" الفاصلة بين تحليل وقيمة وتحليل آخر
-      // نمط: [اسم_تحليل] [قيمة] و [اسم_تحليل] [قيمة]
-      // مثال: "سكر عشرة وكرياتينين خمسة" → ['سكر عشرة', 'كرياتينين خمسة']
-      const byWaw = raw.split(/\s+و\s+|\s+مع\s+/).map(p=>p.trim()).filter(Boolean);
-      if(byWaw.length > 1) return byWaw;
-      // ثالثاً: تقطيع تلقائي بناءً على الأرقام — كل رقم يكون نهاية وحدة
-      // نمط: اسم [رقم] اسم [رقم] ...
-      const autoSplit = [];
-      const numPattern = /(\S.*?)(\s+\d+(?:[.,]\d+)?)(?=\s|$)/g;
-      let m; let lastIdx=0;
-      while((m=numPattern.exec(raw))!==null){
-        autoSplit.push((m[1]+m[2]).trim());
-        lastIdx=m.index+m[0].length;
-      }
-      if(autoSplit.length > 1) return autoSplit;
-      return [raw];
-    }
-
-    const lines = _splitResultLines(raw);
-    for(const line of lines){
-      const res=_processResultLine(line.trim());
-      if(res)out.push(res);
-    }
-    return out;
-  }
-
-  /* ── واجهة الطلبات (البحث + أزرار الصف) ── */
-  function _handleRequests(t, raw){
-    const out=[];
-
-    // ① بحث عن مريض في قسم الطلبات
-    const searchMatch=raw.match(/(?:ابحث\s+عن|بحث\s+عن|دور\s+على|دور\s+عن|دوّر\s+على|فتش\s+عن|فتّش\s+عن|اشوف\s+طلبات?|جيب\s+طلبات?|هات\s+طلبات?|گلي\s+عن|كلي\s+عن|لچ\s+عن|لگ\s+عن)\s+(.+)/i)
-      || raw.match(/^(?:فتش|دور|ابحث|بحث)\s+(.+)/i);
-    if(searchMatch){
-      // استخرج الاسم فقط — بدون الكلمة المحفزة
-      const name = searchMatch[searchMatch.length-1]
-        .replace(/(?:\s+في\s+الطلبات|\s+الطلبات)$/,'').trim();
-      if(name.length < 2){ out.push({cls:'err',msg:'أعد قول الاسم'}); return out; }
-      const inp=document.getElementById('req-srch-inp');
-      if(inp){
-        // اكتب الاسم مرة واحدة فقط
-        if(inp.value !== name){
-          inp.value = name;
-          inp.dispatchEvent(new Event('input',{bubbles:true}));
-          if(typeof searchReq==='function') searchReq(name);
-        }
-        out.push({cls:'ok',msg:'بحث عن: '+name+' ✅'});
-      }else{ out.push({cls:'err',msg:'لم أجد حقل البحث'}); }
-      return out;
-    }
-
-    // ② مسح البحث / عرض الكل
-    if(/امسح البحث|مسح البحث|عرض الكل|كل الطلبات|اظهر الكل|clear search/.test(t)){
-      const inp=document.getElementById('req-srch-inp');
-      if(inp){inp.value='';if(typeof searchReq==='function')searchReq('');}
-      out.push({cls:'ok',msg:'عرض جميع الطلبات'});
-      return out;
-    }
-
-    // ③ أزرار صف الطلب المحدد (يعمل على أول صف ظاهر أو الصف المطابق للبحث الحالي)
-    // — المساعد يبحث عن الطلب المرئي الوحيد أو الأول في النتائج
-    function _getVisibleReq(){
-      const rows=document.querySelectorAll('#requests-body tr');
-      if(rows.length===1){
-        // استخرج id من أي onclick في الصف (يشمل goToPrint و openViewResultsModal و goToResult)
-        const btns=rows[0].querySelectorAll('button[onclick]');
-        for(const btn of btns){
-          const oc=btn.getAttribute('onclick')||'';
-          const m=oc.match(/'([A-Za-z0-9\-_]+)'/);
-          if(m&&m[1])return m[1];
-        }
-      }
-      return null;
-    }
-    // استرجاع حالة الطلب المرئي
-    function _getVisibleReqStatus(){
-      const rows=document.querySelectorAll('#requests-body tr');
-      if(rows.length===1){
-        const btns=rows[0].querySelectorAll('button[onclick]');
-        for(const btn of btns){
-          const oc=btn.getAttribute('onclick')||'';
-          if(oc.includes('goToPrint')||oc.includes('openViewResultsModal'))return 'done';
-          if(oc.includes('goToResult'))return 'pending';
-        }
-      }
-      return null;
-    }
-
-    // طباعة — يعمل مع الطلب المطبوع (done) أو غيره
-    if(/(?:^|\s)(طباعة|اطبع|طبع|print)(?:\s|$)/.test(t)&&!/ملصق|label|cbc/.test(t)){
-      const rid=_getVisibleReq();
-      const status=_getVisibleReqStatus();
-      if(rid){
-        if(status==='done'){
-          // الطلب مطبوع — انتقل مباشرة لصفحة الطباعة
-          if(typeof goToPrint==='function'){setTimeout(()=>goToPrint(rid),300);out.push({cls:'ok',msg:'فتح صفحة الطباعة ✅'});}
-          else{const b=document.querySelector('#requests-body button[onclick*="goToPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة ✅'});}else{out.push({cls:'err',msg:'لم أجد زر الطباعة'});}}
-        }else{
-          // طلب معلق — فتح إدخال النتائج أولاً
-          out.push({cls:'inf',msg:'الطلب لم يكتمل بعد — قل "نتائج" لإدخال النتائج أولاً'});
-        }
-      }else{
-        const b=document.querySelector('#requests-body button[onclick*="goToPrint"]');
-        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة ✅'});}
-        else{out.push({cls:'err',msg:'ابحث عن المريض أولاً ثم قل "طباعة"'});}
-      }
-      return out;
-    }
-
-    // عرض النتائج / مشاهدة النتائج — للمطبوع
-    if(/عرض النتائج|مشاهدة النتائج|شوف النتائج|عرض.*نتائج|اشوف النتيجة|مشاهدة.*نتيجة|view results/.test(t)){
-      const rid=_getVisibleReq();
-      if(rid&&typeof openViewResultsModal==='function'){
-        setTimeout(()=>openViewResultsModal(rid),300);
-        out.push({cls:'ok',msg:'عرض نتائج الطلب ✅'});
-      }else{
-        const b=document.querySelector('#requests-body button[onclick*="openViewResultsModal"]');
-        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'عرض النتائج ✅'});}
-        else{out.push({cls:'err',msg:'لا توجد نتائج مكتملة لعرضها'});}
-      }
-      return out;
-    }
-
-    // نتائج / ادخال نتائج — للغير مطبوع (status=pending/inprogress)
-    if(/(?:^|\s)(نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|نتيجة|نتيجه)(?:\s|$)/.test(t)){
-      const rid=_getVisibleReq();
-      if(rid&&typeof goToResult==='function'){
-        setTimeout(()=>goToResult(rid),300);
-        out.push({cls:'ok',msg:'فتح إدخال النتائج ✅'});
-      }else{
-        const b=document.querySelector('#requests-body button[onclick*="goToResult"]');
-        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'إدخال النتائج ✅'});}
-        else{out.push({cls:'err',msg:'لم أجد طلباً معلقاً — جرب "عرض النتائج" إذا كان الطلب مكتملاً'});}
-      }
-      return out;
-    }
-
-    // طباعة ملصق
-    if(/ملصق|label|طباعة ملصق|اطبع ملصق|طبع ملصق/.test(t)){
-      const rid=_getVisibleReq();
-      if(rid&&typeof printTubeLabel==='function'){
-        setTimeout(()=>printTubeLabel(rid),300);
-        out.push({cls:'ok',msg:'طباعة ملصق الأنبوب ✅'});
-      }else{
-        const b=document.querySelector('#requests-body button[onclick*="printTubeLabel"]');
-        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة الملصق ✅'});}
-        else{out.push({cls:'err',msg:'لم أجد طلباً لطباعة ملصقه'});}
-      }
-      return out;
-    }
-
-    // حذف الطلب
-    if(/احذف الطلب|حذف الطلب|امسح الطلب|delete.*request|شيل الطلب/.test(t)){
-      const rid=_getVisibleReq();
-      if(rid&&typeof deleteReq==='function'){
-        const origConfirm=window.confirm;
-        window.confirm=()=>true;
-        setTimeout(()=>{deleteReq(rid);window.confirm=origConfirm;},300);
-        out.push({cls:'ok',msg:'حذف الطلب ✅'});
-      }else{out.push({cls:'err',msg:'لم أجد طلباً للحذف — ابحث عن المريض أولاً'});}
-      return out;
-    }
-
-    // إذا لم يُفهم الأمر
-    return [{cls:'inf',msg:'في الطلبات قل: "ابحث عن [اسم]" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"'}];
-  }
-
-
-  /* ── واجهة عرض النتائج (m-view-results) ── */
-  function _handleViewResults(t,raw){
-    const out=[];
-
-    // ① طباعة من داخل نافذة العرض
-    if(/(?:^|\s)(طباعة|اطبع|طبع|print)(?:\s|$)/.test(t)&&!/ملصق|label/.test(t)){
-      const b=document.querySelector('#vr-ftr button[onclick*="goToPrint"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة التقرير ✅'});}
-      else if(typeof currentReqId!=='undefined'&&typeof goToPrint==='function'){
-        closeModal('m-view-results');setTimeout(()=>goToPrint(currentReqId),350);
-        out.push({cls:'ok',msg:'طباعة التقرير ✅'});
-      }else{out.push({cls:'err',msg:'لم أجد زر الطباعة'});}
-      return out;
-    }
-
-    // ② تحميل PDF
-    if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
-      const b=document.querySelector('#vr-ftr button[onclick*="downloadPDF"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
-      else if(typeof downloadPDF==='function'){setTimeout(()=>{closeModal('m-view-results');downloadPDF();},350);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
-      else{out.push({cls:'err',msg:'لم أجد زر التحميل'});}
-      return out;
-    }
-
-    // ③ مشاركة واتساب
-    if(/واتس|واتساب|whatsapp|مشاركة|ارسل|شارك/.test(t)){
-      const b=document.querySelector('#vr-ftr button[onclick*="shareWhatsApp"]')||document.querySelector('#vr-ftr button[onclick*="WhatsApp"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}
-      else if(typeof shareWhatsApp==='function'){setTimeout(()=>{closeModal('m-view-results');shareWhatsApp();},350);out.push({cls:'ok',msg:'مشاركة واتساب ✅'});}
-      else{out.push({cls:'err',msg:'لم أجد زر الواتساب'});}
-      return out;
-    }
-
-    // ④ إدخال / تعديل نتيجة تحليل معين
-    const addMatch=raw.match(/(?:عدّل|عدل|تعديل|ادخل|ادخال|غير|غيّر|بدّل|بدل)\s+(?:نتيجة\s+)?(.+?)(?:\s+إلى|\s+ب|\s+الى|$)/i);
-    if(addMatch){
-      const testName=addMatch[1].trim();
-      const code=_findTestCode(testName.toLowerCase());
-      if(code){
-        const b=document.querySelector(`#vr-body button[onclick*="'${code}'"],[onclick*="${code}"]`);
-        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تعديل '+code+' ✅'});}
-        else{out.push({cls:'inf',msg:'انقر على التحليل '+code+' في القائمة لتعديله'});}
-      }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
-      return out;
-    }
-
-    // ⑤ فتح تحليل بول/براز/مني من داخل النافذة
-    if(/تحليل بول|فحص بول|بول/.test(t)){
-      const b=document.querySelector('#vr-body button[onclick*="ua"],#vr-body button[onclick*="UA"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل البول ✅'});}
-      return out;
-    }
-    if(/تحليل براز|فحص براز|براز/.test(t)){
-      const b=document.querySelector('#vr-body button[onclick*="stool"],#vr-body button[onclick*="Stool"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل البراز ✅'});}
-      return out;
-    }
-    if(/تحليل مني|فحص مني|سائل منوي/.test(t)){
-      const b=document.querySelector('#vr-body button[onclick*="semen"],#vr-body button[onclick*="Semen"]');
-      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل المني ✅'});}
-      return out;
-    }
-
-    // ⑥ إغلاق النافذة
-    if(/اغلق|أغلق|إغلاق|الغاء|cancel|close|رجوع|ارجع/.test(t)){
-      if(typeof closeModal==='function'){closeModal('m-view-results');out.push({cls:'ok',msg:'تم الإغلاق'});}
-      return out;
-    }
-
-    return [{cls:'inf',msg:'في عرض النتائج: "طباعة" — "تحميل PDF" — "واتساب" — "تعديل [تحليل]" — "إغلاق"'}];
-  }
-
-  function _handleUA(t){
-    const out=[];
-    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
-      if(typeof saveAndPrintUA==='function'){setTimeout(()=>saveAndPrintUA(),300);out.push({cls:'ok',msg:'حفظ وطباعة تحليل البول ✅'});}
-      else{const b=document.querySelector('#m-ua button[onclick*="saveAndPrintUA"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
-      return out;
-    }
-    if(/حفظ النتيجة|حفظ/.test(t)){
-      if(typeof saveUAEntry==='function'){setTimeout(()=>saveUAEntry(),300);out.push({cls:'ok',msg:'حفظ النتيجة ✅'});}
-      else{const b=document.querySelector('#m-ua button[onclick*="saveUAEntry"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ ✅'});}}
-      return out;
-    }
-    if(/واتس|واتساب|مشاركة|ارسل/.test(t)){
-      if(typeof saveAndShareUAWhatsApp==='function'){setTimeout(()=>saveAndShareUAWhatsApp(),300);out.push({cls:'ok',msg:'إرسال عبر واتساب ✅'});}
-      else{const b=document.querySelector('#m-ua button[onclick*="WhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'واتساب ✅'});}}
-      return out;
-    }
-    if(/الغاء|إغلاق|اغلق|cancel|close/.test(t)){
-      const b=document.querySelector('#m-ua .mclose, button[onclick*="closeModal(\'m-ua\')"]');
-      if(b){b.click();out.push({cls:'ok',msg:'تم الإغلاق'});}
-      else if(typeof closeModal==='function'){closeModal('m-ua');out.push({cls:'ok',msg:'تم الإغلاق'});}
-      return out;
-    }
-    return [{cls:'inf',msg:'أوامر البول: "حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"'}];
-  }
-
-  /* ── واجهة تحليل البراز ── */
-  function _handleStool(t){
-    const out=[];
-    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
-      if(typeof saveAndPrintStool==='function'){setTimeout(()=>saveAndPrintStool(),300);out.push({cls:'ok',msg:'حفظ وطباعة تحليل البراز ✅'});}
-      else{const b=document.querySelector('#m-stool-exam button[onclick*="saveAndPrintStool"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
-      return out;
-    }
-    if(/حفظ النتيجة|حفظ/.test(t)){
-      if(typeof saveStoolEntry==='function'){setTimeout(()=>saveStoolEntry(),300);out.push({cls:'ok',msg:'حفظ النتيجة ✅'});}
-      else{const b=document.querySelector('#m-stool-exam button[onclick*="saveStoolEntry"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ ✅'});}}
-      return out;
-    }
-    if(/واتس|واتساب|مشاركة|ارسل/.test(t)){
-      if(typeof saveAndShareStoolWhatsApp==='function'){setTimeout(()=>saveAndShareStoolWhatsApp(),300);out.push({cls:'ok',msg:'إرسال عبر واتساب ✅'});}
-      else{const b=document.querySelector('#m-stool-exam button[onclick*="WhatsApp"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'واتساب ✅'});}}
-      return out;
-    }
-    if(/الغاء|إغلاق|اغلق|cancel|close/.test(t)){
-      const b=document.querySelector('#m-stool-exam .mclose, button[onclick*="closeModal(\'m-stool-exam\')"]');
-      if(b){b.click();out.push({cls:'ok',msg:'تم الإغلاق'});}
-      else if(typeof closeModal==='function'){closeModal('m-stool-exam');out.push({cls:'ok',msg:'تم الإغلاق'});}
-      return out;
-    }
-    return [{cls:'inf',msg:'أوامر البراز: "حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"'}];
-  }
-
-  /* ── تعيين نتيجة في حقل ── */
-  function _setResult(code,value){
-    if(typeof tests==='undefined')return false;
-    const t=tests.find(x=>x.code===code||(x.nameShort||'').toUpperCase()===code.toUpperCase());
-    if(!t)return false;
-    const inp=document.getElementById('rv-'+t.id);
-    if(!inp)return false;
-    inp.value=value;
-    inp.dispatchEvent(new Event('input',{bubbles:true}));
-    inp.dispatchEvent(new Event('change',{bubbles:true}));
-    inp.style.transition='background 0.4s';
-    inp.style.background='rgba(0,232,122,0.22)';
-    setTimeout(()=>{inp.style.background='';},1200);
-    if(typeof _autoSaveResults==='function')_autoSaveResults();
-    return true;
-  }
-
-  /* ── أوامر عامة (التنقل بين الصفحات) ── */
-  function _handleGeneral(t){
-    if(/مريض جديد|اضافة مريض|مريض جديدي|ضيف مريض|اضف مريض|مريض جديده|دخّل مريض|سجّل مريض|سجل مريض/.test(t)){
-      if(typeof startNewPatient==='function')startNewPatient();
-      return [{cls:'ok',msg:'فتح نافذة مريض جديد'}];
-    }
-    if(/(?:^|\s)(مريض|المريض)(?:\s|$)|المرضى|قائمة المرضى|شوف المرضى|اشوف المرضى|سجل المرضى/.test(t)){
-      if(typeof nav==='function')nav('patients');return [{cls:'ok',msg:'صفحة المرضى'}];
-    }
-    if(/نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|صفحة النتائج|دخّل نتائج|هاتلي نتائج/.test(t)){
-      if(typeof nav==='function')nav('results');return [{cls:'ok',msg:'صفحة إدخال النتائج'}];
-    }
-    if(/(?:^|\s)(طلبات|الطلبات)(?:\s|$)|قائمة الطلبات|شوف الطلبات|اشوف الطلبات/.test(t)){
-      if(typeof nav==='function')nav('requests');return [{cls:'ok',msg:'صفحة الطلبات'}];
-    }
-    if(/فواتير|الفواتير|حسابات|دفع|فلوس|الفلوس|حساب/.test(t)){
-      if(typeof nav==='function')nav('invoices');return [{cls:'ok',msg:'صفحة الفواتير'}];
-    }
-    if(/لوحة التحكم|dashboard|الرئيسية|رئيسية|البداية|الهوم|هوم/.test(t)){
-      if(typeof nav==='function')nav('dashboard');return [{cls:'ok',msg:'لوحة التحكم'}];
-    }
-    if(/اعدادات|إعدادات|settings|الإعدادات|الإعداد/.test(t)){
-      if(typeof nav==='function')nav('settings');return [{cls:'ok',msg:'الإعدادات'}];
-    }
-    if(/تقارير|reports|تقرير|إحصائيات|احصائيات|ستاتستك/.test(t)){
-      if(typeof nav==='function')nav('reports');return [{cls:'ok',msg:'التقارير'}];
-    }
-    if(/زرع|culture|مزرعة|زرعة/.test(t)){
-      if(typeof nav==='function')nav('culture');return [{cls:'ok',msg:'نتائج الزرع'}];
-    }
-    if(/(?:^|\s)(بول|البول)(?:\s|$)|ua|تحليل بول|فحص بول|بولة/.test(t)){
-      if(typeof nav==='function')nav('ua');return [{cls:'ok',msg:'تحليل البول'}];
-    }
-    if(/براز|stool|تحليل براز|فحص براز/.test(t)){
-      if(typeof nav==='function')nav('stool');return [{cls:'ok',msg:'تحليل البراز'}];
-    }
-    if(/عداد esr|عداد الترسيب|ايزر|esr عداد/.test(t)){
-      if(typeof nav==='function')nav('esr');return [{cls:'ok',msg:'عداد ESR'}];
-    }
-    if(/طابور|الانتظار|قائمة انتظار|wait/.test(t)){
-      if(typeof nav==='function')nav('waitqueue');return [{cls:'ok',msg:'طابور الانتظار'}];
-    }
-    if(/(?:^|\s)(تحاليل|قاعدة التحاليل|داتابيس التحاليل)(?:\s|$)/.test(t)){
-      if(typeof nav==='function')nav('tests-db');return [{cls:'ok',msg:'قاعدة التحاليل'}];
-    }
-    return [{cls:'inf',msg:'قل: "مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير"'}];
-  }
-
-  // دالة مساعدة لتجربة النص وإرجاع النتيجة دون تنفيذ
-  function _tryProcess(txt){
-    const ctx=_ctx();
-    const t=txt.toLowerCase().trim();
-    if(ctx==='patient')         return _handlePatient(t,txt);
-    else if(ctx==='tests')      return _handleTests(t,txt);
-    else if(ctx==='results')    return _handleResults(t,txt);
-    else if(ctx==='viewresults') return _handleViewResults(t,txt);
-    else if(ctx==='requests')   return _handleRequests(t,txt);
-    else if(ctx==='ua')         return _handleUA(t);
-    else if(ctx==='stool')      return _handleStool(t);
-    else                        return _handleGeneral(t);
-  }
-
-  // ══════════════════════════════════════════════════════
-  // معالجة الأمر الصوتي
-  // ══════════════════════════════════════════════════════
-  function _process(txt){
-    const ctx=_ctx();
-    _setCtxLabel(ctx);
-    const t=txt.toLowerCase().trim();
-    let results=[];
-
-    // أمر إغلاق عالمي
-    if(/(?:^|\s)(اغلق المساعد|أغلق المساعد|stop assistant)(?:\s|$)/.test(t)){
-      close();return;
-    }
-
-    // في السياق العام، إذا كان الأمر يخص النتائج يُحوَّل لـ _handleResults مباشرة
-    const isResultsCmd = /تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|confirm results|حفظ وطباعة|حفظ وطبع|احفظ وطبع|save.*print|print.*save|تحميل pdf|واتساب.*نتائج|نتائج.*واتساب/.test(t);
-
-    if(ctx==='patient')         results=_handlePatient(t,txt);
-    else if(ctx==='tests')      results=_handleTests(t,txt);
-    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,txt);
-    else if(ctx==='viewresults') results=_handleViewResults(t,txt);
-    else if(ctx==='requests')   results=_handleRequests(t,txt);
-    else if(ctx==='ua')         results=_handleUA(t);
-    else if(ctx==='stool')      results=_handleStool(t);
-    else                        results=_handleGeneral(t);
-
-    // إذا لم يُفهم الأمر — جرب الأوامر العامة كبديل
-    if(!results.length||(results.length===1&&results[0].cls==='err'&&ctx!=='general')){
-      const gen=_handleGeneral(t);
-      if(gen.length&&gen[0].cls!=='inf')results=gen;
-    }
-    if(!results.length)results=[{cls:'err',msg:'لم أفهم — جرب: "حفظ وطباعة" أو "تأكيد النتائج"'}];
-
-    _showReply(results);
-    _speak(results.map(r=>r.msg).join('، '));
-  }
-
-  // ══════════════════════════════════════════════════════
-  // واجهة المساعد
-  // ══════════════════════════════════════════════════════
-  function _setCtxLabel(ctx){
-    const map={patient:'📝 بيانات مريض',tests:'🧪 اختيار تحاليل',results:'📊 نتائج',viewresults:'👁️ عرض النتائج',ua:'🧪 تحليل بول',stool:'🧫 تحليل براز',semen:'🔬 تحليل مني',patients:'👥 المرضى',requests:'📋 الطلبات',general:'—'};
-    const el=document.getElementById('va-hdr-ctx');
-    if(el)el.textContent=map[ctx]||'—';
-  }
-  function _showHeard(txt){
-    const el=document.getElementById('va-heard');
-    if(el)el.innerHTML='<b>🎤 سمعت:</b> '+txt;
-  }
-  function _showReply(items){
-    const el=document.getElementById('va-reply');
-    if(!el)return;
-    el.innerHTML=items.map(i=>`<span class="${i.cls}">${i.msg}</span>`).join('<br>');
-  }
-  function _setHint(ctx){
-    const hints={
-      patient: '"اسمه أحمد" — "عمره 30" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
-      tests:   '"CBC" — "كوليسترول ودهون ثلاثية" — "حفظ وإنشاء" — "امسح الكل" — "رجوع"',
-      results: '"تأكيد النتائج" — "حفظ وطباعة" — "اضف تحليل كوليسترول" — "احذف TSH" — "طباعة CBC"',
-      viewresults:'"طباعة" — "تحميل PDF" — "واتساب" — "تعديل [تحليل]" — "تحليل بول" — "إغلاق"',
-      requests:'"ابحث عن أحمد" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"',
-      ua:      '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
-      stool:   '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
-      general: '"مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير" — "تقارير"',
-    };
-    const el=document.getElementById('va-hint');
-    if(el)el.textContent=hints[ctx]||'';
-  }
-
-  // موجة صوتية
-  function _startWave(){
-    const w=document.getElementById('va-wave');
-    const bars=w?w.querySelectorAll('span'):[];
-    if(w)w.classList.add('active');
-    _waveTimer=setInterval(()=>{bars.forEach(b=>{b.style.height=(4+Math.random()*22)+'px';});},90);
-  }
-  function _stopWave(){
-    clearInterval(_waveTimer);
-    const w=document.getElementById('va-wave');
-    const bars=w?w.querySelectorAll('span'):[];
-    if(w)w.classList.remove('active');
-    bars.forEach(b=>{b.style.height='6px';});
-  }
-
-  // نطق (يحترم وضع الصمت)
-  function _speak(txt){
-    if(_isSilent()) return;   // وضع صامت — لا يتكلم
-    if(!txt||!window.speechSynthesis)return;
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(txt.replace(/<[^>]+>/g,'').substring(0,150));
-    u.lang='ar-SA';u.rate=1.1;u.pitch=1;
-    const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
-    if(arV)u.voice=arV;
-    window.speechSynthesis.speak(u);
-  }
-
-  // ══════════════════════════════════════════════════════
-  // الاستماع المستمر
-  // ══════════════════════════════════════════════════════
-  function toggle(){
-    if(!_isEnabled()){
-      // إذا كان موقوفاً من الإعدادات، لا تفعل شيئاً
-      return;
-    }
-    const box=document.getElementById('va-box');
-    if(box&&!box.classList.contains('va-open')){
-      box.classList.add('va-open');
-      _setHint(_ctx());
-    }
-    if(!SpeechRec){
-      _showReply([{cls:'err',msg:'المتصفح لا يدعم الصوت — استخدم Chrome'}]);return;
-    }
-    if(_on){stop();return;}
-    _startListening();
-  }
-
-  function _startListening(){
-    if(_on) return;
-    if(!SpeechRec) return;
-
-    _on = true;
-    _rec = new SpeechRec();
-    _rec.lang = 'ar-IQ';
-    _rec.continuous = false;     // جملة واحدة ثم إعادة — أبسط وأموثق
-    _rec.interimResults = false; // نص نهائي فقط — لا interim
-    _rec.maxAlternatives = 5;
-
-    // علامة لمنع تنفيذ نفس الجملة مرتين
-    let _executed = false;
-
-    _rec.onresult = e => {
-      if(_executed) return;
-      _executed = true;
-
-      // اجمع كل البدائل
-      const alts = [];
-      for(let i = 0; i < e.results.length; i++){
-        for(let j = 0; j < e.results[i].length; j++){
-          const t = e.results[i][j].transcript.trim();
-          if(t && !alts.includes(t)) alts.push(t);
-        }
-      }
-      if(!alts.length) return;
-      const tx = alts[0];
-
-      _showHeard('<b>🎤 سمعت:</b> ' + tx);
-
-      // حوّل الحروف الإنجليزية المنطوقة بالعربية
-      const converted = _arabicLettersToEn(tx.toLowerCase().trim());
-      const candidates = converted !== tx.toLowerCase().trim() ? [converted, tx] : [tx];
-
-      let processed = false;
-      for(const alt of candidates){
-        const r = _tryProcess(alt);
-        if(r && r.length && r[0].cls !== 'err' && r[0].cls !== 'inf'){
-          _showReply(r);
-          _speak(r.map(x=>x.msg).join('، '));
-          processed = true;
-          break;
-        }
-      }
-      if(!processed) _process(tx);
-      _setHint(_ctx());
-      _resetIdleTimer();
-    };
-
-    _rec.onerror = e => {
-      _stopWave();
-      const fab = document.getElementById('va-fab');
-      if(fab) fab.classList.remove('va-on');
-      if(e.error === 'not-allowed'){
-        _on = false; clearTimeout(_idleTimer);
-        _showReply([{cls:'err', msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
-        return;
-      }
-      if(!_on) return;
-      // أي خطأ آخر → أعد
-      _on = false;
-      clearTimeout(_restartTimer);
-      _restartTimer = setTimeout(()=>_startListening(), 300);
-    };
-
-    _rec.onend = () => {
-      _stopWave();
-      const fab = document.getElementById('va-fab');
-      if(fab) fab.classList.remove('va-on');
-      if(_on){
-        _on = false;
-        clearTimeout(_restartTimer);
-        _restartTimer = setTimeout(()=>{
-          _showHeard('<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>');
-          _startListening();
-        }, 150);
-      }
-    };
-
-    try{
-      _rec.start();
-      _startWave();
-      const fab = document.getElementById('va-fab'); if(fab) fab.classList.add('va-on');
-      const heard = document.getElementById('va-heard');
-      if(heard) heard.innerHTML = '<span style="color:rgba(255,255,255,0.4)">🎤 اتكلم الآن...</span>';
-      _setCtxLabel(_ctx());
-      _resetIdleTimer();
-    } catch(e){
-      _on = false; _rec = null;
-    }
-  }
-
-  function stop(){
-    clearTimeout(_restartTimer);
-    clearTimeout(_idleTimer);
-    _on = false;
-    if(_rec){
-      try{ _rec.stop(); }catch(e){}  // stop() أفضل من abort() في continuous mode
-      _rec = null;
-    }
-    _stopWave();
-    if(window.speechSynthesis) window.speechSynthesis.cancel();
-    const fab=document.getElementById('va-fab'); if(fab) fab.classList.remove('va-on');
-    const heard=document.getElementById('va-heard'); if(heard) heard.innerHTML='اضغط الزر للتفعيل...';
-  }
-  function close(){
-    stop();
-    const box=document.getElementById('va-box');if(box)box.classList.remove('va-open');
-  }
-
-  if(window.speechSynthesis)window.speechSynthesis.getVoices();
-  if(window.speechSynthesis&&window.speechSynthesis.onvoiceschanged!==undefined)
-    window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
-
-  // تطبيق حالة التفعيل عند التحميل
-  setTimeout(()=>_applyEnabledState(_isEnabled()), 300);
-
-  return{toggle,close,stop,
-    isEnabled:_isEnabled,
-    setEnabled:_setEnabled,
-    isSilent:_isSilent,
-    setSilent:_setSilent,
-    applySilentState:_applySilentState,
-    applyEnabledState:_applyEnabledState,
-    loadCustomDict:_loadCustomDict,
-    saveCustomDict:_saveCustomDict,
-    resetIdleTimer:_resetIdleTimer
-  };
-})();
-
-// ══════════════════════════════════════════════════════════════
-// 🎙️ دوال إدارة إعدادات المساعد الصوتي
-// ══════════════════════════════════════════════════════════════
-function vaToggleEnabled(){
-  const cur = VA.isEnabled();
-  VA.setEnabled(!cur);
-}
-
-function vaToggleSilent(){
-  const cur = VA.isSilent();
-  VA.setSilent(!cur);
-}
-
-function vaSaveIdleTimeout(val){
-  localStorage.setItem('va_idle_timeout', val);
-  // تحديث الثابت داخلياً عبر إعادة قراءته عند بدء الاستماع
-  showNotif('تم', 'تم حفظ مهلة الخمول ✅', 'success');
-}
-
-function vaRenderDict(){
-  const dict = VA.loadCustomDict();
-  const container = document.getElementById('va-dict-list');
-  if(!container) return;
-  const entries = Object.entries(dict);
-  if(!entries.length){
-    container.innerHTML = '<div style="color:var(--text2);font-size:12px;text-align:center;padding:16px">لا توجد بصمات مخصصة بعد — أضف أول بصمة أعلاه</div>';
-    return;
-  }
-  container.innerHTML = entries.map(([phrase,code])=>`
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.18);border-radius:10px;padding:10px 14px">
-      <span style="font-size:18px">🎤</span>
-      <div style="flex:1;min-width:0">
-        <span style="font-size:13px;font-weight:800;color:var(--text)">${phrase}</span>
-        <span style="margin:0 8px;color:var(--text2)">→</span>
-        <span style="font-size:13px;font-weight:900;color:var(--accent);font-family:monospace">${code}</span>
-      </div>
-      <button onclick="vaRemoveDictEntry(${JSON.stringify(phrase)})" style="background:rgba(255,34,68,0.1);border:1px solid rgba(255,34,68,0.3);color:var(--danger);border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Cairo',sans-serif;font-weight:700;flex-shrink:0">🗑️ حذف</button>
-    </div>
-  `).join('');
-}
-
-function vaAddDictEntry(){
-  const phraseEl = document.getElementById('va-dict-phrase');
-  const codeEl   = document.getElementById('va-dict-code');
-  if(!phraseEl||!codeEl) return;
-  const phrase = phraseEl.value.trim().toLowerCase();
-  const code   = codeEl.value.trim().toUpperCase();
-  if(!phrase){ showNotif('خطأ','أدخل النطق الذي تقوله','error'); return; }
-  if(!code){   showNotif('خطأ','أدخل كود التحليل','error'); return; }
-  const dict = VA.loadCustomDict();
-  dict[phrase] = code;
-  VA.saveCustomDict(dict);
-  phraseEl.value = '';
-  codeEl.value   = '';
-  vaRenderDict();
-  showNotif('تم','تمت إضافة البصمة: "'+phrase+'" → '+code+' ✅','success');
-}
-
-function vaRemoveDictEntry(phrase){
-  const dict = VA.loadCustomDict();
-  delete dict[phrase];
-  VA.saveCustomDict(dict);
-  vaRenderDict();
-  showNotif('تم','تم حذف البصمة ✅','success');
-}
-
-function vaClearDict(){
-  if(!confirm('هل تريد حذف جميع البصمات المخصصة؟')) return;
-  VA.saveCustomDict({});
-  vaRenderDict();
-  showNotif('تم','تم مسح القاموس المخصص','success');
-}
-
-function vaExportDict(){
-  const dict = VA.loadCustomDict();
-  const blob = new Blob([JSON.stringify(dict,null,2)],{type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'va_custom_dict.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function vaImportDict(input){
-  const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    try{
-      const imported = JSON.parse(e.target.result);
-      if(typeof imported !== 'object' || Array.isArray(imported)) throw new Error();
-      const cur = VA.loadCustomDict();
-      const merged = Object.assign({},cur,imported);
-      VA.saveCustomDict(merged);
-      vaRenderDict();
-      showNotif('تم','تم استيراد '+Object.keys(imported).length+' بصمة ✅','success');
-    }catch(err){ showNotif('خطأ','ملف القاموس غير صحيح','error'); }
-  };
-  reader.readAsText(file);
-  input.value='';
-}
-
-// تحديث واجهة الإعدادات عند فتح بطاقة المساعد الصوتي
-(function(){
-  const origToggle = window.toggleStCard;
-  window.toggleStCard = function(id){
-    if(typeof origToggle==='function') origToggle(id);
-    if(id==='stc-voice-assistant'){
-      setTimeout(()=>{
-        // تحديث حالة التشغيل/الإيقاف
-        VA.applyEnabledState(VA.isEnabled());
-        // تحديث حالة الصمت
-        VA.applySilentState(VA.isSilent());
-        // تحديث قيمة مهلة الخمول
-        const storedTimeout = localStorage.getItem('va_idle_timeout') || '15000';
-        const selEl = document.getElementById('va-idle-timeout');
-        if(selEl) selEl.value = storedTimeout;
-        vaRenderDict();
-      }, 80);
-    }
-  };
-})();
-</script>
-
