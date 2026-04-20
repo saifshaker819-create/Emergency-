@@ -27840,105 +27840,76 @@ const VA = (function(){
     _on = true;
     _rec = new SpeechRec();
     _rec.lang = 'ar-IQ';
-    _rec.continuous = true;      // ← الاستماع الدائم بدون انقطاع
-    _rec.interimResults = true;  // ← لكشف متى يتكلم المستخدم
+    _rec.continuous = false;     // جملة واحدة ثم إعادة — أبسط وأموثق
+    _rec.interimResults = false; // نص نهائي فقط — لا interim
     _rec.maxAlternatives = 5;
 
-    let _finalBuf = '';          // تجميع النص النهائي فقط
-    let _commitTimer = null;     // مؤقت تنفيذ الأمر بعد توقف الكلام
-    let _executing = false;      // منع التنفيذ المزدوج
+    // علامة لمنع تنفيذ نفس الجملة مرتين
+    let _executed = false;
 
     _rec.onresult = e => {
-      let interimText = '';
-      let newFinal = '';
-      for(let i = e.resultIndex; i < e.results.length; i++){
-        const txt = e.results[i][0].transcript;
-        if(e.results[i].isFinal){
-          newFinal += txt + ' ';
-        } else {
-          interimText += txt;
+      if(_executed) return;
+      _executed = true;
+
+      // اجمع كل البدائل
+      const alts = [];
+      for(let i = 0; i < e.results.length; i++){
+        for(let j = 0; j < e.results[i].length; j++){
+          const t = e.results[i][j].transcript.trim();
+          if(t && !alts.includes(t)) alts.push(t);
         }
       }
+      if(!alts.length) return;
+      const tx = alts[0];
 
-      // أضف فقط النص النهائي الجديد للمخزن
-      if(newFinal.trim()){
-        _finalBuf += newFinal;
-      }
+      _showHeard('<b>🎤 سمعت:</b> ' + tx);
 
-      // عرض ما يُسمع الآن
-      const display = (_finalBuf + interimText).trim();
-      if(display) _showHeard('🎤 ' + _finalBuf.trim() +
-        (interimText ? ' <span style="opacity:0.5">' + interimText + '</span>' : ''));
+      // حوّل الحروف الإنجليزية المنطوقة بالعربية
+      const converted = _arabicLettersToEn(tx.toLowerCase().trim());
+      const candidates = converted !== tx.toLowerCase().trim() ? [converted, tx] : [tx];
 
-      // أعد ضبط المؤقت — سينفّذ بعد 900ms من آخر كلمة
-      clearTimeout(_commitTimer);
-      if(!display) return;
-      _commitTimer = setTimeout(()=>{
-        if(_executing) return;
-        // استخدم النص النهائي فقط — النص المؤقت قد يكون غير دقيق
-        const tx = _finalBuf.trim() || interimText.trim();
-        _finalBuf = '';      // ← صفّر فوراً قبل أي شيء
-        interimText = '';
-        if(!tx || _executing) return;
-        _executing = true;
-
-        const converted = _arabicLettersToEn(tx.toLowerCase().trim());
-        _showHeard('<b>🎤 سمعت:</b> ' + tx);
-
-        let processed = false;
-        for(const alt of [converted, tx]){
-          const r = _tryProcess(alt);
-          if(r && r.length && r[0].cls !== 'err' && r[0].cls !== 'inf'){
-            _showReply(r);
-            if(!_isSilent() && window.speechSynthesis){
-              window.speechSynthesis.cancel();
-              const u = new SpeechSynthesisUtterance(r.map(x=>x.msg).join('، ').replace(/<[^>]+>/g,'').substring(0,80));
-              u.lang='ar-SA'; u.rate=1.2; u.pitch=1;
-              const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
-              if(arV) u.voice=arV;
-              window.speechSynthesis.speak(u);
-            }
-            processed = true;
-            break;
-          }
+      let processed = false;
+      for(const alt of candidates){
+        const r = _tryProcess(alt);
+        if(r && r.length && r[0].cls !== 'err' && r[0].cls !== 'inf'){
+          _showReply(r);
+          _speak(r.map(x=>x.msg).join('، '));
+          processed = true;
+          break;
         }
-        if(!processed){ _process(tx); }
-        _setHint(_ctx());
-        _resetIdleTimer();
-        // أعد تعيين العلامة بعد فترة قصيرة
-        setTimeout(()=>{ _executing = false; }, 600);
-      }, 900);
+      }
+      if(!processed) _process(tx);
+      _setHint(_ctx());
+      _resetIdleTimer();
     };
 
     _rec.onerror = e => {
+      _stopWave();
+      const fab = document.getElementById('va-fab');
+      if(fab) fab.classList.remove('va-on');
       if(e.error === 'not-allowed'){
-        _on = false; clearTimeout(_idleTimer); clearTimeout(_commitTimer);
-        _stopWave();
+        _on = false; clearTimeout(_idleTimer);
         _showReply([{cls:'err', msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
         return;
       }
-      if(e.error === 'no-speech') return; // صمت طبيعي — لا شيء
-      if(e.error === 'aborted' && !_on) return; // أوقفناه بشكل مقصود
-      // أي خطأ آخر → أعد التشغيل
-      if(_on){
-        _on = false;
-        clearTimeout(_restartTimer);
-        _restartTimer = setTimeout(()=>{ if(!_on) _startListening(); }, 500);
-      }
+      if(!_on) return;
+      // أي خطأ آخر → أعد
+      _on = false;
+      clearTimeout(_restartTimer);
+      _restartTimer = setTimeout(()=>_startListening(), 300);
     };
 
     _rec.onend = () => {
       _stopWave();
-      const fab = document.getElementById('va-fab'); if(fab) fab.classList.remove('va-on');
+      const fab = document.getElementById('va-fab');
+      if(fab) fab.classList.remove('va-on');
       if(_on){
-        // انتهى بشكل غير متوقع → أعد التشغيل فوراً
         _on = false;
         clearTimeout(_restartTimer);
         _restartTimer = setTimeout(()=>{
-          const heard = document.getElementById('va-heard');
-          if(heard) heard.innerHTML = '<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>';
+          _showHeard('<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>');
           _startListening();
-        }, 300);
+        }, 150);
       }
     };
 
