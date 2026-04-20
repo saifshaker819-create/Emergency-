@@ -26391,6 +26391,9 @@ const VA = (function(){
     // 5) قسم إدخال النتائج نشط
     const rs = document.getElementById('sec-results');
     if(rs && rs.classList.contains('active')) return 'results';
+    // 5b) نافذة عرض النتائج (m-view-results) مفتوحة
+    const vrModal = document.getElementById('m-view-results');
+    if(vrModal && (vrModal.style.display==='flex' || vrModal.classList.contains('open'))) return 'viewresults';
     // 6) قسم المرضى نشط
     const pts = document.getElementById('sec-patients');
     if(pts && pts.classList.contains('active')) return 'patients';
@@ -26407,15 +26410,19 @@ const VA = (function(){
     // CBC - صورة دم
     'cbc':'CBC','سي بي سي':'CBC','دم كامل':'CBC','صورة دم':'CBC','صورة دم كاملة':'CBC',
     'سيبيسي':'CBC','سي بي سي':'CBC','تعداد دم':'CBC','عد دم':'CBC','عدد الدم':'CBC',
+    'سي بي':'CBC','سيبي':'CBC','صي بي سي':'CBC',
     // HGB - هيموغلوبين
     'hgb':'HGB','هيموغلوبين':'HGB','hemoglobin':'HGB','هيموجلوبين':'HGB',
     'هيموكلوبين':'HGB','هيموغلبين':'HGB','خضاب الدم':'HGB','الهيموغلوبين':'HGB',
     // WBC - كريات بيضاء
     'wbc':'WBC','كريات بيضاء':'WBC','خلايا بيضاء':'WBC','كريات بيض':'WBC',
     'خلية بيضاء':'WBC','كرات بيضاء':'WBC','الكريات البيضاء':'WBC',
+    'دبليو بي سي':'WBC','دبليوبيسي':'WBC',
     // RBC - كريات حمراء
     'rbc':'RBC','كريات حمراء':'RBC','خلايا حمراء':'RBC','كرات حمراء':'RBC',
     'كريات حمر':'RBC','الكريات الحمراء':'RBC',
+    'ار بي سي':'RBC','اربيسي':'RBC','ار بي':'RBC','آربيسي':'RBC',
+    'ار بي سى':'RBC','ربي سي':'RBC',
     // PLT - صفائح
     'plt':'PLT','صفائح':'PLT','platelets':'PLT','صفيحات':'PLT',
     'الصفائح':'PLT','الصفيحات الدموية':'PLT','صفائح دموية':'PLT',
@@ -26499,6 +26506,8 @@ const VA = (function(){
     // CRP
     'crp':'CRP','سي ار بي':'CRP','سي أر بي':'CRP','البروتين التفاعلي':'CRP',
     'سي ار بي':'CRP','الالتهاب':'CRP',
+    'سي آر بي':'CRP','سي.ار.بي':'CRP','cرp':'CRP','c r p':'CRP',
+    'بروتين التهابي':'CRP','بروتين مفاعل':'CRP','سيربي':'CRP','سيرب':'CRP',
     // RA, ANA, ASO
     'ra':'RA','روماتيزم':'RA','روماتويد':'RA','عامل الروماتويد':'RA',
     'ana':'ANA','aso':'ASO','عقدية':'ASO',
@@ -26531,6 +26540,68 @@ const VA = (function(){
     // BLOOD GROUP
     'blood group':'BLOOD-GRP','فصيلة دم':'BLOOD-GRP','فصيلة الدم':'BLOOD-GRP',
     'زمرة الدم':'BLOOD-GRP','زمرة دم':'BLOOD-GRP','فصيلة':'BLOOD-GRP',
+    // ══ لهجة عراقية إضافية ══
+    // سكر
+    'گلوكوز':'GLU','كلوكز':'GLU','شوگر':'GLU','شوكر':'GLU',
+    'السكر الصايم':'FBS','صايم':'FBS','الصايم':'FBS',
+    'سكر عالفاضي':'FBS','فاضي':'FBS',
+    'سكر راندم':'RBS','راندم':'RBS','عشوائي':'RBS',
+    'سگر':'GLU','سگر صايم':'FBS',
+    // دم
+    'صورة الدم':'CBC','صورت الدم':'CBC','سي بي':'CBC',
+    'دبليو بي':'WBC','وايت':'WBC','وايت بلد':'WBC',
+    'ريد بلد':'RBC','ريد سيل':'RBC',
+    // كلى
+    'كلاوي':'CREAT','وظايف الكلاوي':'CREAT','الكلاوي':'CREAT',
+    'فضلات الكلى':'UREA','بقايا الكلى':'UREA',
+    // كبد
+    'كبدية':'ALT','وظايف الچبد':'ALT','چبد':'ALT','الچبد':'ALT',
+    'انزيم':'ALT','انزيمات':'ALT',
+    // دهون
+    'دهنيات':'CHOL','دهن الدم':'CHOL','الدهنيات':'TG',
+    'ثلاثيات':'TG','تلاتيات':'TG',
+    // الغدة
+    'الغده':'TSH','غده':'TSH','درقيه':'TSH','الدرقيه':'TSH',
+    'تي اس':'TSH','تي اس ايج':'TSH',
+    // هرمونات
+    'هرمون الذكر':'TEST','ذكورة':'TEST',
+    'هرمون الأنثى':'E2','هرمون الأنوثة':'E2',
+    'حليب':'PRL','هرمون الحليب':'PRL',
+    'بصيلات':'FSH','هرمون بصيلة':'FSH',
+    // فيتامينات
+    'فتمين دي':'VITD','فيتمين دي':'VITD','الشمسية':'VITD',
+    'فتمين بي':'VB12','فيتمين بي':'VB12',
+    // التهابات
+    'التهاب':'CRP','ترسب':'ESR','ترسيب الدم':'ESR',
+    // حمل
+    'حامل':'β-HCG','هرمون الأمومة':'β-HCG','تحليل الحمل':'β-HCG',
+    // براز
+    'تحليل براز':'Stoole','تحليل البراز':'Stoole','فحص براز':'Stoole',
+    // بول
+    'تحليل البول':'UA','فحص البول':'UA','تحليل بول':'UA',
+    // زرع
+    'زرعة':'CULTURE','مزرعة':'CULTURE','زرع بكتيري':'CULTURE',
+    // ملاريا
+    'ملاريا':'MALARIA-RDT','حمى':'MALARIA-RDT',
+    // تيفوئيد
+    'تيفه':'TYPH','تيف':'TYPH','حمى التيف':'TYPH',
+    // بروسيلا
+    'مالطا':'BRUC','حمى مالطه':'BRUC',
+    // كورونا
+    'كرونا':'COVID-AG','كوفيت':'COVID-AG','كوفد':'COVID-AG',
+    // ايدز
+    'الايدز':'HIV','ايج':'HIV',
+    // حديد
+    'حديديات':'FE','نقص حديد':'FERR','خزين الحديد':'FERR',
+    // كالسيوم وكهارل
+    'كالسيوم':'Ca','صوديوم':'Na','بوتاسيوم':'K','ملح الدم':'Na',
+    'معادن':'Ca','كهارل':'Na',
+    // بروستات
+    'البروستات':'PSA','هرمون بروستات':'PSA','غدة البروستات':'PSA',
+    // كوليسترول
+    'كولسترول':'CHOL','كولستيرول':'CHOL','چولسترول':'CHOL',
+    // ترانسامنيز
+    'ترانسامنيز':'ALT','سجبت':'AST','سجبت ':'AST',
   };
 
   // ══════════════════════════════════════════════════════
@@ -26549,6 +26620,13 @@ const VA = (function(){
     'سبعتاش':17,'ثمنتاش':18,'تسعتاش':19,'عشرين':20,'تلاتين':30,
     'خمستين':50,'سبعين':70,'ثمانين':80,'تسعين':90,'مئه':100,'ميه':100,
     'نص':0.5,'ربع':0.25,'ونص':0.5,
+    // عراقي إضافي
+    'گلووس':0,'چهار':4,'بيست':20,'سي':30,'چل':40,'پنجا':50,
+    'احدعش':11,'اثنعش':12,'ثلطعش':13,'اربعطعش':14,'خمسطعش':15,
+    'ستطعش':16,'سبعطعش':17,'ثمنطعش':18,'تسعطعش':19,
+    'احد عشر':11,'اثنا عشر':12,'ثلاثة عشر':13,'أربعة عشر':14,'خمسة عشر':15,
+    'ستة عشر':16,'سبعة عشر':17,'ثمانية عشر':18,'تسعة عشر':19,
+    'نقطة خمسة':0.5,'صفر فاصل خمسة':0.5,
   };
 
   function _parseNum(txt){
@@ -26580,17 +26658,38 @@ const VA = (function(){
 
   function _findTestCode(word){
     const w=word.toLowerCase().trim();
+    // ① مطابقة مباشرة من القاموس
     if(TEST_MAP[w])return TEST_MAP[w];
-    for(const[k,v]of Object.entries(TEST_MAP)){if(w.includes(k)||k.includes(w))return v;}
-    let best=null,bestScore=0;
-    for(const[k,v]of Object.entries(TEST_MAP)){
-      const s=_sim(w,k);if(s>bestScore&&s>0.72){bestScore=s;best=v;}
+    // ② مطابقة الأكواد القصيرة (3 أحرف أو أقل) بشكل دقيق فقط — لمنع الخلط بين RBC/CRP/CBC
+    const upper=w.toUpperCase();
+    if(w.length<=4){
+      // جرب مطابقة مباشرة للكود
+      if(typeof tests!=='undefined'){
+        const exact=tests.find(t=>t.code.toUpperCase()===upper);
+        if(exact)return exact.code;
+      }
+      // جرب القاموس بالضبط
+      const directKey=Object.keys(TEST_MAP).find(k=>k.toUpperCase()===upper);
+      if(directKey)return TEST_MAP[directKey];
     }
-    if(!best&&typeof tests!=='undefined'){
+    // ③ بحث بالاحتواء — لكن بشرط ألا يكون الكلمة قصيرة جداً
+    if(w.length>3){
+      for(const[k,v]of Object.entries(TEST_MAP)){if(w.includes(k)||k.includes(w))return v;}
+    }
+    // ④ مطابقة تقريبية — فقط للكلمات الطويلة (> 4 أحرف) لتجنب الخلط
+    if(w.length>4){
+      let best=null,bestScore=0;
+      for(const[k,v]of Object.entries(TEST_MAP)){
+        const s=_sim(w,k);if(s>bestScore&&s>0.78){bestScore=s;best=v;}
+      }
+      if(best)return best;
+    }
+    // ⑤ بحث في قاعدة التحاليل المحلية
+    if(typeof tests!=='undefined'){
       const t=tests.find(t=>t.code.toLowerCase()===w||(t.nameShort||'').toLowerCase().includes(w)||t.nameEn.toLowerCase().includes(w));
       if(t)return t.code;
     }
-    return best;
+    return null;
   }
 
   // ══════════════════════════════════════════════════════
@@ -26857,13 +26956,16 @@ const VA = (function(){
     const qualMap={
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
       'سلب':'Negative','نيكاتيف':'Negative','ما موجود':'Negative','مو موجود':'Negative',
+      'ما لكيت':'Negative','مالكيت':'Negative','ما طلع':'Negative','ما طلعت':'Negative',
       'ايجابي':'Positive','موجب':'Positive','positive':'Positive','pos':'Positive',
       'ايجاب':'Positive','بوزيتيف':'Positive','موجود':'Positive',
+      'طلع':'Positive','طلعت':'Positive','لكيت':'Positive','لقيت':'Positive',
       'تفاعلي':'Reactive','reactive':'Reactive','ريآكتيف':'Reactive',
       'غير تفاعلي':'Non-Reactive','non reactive':'Non-Reactive','نون ريآكتيف':'Non-Reactive',
-      'ضعيف':'Weak','weak':'Weak',
-      'طبيعي':'Normal','نورمال':'Normal','normal':'Normal',
-      'غير طبيعي':'Abnormal','abnormal':'Abnormal',
+      'مو تفاعلي':'Non-Reactive','ماهو تفاعلي':'Non-Reactive',
+      'ضعيف':'Weak','weak':'Weak','حادم':'Weak',
+      'طبيعي':'Normal','نورمال':'Normal','normal':'Normal','عادي':'Normal','زين':'Normal',
+      'غير طبيعي':'Abnormal','abnormal':'Abnormal','مو طبيعي':'Abnormal','مو زين':'Abnormal',
     };
     const lines=raw.split(/[،\n]+/);
     for(const line of lines){
@@ -26895,7 +26997,7 @@ const VA = (function(){
 
     // ① بحث عن مريض في قسم الطلبات
     // صيغ: "ابحث عن أحمد" / "دور على محمد" / "فتش عن سالم" / "اشوف طلبات علي"
-    const searchMatch=raw.match(/(?:ابحث عن|بحث عن|دور على|دور عن|دوّر على|فتش عن|فتّش عن|اشوف|شوف طلبات|اجيب|هاي|هات طلبات?)\s+(.+)/i);
+    const searchMatch=raw.match(/(?:ابحث عن|بحث عن|دور على|دور عن|دوّر على|فتش عن|فتّش عن|اشوف|شوف طلبات|اجيب|هاي|هات طلبات?|جيب طلبات?|جيب طلب|گلي عن|كلي عن|لكيت|لچ عن|لگ عن|بحث عن|فتش)\s+(.+)/i);
     if(searchMatch){
       const name=searchMatch[1].replace(/(?:\s+في الطلبات|\s+الطلبات)$/,'').trim();
       const inp=document.getElementById('req-srch-inp');
@@ -26921,28 +27023,47 @@ const VA = (function(){
     function _getVisibleReq(){
       const rows=document.querySelectorAll('#requests-body tr');
       if(rows.length===1){
-        // صف واحد — هذا هو المقصود
-        const btn=rows[0].querySelector('button');
-        if(btn){
-          // استخرج id من onclick
-          const m=btn.getAttribute('onclick')?.match(/'([^']+)'/);
-          if(m)return m[1];
+        // استخرج id من أي onclick في الصف (يشمل goToPrint و openViewResultsModal و goToResult)
+        const btns=rows[0].querySelectorAll('button[onclick]');
+        for(const btn of btns){
+          const oc=btn.getAttribute('onclick')||'';
+          const m=oc.match(/'([A-Za-z0-9\-_]+)'/);
+          if(m&&m[1])return m[1];
+        }
+      }
+      return null;
+    }
+    // استرجاع حالة الطلب المرئي
+    function _getVisibleReqStatus(){
+      const rows=document.querySelectorAll('#requests-body tr');
+      if(rows.length===1){
+        const btns=rows[0].querySelectorAll('button[onclick]');
+        for(const btn of btns){
+          const oc=btn.getAttribute('onclick')||'';
+          if(oc.includes('goToPrint')||oc.includes('openViewResultsModal'))return 'done';
+          if(oc.includes('goToResult'))return 'pending';
         }
       }
       return null;
     }
 
-    // طباعة — للطلب المطبوع فقط (status=done)
+    // طباعة — يعمل مع الطلب المطبوع (done) أو غيره
     if(/(?:^|\s)(طباعة|اطبع|طبع|print)(?:\s|$)/.test(t)&&!/ملصق|label|cbc/.test(t)){
       const rid=_getVisibleReq();
-      if(rid&&typeof goToPrint==='function'){
-        setTimeout(()=>goToPrint(rid),300);
-        out.push({cls:'ok',msg:'فتح طباعة الطلب ✅'});
+      const status=_getVisibleReqStatus();
+      if(rid){
+        if(status==='done'){
+          // الطلب مطبوع — انتقل مباشرة لصفحة الطباعة
+          if(typeof goToPrint==='function'){setTimeout(()=>goToPrint(rid),300);out.push({cls:'ok',msg:'فتح صفحة الطباعة ✅'});}
+          else{const b=document.querySelector('#requests-body button[onclick*="goToPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة ✅'});}else{out.push({cls:'err',msg:'لم أجد زر الطباعة'});}}
+        }else{
+          // طلب معلق — فتح إدخال النتائج أولاً
+          out.push({cls:'inf',msg:'الطلب لم يكتمل بعد — قل "نتائج" لإدخال النتائج أولاً'});
+        }
       }else{
-        // بحث عن زر طباعة في الصفوف الظاهرة
         const b=document.querySelector('#requests-body button[onclick*="goToPrint"]');
         if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة ✅'});}
-        else{out.push({cls:'err',msg:'لا يوجد طلب مطبوع — استخدم "طباعة" بعد اكتمال النتائج'});}
+        else{out.push({cls:'err',msg:'ابحث عن المريض أولاً ثم قل "طباعة"'});}
       }
       return out;
     }
@@ -27005,6 +27126,78 @@ const VA = (function(){
     return [{cls:'inf',msg:'في الطلبات قل: "ابحث عن [اسم]" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"'}];
   }
 
+
+  /* ── واجهة عرض النتائج (m-view-results) ── */
+  function _handleViewResults(t,raw){
+    const out=[];
+
+    // ① طباعة من داخل نافذة العرض
+    if(/(?:^|\s)(طباعة|اطبع|طبع|print)(?:\s|$)/.test(t)&&!/ملصق|label/.test(t)){
+      const b=document.querySelector('#vr-ftr button[onclick*="goToPrint"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'طباعة التقرير ✅'});}
+      else if(typeof currentReqId!=='undefined'&&typeof goToPrint==='function'){
+        closeModal('m-view-results');setTimeout(()=>goToPrint(currentReqId),350);
+        out.push({cls:'ok',msg:'طباعة التقرير ✅'});
+      }else{out.push({cls:'err',msg:'لم أجد زر الطباعة'});}
+      return out;
+    }
+
+    // ② تحميل PDF
+    if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
+      const b=document.querySelector('#vr-ftr button[onclick*="downloadPDF"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
+      else if(typeof downloadPDF==='function'){setTimeout(()=>{closeModal('m-view-results');downloadPDF();},350);out.push({cls:'ok',msg:'تحميل PDF ✅'});}
+      else{out.push({cls:'err',msg:'لم أجد زر التحميل'});}
+      return out;
+    }
+
+    // ③ مشاركة واتساب
+    if(/واتس|واتساب|whatsapp|مشاركة|ارسل|شارك/.test(t)){
+      const b=document.querySelector('#vr-ftr button[onclick*="shareWhatsApp"]')||document.querySelector('#vr-ftr button[onclick*="WhatsApp"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'مشاركة عبر واتساب ✅'});}
+      else if(typeof shareWhatsApp==='function'){setTimeout(()=>{closeModal('m-view-results');shareWhatsApp();},350);out.push({cls:'ok',msg:'مشاركة واتساب ✅'});}
+      else{out.push({cls:'err',msg:'لم أجد زر الواتساب'});}
+      return out;
+    }
+
+    // ④ إدخال / تعديل نتيجة تحليل معين
+    const addMatch=raw.match(/(?:عدّل|عدل|تعديل|ادخل|ادخال|غير|غيّر|بدّل|بدل)\s+(?:نتيجة\s+)?(.+?)(?:\s+إلى|\s+ب|\s+الى|$)/i);
+    if(addMatch){
+      const testName=addMatch[1].trim();
+      const code=_findTestCode(testName.toLowerCase());
+      if(code){
+        const b=document.querySelector(`#vr-body button[onclick*="'${code}'"],[onclick*="${code}"]`);
+        if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تعديل '+code+' ✅'});}
+        else{out.push({cls:'inf',msg:'انقر على التحليل '+code+' في القائمة لتعديله'});}
+      }else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testName});}
+      return out;
+    }
+
+    // ⑤ فتح تحليل بول/براز/مني من داخل النافذة
+    if(/تحليل بول|فحص بول|بول/.test(t)){
+      const b=document.querySelector('#vr-body button[onclick*="ua"],#vr-body button[onclick*="UA"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل البول ✅'});}
+      return out;
+    }
+    if(/تحليل براز|فحص براز|براز/.test(t)){
+      const b=document.querySelector('#vr-body button[onclick*="stool"],#vr-body button[onclick*="Stool"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل البراز ✅'});}
+      return out;
+    }
+    if(/تحليل مني|فحص مني|سائل منوي/.test(t)){
+      const b=document.querySelector('#vr-body button[onclick*="semen"],#vr-body button[onclick*="Semen"]');
+      if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'فتح تحليل المني ✅'});}
+      return out;
+    }
+
+    // ⑥ إغلاق النافذة
+    if(/اغلق|أغلق|إغلاق|الغاء|cancel|close|رجوع|ارجع/.test(t)){
+      if(typeof closeModal==='function'){closeModal('m-view-results');out.push({cls:'ok',msg:'تم الإغلاق'});}
+      return out;
+    }
+
+    return [{cls:'inf',msg:'في عرض النتائج: "طباعة" — "تحميل PDF" — "واتساب" — "تعديل [تحليل]" — "إغلاق"'}];
+  }
 
   function _handleUA(t){
     const out=[];
@@ -27078,39 +27271,48 @@ const VA = (function(){
 
   /* ── أوامر عامة (التنقل بين الصفحات) ── */
   function _handleGeneral(t){
-    if(/مريض جديد|اضافة مريض|مريض جديدي|ضيف مريض|اضف مريض/.test(t)){
+    if(/مريض جديد|اضافة مريض|مريض جديدي|ضيف مريض|اضف مريض|مريض جديده|دخّل مريض|سجّل مريض|سجل مريض/.test(t)){
       if(typeof startNewPatient==='function')startNewPatient();
       return [{cls:'ok',msg:'فتح نافذة مريض جديد'}];
     }
-    if(/(?:^|\s)مريض(?:\s|$)|المرضى|قائمة المرضى/.test(t)){
+    if(/(?:^|\s)(مريض|المريض)(?:\s|$)|المرضى|قائمة المرضى|شوف المرضى|اشوف المرضى|سجل المرضى/.test(t)){
       if(typeof nav==='function')nav('patients');return [{cls:'ok',msg:'صفحة المرضى'}];
     }
-    if(/نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|صفحة النتائج/.test(t)){
+    if(/نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|صفحة النتائج|دخّل نتائج|هاتلي نتائج/.test(t)){
       if(typeof nav==='function')nav('results');return [{cls:'ok',msg:'صفحة إدخال النتائج'}];
     }
-    if(/(?:^|\s)طلبات(?:\s|$)|الطلبات|قائمة الطلبات/.test(t)){
+    if(/(?:^|\s)(طلبات|الطلبات)(?:\s|$)|قائمة الطلبات|شوف الطلبات|اشوف الطلبات/.test(t)){
       if(typeof nav==='function')nav('requests');return [{cls:'ok',msg:'صفحة الطلبات'}];
     }
-    if(/فواتير|الفواتير|حسابات|دفع/.test(t)){
+    if(/فواتير|الفواتير|حسابات|دفع|فلوس|الفلوس|حساب/.test(t)){
       if(typeof nav==='function')nav('invoices');return [{cls:'ok',msg:'صفحة الفواتير'}];
     }
-    if(/لوحة التحكم|dashboard|الرئيسية|رئيسية|البداية/.test(t)){
+    if(/لوحة التحكم|dashboard|الرئيسية|رئيسية|البداية|الهوم|هوم/.test(t)){
       if(typeof nav==='function')nav('dashboard');return [{cls:'ok',msg:'لوحة التحكم'}];
     }
-    if(/اعدادات|إعدادات|settings|الإعدادات/.test(t)){
+    if(/اعدادات|إعدادات|settings|الإعدادات|الإعداد/.test(t)){
       if(typeof nav==='function')nav('settings');return [{cls:'ok',msg:'الإعدادات'}];
     }
-    if(/تقارير|reports|تقرير/.test(t)){
+    if(/تقارير|reports|تقرير|إحصائيات|احصائيات|ستاتستك/.test(t)){
       if(typeof nav==='function')nav('reports');return [{cls:'ok',msg:'التقارير'}];
     }
-    if(/زرع|culture|مزرعة/.test(t)){
+    if(/زرع|culture|مزرعة|زرعة/.test(t)){
       if(typeof nav==='function')nav('culture');return [{cls:'ok',msg:'نتائج الزرع'}];
     }
-    if(/بول|ua|تحليل بول|فحص بول/.test(t)){
+    if(/(?:^|\s)(بول|البول)(?:\s|$)|ua|تحليل بول|فحص بول|بولة/.test(t)){
       if(typeof nav==='function')nav('ua');return [{cls:'ok',msg:'تحليل البول'}];
     }
     if(/براز|stool|تحليل براز|فحص براز/.test(t)){
       if(typeof nav==='function')nav('stool');return [{cls:'ok',msg:'تحليل البراز'}];
+    }
+    if(/عداد esr|عداد الترسيب|ايزر|esr عداد/.test(t)){
+      if(typeof nav==='function')nav('esr');return [{cls:'ok',msg:'عداد ESR'}];
+    }
+    if(/طابور|الانتظار|قائمة انتظار|wait/.test(t)){
+      if(typeof nav==='function')nav('waitqueue');return [{cls:'ok',msg:'طابور الانتظار'}];
+    }
+    if(/(?:^|\s)(تحاليل|قاعدة التحاليل|داتابيس التحاليل)(?:\s|$)/.test(t)){
+      if(typeof nav==='function')nav('tests-db');return [{cls:'ok',msg:'قاعدة التحاليل'}];
     }
     return [{cls:'inf',msg:'قل: "مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير"'}];
   }
@@ -27122,6 +27324,7 @@ const VA = (function(){
     if(ctx==='patient')         return _handlePatient(t,txt);
     else if(ctx==='tests')      return _handleTests(t,txt);
     else if(ctx==='results')    return _handleResults(t,txt);
+    else if(ctx==='viewresults') return _handleViewResults(t,txt);
     else if(ctx==='requests')   return _handleRequests(t,txt);
     else if(ctx==='ua')         return _handleUA(t);
     else if(ctx==='stool')      return _handleStool(t);
@@ -27148,6 +27351,7 @@ const VA = (function(){
     if(ctx==='patient')         results=_handlePatient(t,txt);
     else if(ctx==='tests')      results=_handleTests(t,txt);
     else if(ctx==='results'||isResultsCmd) results=_handleResults(t,txt);
+    else if(ctx==='viewresults') results=_handleViewResults(t,txt);
     else if(ctx==='requests')   results=_handleRequests(t,txt);
     else if(ctx==='ua')         results=_handleUA(t);
     else if(ctx==='stool')      results=_handleStool(t);
@@ -27168,7 +27372,7 @@ const VA = (function(){
   // واجهة المساعد
   // ══════════════════════════════════════════════════════
   function _setCtxLabel(ctx){
-    const map={patient:'📝 بيانات مريض',tests:'🧪 اختيار تحاليل',results:'📊 نتائج',ua:'🧪 تحليل بول',stool:'🧫 تحليل براز',semen:'🔬 تحليل مني',patients:'👥 المرضى',requests:'📋 الطلبات',general:'—'};
+    const map={patient:'📝 بيانات مريض',tests:'🧪 اختيار تحاليل',results:'📊 نتائج',viewresults:'👁️ عرض النتائج',ua:'🧪 تحليل بول',stool:'🧫 تحليل براز',semen:'🔬 تحليل مني',patients:'👥 المرضى',requests:'📋 الطلبات',general:'—'};
     const el=document.getElementById('va-hdr-ctx');
     if(el)el.textContent=map[ctx]||'—';
   }
@@ -27186,6 +27390,7 @@ const VA = (function(){
       patient: '"اسمه أحمد" — "عمره 30" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
       tests:   '"CBC" — "كوليسترول ودهون ثلاثية" — "حفظ وإنشاء" — "امسح الكل" — "رجوع"',
       results: '"تأكيد النتائج" — "حفظ وطباعة" — "اضف تحليل كوليسترول" — "احذف TSH" — "طباعة CBC"',
+      viewresults:'"طباعة" — "تحميل PDF" — "واتساب" — "تعديل [تحليل]" — "تحليل بول" — "إغلاق"',
       requests:'"ابحث عن أحمد" — "نتائج" — "طباعة" — "عرض النتائج" — "ملصق" — "حذف الطلب"',
       ua:      '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
       stool:   '"حفظ وطباعة" — "حفظ النتيجة" — "واتساب" — "إغلاق"',
