@@ -26404,52 +26404,133 @@ const VA = (function(){
   // قاموس التحاليل
   // ══════════════════════════════════════════════════════
   const TEST_MAP = {
+    // CBC - صورة دم
     'cbc':'CBC','سي بي سي':'CBC','دم كامل':'CBC','صورة دم':'CBC','صورة دم كاملة':'CBC',
+    'سيبيسي':'CBC','سي بي سي':'CBC','تعداد دم':'CBC','عد دم':'CBC','عدد الدم':'CBC',
+    // HGB - هيموغلوبين
     'hgb':'HGB','هيموغلوبين':'HGB','hemoglobin':'HGB','هيموجلوبين':'HGB',
-    'wbc':'WBC','كريات بيضاء':'WBC','خلايا بيضاء':'WBC',
-    'rbc':'RBC','كريات حمراء':'RBC',
+    'هيموكلوبين':'HGB','هيموغلبين':'HGB','خضاب الدم':'HGB','الهيموغلوبين':'HGB',
+    // WBC - كريات بيضاء
+    'wbc':'WBC','كريات بيضاء':'WBC','خلايا بيضاء':'WBC','كريات بيض':'WBC',
+    'خلية بيضاء':'WBC','كرات بيضاء':'WBC','الكريات البيضاء':'WBC',
+    // RBC - كريات حمراء
+    'rbc':'RBC','كريات حمراء':'RBC','خلايا حمراء':'RBC','كرات حمراء':'RBC',
+    'كريات حمر':'RBC','الكريات الحمراء':'RBC',
+    // PLT - صفائح
     'plt':'PLT','صفائح':'PLT','platelets':'PLT','صفيحات':'PLT',
-    'hct':'HCT','هيماتوكريت':'HCT',
+    'الصفائح':'PLT','الصفيحات الدموية':'PLT','صفائح دموية':'PLT',
+    // HCT - هيماتوكريت
+    'hct':'HCT','هيماتوكريت':'HCT','هيمتوكريت':'HCT','الهيماتوكريت':'HCT',
+    // ESR - ترسيب
     'esr':'ESR','ايزر':'ESR','ترسب':'ESR','ترسيب':'ESR',
+    'ترسب الدم':'ESR','سرعة الترسب':'ESR','سرعة الترسيب':'ESR',
+    // MCV, MCH, MCHC, RDW
     'mcv':'MCV','mch':'MCH','mchc':'MCHC','rdw':'RDW',
-    'urea':'UREA','يوريا':'UREA','يوريه':'UREA',
+    // UREA - يوريا
+    'urea':'UREA','يوريا':'UREA','يوريه':'UREA','اليوريا':'UREA',
+    'بولة':'UREA','نيتروجين اليوريا':'UREA','bun':'UREA',
+    // CREATININE
     'creatinine':'CREAT','كرياتينين':'CREAT','creat':'CREAT',
+    'كرياتنين':'CREAT','كرياتينين الدم':'CREAT','الكرياتينين':'CREAT',
+    // URIC ACID
     'uric acid':'UA','حمض يوريك':'UA','يوريك':'UA',
-    'egfr':'EGFR','alt':'ALT','sgpt':'ALT','ast':'AST','sgot':'AST',
-    'alp':'ALP','ggt':'GGT','tbil':'TBIL','bilirubin':'TBIL','بيليروبين':'TBIL',
-    'dbil':'DBIL','ibil':'IBIL','tp':'TP','albumin':'ALB','البومين':'ALB','alb':'ALB',
-    'ldh':'LDH','glucose':'GLU','سكر':'GLU','جلوكوز':'GLU',
-    'fbs':'FBS','سكر صائم':'FBS','rbs':'RBS','hba1c':'HBA1C','a1c':'HBA1C','سكر تراكمي':'HBA1C',
-    'insulin':'INSU-F','انسولين':'INSU-F',
+    'حمض البول':'UA','حمض اليوريك':'UA','يوريك اسيد':'UA',
+    // eGFR
+    'egfr':'EGFR','تصفية الكلى':'EGFR','وظائف الكلى':'EGFR',
+    // ALT/AST - وظائف الكبد
+    'alt':'ALT','sgpt':'ALT','ast':'AST','sgot':'AST',
+    'البديل':'ALT','انزيم الكبد':'ALT','الانزيمات الكبدية':'ALT',
+    'اس جي بي تي':'ALT','اس جي او تي':'AST',
+    // ALP, GGT
+    'alp':'ALP','ggt':'GGT',
+    // BILIRUBIN
+    'tbil':'TBIL','bilirubin':'TBIL','بيليروبين':'TBIL',
+    'بيليروبين كلي':'TBIL','بلروبين':'TBIL','البيليروبين':'TBIL',
+    'dbil':'DBIL','بيليروبين مباشر':'DBIL',
+    'ibil':'IBIL','بيليروبين غير مباشر':'IBIL',
+    // TP, ALB
+    'tp':'TP','albumin':'ALB','البومين':'ALB','alb':'ALB',
+    'بروتين':'TP','البروتين الكلي':'TP','الالبومين':'ALB',
+    // LDH
+    'ldh':'LDH',
+    // GLUCOSE - سكر
+    'glucose':'GLU','سكر':'GLU','جلوكوز':'GLU','كلوكوز':'GLU',
+    'سكر عشوائي':'GLU','سكر في الدم':'GLU',
+    'fbs':'FBS','سكر صائم':'FBS','سكر الصيام':'FBS','صائم':'FBS',
+    'rbs':'RBS','سكر عشوائي':'RBS','سكر راندوم':'RBS',
+    'hba1c':'HBA1C','a1c':'HBA1C','سكر تراكمي':'HBA1C',
+    'هيموغلوبين سكري':'HBA1C','اي ون سي':'HBA1C','a1 c':'HBA1C',
+    // INSULIN
+    'insulin':'INSU-F','انسولين':'INSU-F','الانسولين':'INSU-F',
+    // CHOLESTEROL - كوليسترول
     'cholesterol':'CHOL','كوليسترول':'CHOL','chol':'CHOL',
+    'كولسترول':'CHOL','الكوليسترول':'CHOL','كولستيرول':'CHOL',
+    // TRIGLYCERIDES
     'triglycerides':'TG','tg':'TG','تريغليسيريد':'TG','دهون ثلاثية':'TG','تي جي':'TG',
+    'ثلاثي الغليسريد':'TG','تريجلسريد':'TG','تريغليسرايد':'TG','الدهون الثلاثية':'TG',
+    // HDL, LDL, VLDL
     'hdl':'HDL','ldl':'LDL','vldl':'VLDL',
-    'tsh':'TSH','تي اس اتش':'TSH','t4':'TT4','t3':'TT3','ft4':'FT4','ft3':'FT3',
-    'cortisol':'CORT','كورتيزول':'CORT',
-    'progesterone':'PROG','بروجسترون':'PROG',
-    'testosterone':'TEST','تيستوستيرون':'TEST',
-    'fsh':'FSH','lh':'LH','prolactin':'PRL','برولاكتين':'PRL','prl':'PRL',
-    'estradiol':'E2','استراديول':'E2',
-    'hcg':'β-HCG','حمل':'β-HCG',
-    'crp':'CRP','سي ار بي':'CRP',
-    'ra':'RA','روماتيزم':'RA',
-    'ana':'ANA','aso':'ASO',
+    'اتش دي ال':'HDL','ال دي ال':'LDL',
+    'دهن جيد':'HDL','دهن نافع':'HDL','دهن حميد':'HDL',
+    'دهن ضار':'LDL','دهن سيء':'LDL',
+    // TSH - الغدة الدرقية
+    'tsh':'TSH','تي اس اتش':'TSH','تي إس إتش':'TSH','تي اس ايتش':'TSH',
+    'الغدة الدرقية':'TSH','هرمون الغدة':'TSH','درقية':'TSH',
+    't4':'TT4','تي فور':'TT4','t3':'TT3','تي ثري':'TT3',
+    'ft4':'FT4','اف تي فور':'FT4','ft3':'FT3','اف تي ثري':'FT3',
+    'ثيروكسين':'TT4','ثيروكسين حر':'FT4',
+    // CORTISOL
+    'cortisol':'CORT','كورتيزول':'CORT','كورتيزول الدم':'CORT',
+    'هرمون التوتر':'CORT','الكورتيزول':'CORT',
+    // PROGESTERONE
+    'progesterone':'PROG','بروجسترون':'PROG','بروجسترون':'PROG',
+    'هرمون الحمل':'PROG','البروجسترون':'PROG',
+    // TESTOSTERONE
+    'testosterone':'TEST','تيستوستيرون':'TEST','تستوستيرون':'TEST',
+    'هرمون الذكورة':'TEST','التيستوستيرون':'TEST',
+    // FSH, LH, PROLACTIN, ESTRADIOL
+    'fsh':'FSH','اف اس اتش':'FSH','هرمون البصيلات':'FSH',
+    'lh':'LH','اتش ال':'LH','هرمون ال اتش':'LH',
+    'prolactin':'PRL','برولاكتين':'PRL','prl':'PRL','البرولاكتين':'PRL',
+    'estradiol':'E2','استراديول':'E2','استروجين':'E2','الاستراديول':'E2',
+    // HCG - حمل
+    'hcg':'β-HCG','حمل':'β-HCG','بيتا اتش سي جي':'β-HCG','اختبار حمل':'β-HCG',
+    'pregnancy test':'β-HCG','بيتا':'β-HCG',
+    // CRP
+    'crp':'CRP','سي ار بي':'CRP','سي أر بي':'CRP','البروتين التفاعلي':'CRP',
+    'سي ار بي':'CRP','الالتهاب':'CRP',
+    // RA, ANA, ASO
+    'ra':'RA','روماتيزم':'RA','روماتويد':'RA','عامل الروماتويد':'RA',
+    'ana':'ANA','aso':'ASO','عقدية':'ASO',
+    // VITAMINS
     'vitamin d':'VITD','فيتامين دي':'VITD','فيتامين د':'VITD','vitd':'VITD',
-    'b12':'VB12','فيتامين ب12':'VB12',
-    'ferritin':'FERR','فيريتين':'FERR','ferr':'FERR',
-    'iron':'FE','حديد':'FE',
-    'folate':'FOLATE','حمض فوليك':'FOLATE',
-    'hbsag':'HBsAg','hbs':'HBsAg','التهاب كبد ب':'HBsAg',
-    'hcv':'Anti-HCV','التهاب كبد سي':'Anti-HCV',
-    'hiv':'HIV','ايدز':'HIV',
-    'vdrl':'VDRL','سيفلس':'VDRL',
-    'covid':'COVID-AG','كوفيد':'COVID-AG',
-    'typhoid':'TYPH','تيفويد':'TYPH',
-    'brucella':'BRUC','بروسيلا':'BRUC',
-    'h pylori':'HPYL','هيليكوباكتر':'HPYL',
-    'cea':'CEA','psa':'PSA','بروستات':'PSA',
-    'afp':'AFP','ca125':'CA125','ca19':'CA19-9',
+    'فيتامين d':'VITD','فيتامين الشمس':'VITD','فتمين دي':'VITD',
+    'b12':'VB12','فيتامين ب12':'VB12','فيتامين ب 12':'VB12','b 12':'VB12',
+    'فيتامين بي 12':'VB12','كوبالامين':'VB12',
+    // FERRITIN, IRON, FOLATE
+    'ferritin':'FERR','فيريتين':'FERR','ferr':'FERR','الفيريتين':'FERR',
+    'فريتين':'FERR','فيرتين':'FERR',
+    'iron':'FE','حديد':'FE','حديد الدم':'FE','الحديد':'FE',
+    'folate':'FOLATE','حمض فوليك':'FOLATE','فولات':'FOLATE','فوليك':'FOLATE',
+    // HEPATITIS
+    'hbsag':'HBsAg','hbs':'HBsAg','التهاب كبد ب':'HBsAg','كبد ب':'HBsAg',
+    'هيباتيتس ب':'HBsAg','تهاب كبد بائي':'HBsAg',
+    'hcv':'Anti-HCV','التهاب كبد سي':'Anti-HCV','كبد سي':'Anti-HCV',
+    'هيباتيتس سي':'Anti-HCV','سي':'Anti-HCV',
+    // HIV, VDRL, COVID, TYPHOID, BRUCELLA, H.PYLORI
+    'hiv':'HIV','ايدز':'HIV','فيروس نقص المناعة':'HIV',
+    'vdrl':'VDRL','سيفلس':'VDRL','زهري':'VDRL',
+    'covid':'COVID-AG','كوفيد':'COVID-AG','كورونا':'COVID-AG',
+    'typhoid':'TYPH','تيفويد':'TYPH','تيفوئيد':'TYPH','تيفس':'TYPH','حمى التيفوئيد':'TYPH',
+    'brucella':'BRUC','بروسيلا':'BRUC','مالطية':'BRUC','حمى مالطا':'BRUC',
+    'h pylori':'HPYL','هيليكوباكتر':'HPYL','هيليكو':'HPYL','جرثومة المعدة':'HPYL',
+    'ملوية بوابية':'HPYL','جرثومة':'HPYL',
+    // TUMOR MARKERS
+    'cea':'CEA','psa':'PSA','بروستات':'PSA','هرمون البروستات':'PSA',
+    'afp':'AFP','ca125':'CA125','ca19':'CA19-9','ca 125':'CA125','ca 19':'CA19-9',
+    // BLOOD GROUP
     'blood group':'BLOOD-GRP','فصيلة دم':'BLOOD-GRP','فصيلة الدم':'BLOOD-GRP',
+    'زمرة الدم':'BLOOD-GRP','زمرة دم':'BLOOD-GRP','فصيلة':'BLOOD-GRP',
   };
 
   // ══════════════════════════════════════════════════════
@@ -26462,6 +26543,12 @@ const VA = (function(){
     'خمسين':50,'ستين':60,'سبعين':70,'ثمانين':80,'تسعين':90,
     'مئة':100,'مائة':100,'مية':100,'ميه':100,'مئتين':200,
     'ألف':1000,'الف':1000,'فاصل':'.','نقطة':'.','فاصلة':'.',
+    // لهجة عراقية/خليجية/مصرية
+    'وحدة':1,'وحد':1,'اثنتين':2,'اتنين':2,'تلاثة':3,'تلاث':3,'اربع':4,
+    'خمس':5,'سبع':7,'ثمن':8,'تسع':9,'عشر':10,'خمستاش':15,'ستاش':16,
+    'سبعتاش':17,'ثمنتاش':18,'تسعتاش':19,'عشرين':20,'تلاتين':30,
+    'خمستين':50,'سبعين':70,'ثمانين':80,'تسعين':90,'مئه':100,'ميه':100,
+    'نص':0.5,'ربع':0.25,'ونص':0.5,
   };
 
   function _parseNum(txt){
@@ -26659,16 +26746,16 @@ const VA = (function(){
     const out=[];
 
     // ① تأكيد النتائج — زر "✅ تأكيد النتائج"
-    if(/تأكيد النتائج|تأكيد(?:\s|$)|confirm/.test(t)){
+    if(/تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|تأكيد نتائج|تاكيد نتايج|اكد النتائج|اكد النتيجة|confirm results|confirm|تأكيد(?:\s|$)|تاكيد(?:\s|$)/.test(t)){
       if(typeof finalizeResult==='function'){setTimeout(()=>finalizeResult(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="finalizeResult"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}}
-      return out;
+      else{const b=document.querySelector('#sec-results button[onclick*="finalizeResult"]')||document.querySelector('button[onclick*="finalizeResult"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'تأكيد النتائج ✅'});}}
+      if(out.length)return out;
     }
     // ② حفظ وطباعة — زر "🖨️ حفظ وطباعة"
-    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ/.test(t)){
+    if(/حفظ وطباعة|حفظ وطبع|احفظ وطبع|احفظ وطباعة|حفظ.*طباع|طباع.*حفظ|خزن وطبع|اطبع وخزن|save.*print|print.*save/.test(t)){
       if(typeof finalizeAndPrint==='function'){setTimeout(()=>finalizeAndPrint(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}
-      else{const b=document.querySelector('#sec-results button[onclick*="finalizeAndPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
-      return out;
+      else{const b=document.querySelector('#sec-results button[onclick*="finalizeAndPrint"]')||document.querySelector('button[onclick*="finalizeAndPrint"]');if(b){setTimeout(()=>b.click(),300);out.push({cls:'ok',msg:'حفظ وطباعة ✅'});}}
+      if(out.length)return out;
     }
     // ③ تحميل PDF — زر "📄 تحميل PDF"
     if(/تحميل pdf|تحميل|تنزيل|download/.test(t)){
@@ -26708,10 +26795,14 @@ const VA = (function(){
     // ⑧ إدخال نتيجة تحليل — "اسم_التحليل + رقم أو نوعي"
     const qualMap={
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
+      'سلب':'Negative','نيكاتيف':'Negative','ما موجود':'Negative','مو موجود':'Negative',
       'ايجابي':'Positive','موجب':'Positive','positive':'Positive','pos':'Positive',
-      'تفاعلي':'Reactive','reactive':'Reactive',
-      'غير تفاعلي':'Non-Reactive','non reactive':'Non-Reactive',
+      'ايجاب':'Positive','بوزيتيف':'Positive','موجود':'Positive',
+      'تفاعلي':'Reactive','reactive':'Reactive','ريآكتيف':'Reactive',
+      'غير تفاعلي':'Non-Reactive','non reactive':'Non-Reactive','نون ريآكتيف':'Non-Reactive',
       'ضعيف':'Weak','weak':'Weak',
+      'طبيعي':'Normal','نورمال':'Normal','normal':'Normal',
+      'غير طبيعي':'Abnormal','abnormal':'Abnormal',
     };
     const lines=raw.split(/[،\n]+/);
     for(const line of lines){
@@ -26810,41 +26901,53 @@ const VA = (function(){
 
   /* ── أوامر عامة (التنقل بين الصفحات) ── */
   function _handleGeneral(t){
-    if(/مريض جديد|اضافة مريض/.test(t)){
+    if(/مريض جديد|اضافة مريض|مريض جديدي|ضيف مريض|اضف مريض/.test(t)){
       if(typeof startNewPatient==='function')startNewPatient();
       return [{cls:'ok',msg:'فتح نافذة مريض جديد'}];
     }
-    if(/(?:^|\s)مريض(?:\s|$)|المرضى/.test(t)){
+    if(/(?:^|\s)مريض(?:\s|$)|المرضى|قائمة المرضى/.test(t)){
       if(typeof nav==='function')nav('patients');return [{cls:'ok',msg:'صفحة المرضى'}];
     }
-    if(/نتائج|ادخال نتائج/.test(t)){
+    if(/نتائج|ادخال نتائج|ادخل نتائج|إدخال نتائج|صفحة النتائج/.test(t)){
       if(typeof nav==='function')nav('results');return [{cls:'ok',msg:'صفحة إدخال النتائج'}];
     }
-    if(/(?:^|\s)طلبات(?:\s|$)|الطلبات/.test(t)){
+    if(/(?:^|\s)طلبات(?:\s|$)|الطلبات|قائمة الطلبات/.test(t)){
       if(typeof nav==='function')nav('requests');return [{cls:'ok',msg:'صفحة الطلبات'}];
     }
-    if(/فواتير|الفواتير/.test(t)){
+    if(/فواتير|الفواتير|حسابات|دفع/.test(t)){
       if(typeof nav==='function')nav('invoices');return [{cls:'ok',msg:'صفحة الفواتير'}];
     }
-    if(/لوحة التحكم|dashboard|الرئيسية/.test(t)){
+    if(/لوحة التحكم|dashboard|الرئيسية|رئيسية|البداية/.test(t)){
       if(typeof nav==='function')nav('dashboard');return [{cls:'ok',msg:'لوحة التحكم'}];
     }
-    if(/اعدادات|إعدادات|settings/.test(t)){
+    if(/اعدادات|إعدادات|settings|الإعدادات/.test(t)){
       if(typeof nav==='function')nav('settings');return [{cls:'ok',msg:'الإعدادات'}];
     }
-    if(/تقارير|reports/.test(t)){
+    if(/تقارير|reports|تقرير/.test(t)){
       if(typeof nav==='function')nav('reports');return [{cls:'ok',msg:'التقارير'}];
     }
-    if(/زرع|culture/.test(t)){
+    if(/زرع|culture|مزرعة/.test(t)){
       if(typeof nav==='function')nav('culture');return [{cls:'ok',msg:'نتائج الزرع'}];
     }
-    if(/بول|ua/.test(t)){
+    if(/بول|ua|تحليل بول|فحص بول/.test(t)){
       if(typeof nav==='function')nav('ua');return [{cls:'ok',msg:'تحليل البول'}];
     }
-    if(/براز|stool/.test(t)){
+    if(/براز|stool|تحليل براز|فحص براز/.test(t)){
       if(typeof nav==='function')nav('stool');return [{cls:'ok',msg:'تحليل البراز'}];
     }
     return [{cls:'inf',msg:'قل: "مريض جديد" — "نتائج" — "مرضى" — "طلبات" — "فواتير"'}];
+  }
+
+  // دالة مساعدة لتجربة النص وإرجاع النتيجة دون تنفيذ
+  function _tryProcess(txt){
+    const ctx=_ctx();
+    const t=txt.toLowerCase().trim();
+    if(ctx==='patient')       return _handlePatient(t,txt);
+    else if(ctx==='tests')    return _handleTests(t,txt);
+    else if(ctx==='results')  return _handleResults(t,txt);
+    else if(ctx==='ua')       return _handleUA(t);
+    else if(ctx==='stool')    return _handleStool(t);
+    else                      return _handleGeneral(t);
   }
 
   // ══════════════════════════════════════════════════════
@@ -26861,9 +26964,12 @@ const VA = (function(){
       close();return;
     }
 
+    // في السياق العام، إذا كان الأمر يخص النتائج يُحوَّل لـ _handleResults مباشرة
+    const isResultsCmd = /تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|confirm results|حفظ وطباعة|حفظ وطبع|احفظ وطبع|save.*print|print.*save|تحميل pdf|واتساب.*نتائج|نتائج.*واتساب/.test(t);
+
     if(ctx==='patient')       results=_handlePatient(t,txt);
     else if(ctx==='tests')    results=_handleTests(t,txt);
-    else if(ctx==='results')  results=_handleResults(t,txt);
+    else if(ctx==='results'||isResultsCmd)  results=_handleResults(t,txt);
     else if(ctx==='ua')       results=_handleUA(t);
     else if(ctx==='stool')    results=_handleStool(t);
     else                      results=_handleGeneral(t);
@@ -26955,15 +27061,30 @@ const VA = (function(){
     if(_on)return;
     if(!SpeechRec)return;
     _rec=new SpeechRec();
+    // دعم اللهجات: عراقي، مصري، سعودي، فصحى
     _rec.lang='ar-IQ';
     _rec.continuous=false;
     _rec.interimResults=false;
-    _rec.maxAlternatives=5;
+    _rec.maxAlternatives=8;
 
     _rec.onresult=e=>{
-      const tx=Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
-      _showHeard(tx);
-      _process(tx);
+      // جمع كل البدائل لأفضل تعرف على اللهجات
+      const allTexts=[];
+      for(let i=0;i<e.results.length;i++){
+        for(let j=0;j<e.results[i].length;j++){
+          const txt=e.results[i][j].transcript.trim();
+          if(txt&&!allTexts.includes(txt))allTexts.push(txt);
+        }
+      }
+      const tx=allTexts[0]||'';
+      _showHeard(tx+(allTexts.length>1?' <small style="opacity:0.5">('+allTexts.slice(1,3).join(' / ')+')</small>':''));
+      // جرب كل البدائل حتى تنجح
+      let processed=false;
+      for(const alt of allTexts){
+        const r=_tryProcess(alt);
+        if(r&&r.length&&r[0].cls!=='err'&&r[0].cls!=='inf'){_showReply(r);_speak(r.map(x=>x.msg).join('، '));processed=true;break;}
+      }
+      if(!processed){_process(tx);}
       _setHint(_ctx());
     };
     _rec.onerror=e=>{
