@@ -3794,7 +3794,38 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
               </div>
             </div>
 
-            <!-- ② قاموس البصمات الصوتية المخصصة -->
+            <!-- ② وضع الصمت -->
+            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--warning);margin-bottom:4px">🔇 وضع الصمت</div>
+                <div style="font-size:11px;color:var(--text2)">المساعد يسمع وينفذ الأوامر بصمت — بدون أي رد صوتي</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span id="va-silent-label" style="font-size:12px;font-weight:800;color:var(--success)">🔊 يتكلم</span>
+                <div id="va-silent-btn" onclick="vaToggleSilent()" style="width:52px;height:28px;background:linear-gradient(90deg,var(--success),#00c470);border-radius:14px;position:relative;cursor:pointer;transition:all 0.3s;border:1px solid rgba(0,232,122,0.4)">
+                  <div id="va-silent-dot" style="width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:all 0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ③ مهلة الخمول -->
+            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:2px">⏱️ مهلة الخمول</div>
+                <div style="font-size:11px;color:var(--text2)">يُغلق المساعد تلقائياً إذا لم يتلقَّ أوامر خلال المدة المحددة</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <select id="va-idle-timeout" onchange="vaSaveIdleTimeout(this.value)" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+                  <option value="10000">10 ثوانٍ</option>
+                  <option value="15000" selected>15 ثانية</option>
+                  <option value="30000">30 ثانية</option>
+                  <option value="60000">دقيقة</option>
+                  <option value="0">بدون إيقاف</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ④ قاموس البصمات الصوتية المخصصة -->
             <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
               <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:4px">🗣️ بصمات النطق المخصصة</div>
               <div style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.8">
@@ -26425,6 +26456,43 @@ const VA = (function(){
 
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   let _rec = null, _on = false, _waveTimer = null, _restartTimer = null;
+  let _idleTimer = null;         // ① مؤقت الخمول — يوقف بعد 15 ثانية بدون أوامر
+  const IDLE_TIMEOUT = 15000;   // 15 ثانية
+
+  // وضع الصمت — لا يرد صوتياً
+  function _isSilent(){
+    const v = localStorage.getItem('va_silent');
+    return v === '1';
+  }
+  function _setSilent(val){
+    localStorage.setItem('va_silent', val ? '1' : '0');
+    _applySilentState(val);
+  }
+  function _applySilentState(silent){
+    const lbl = document.getElementById('va-silent-label');
+    const btn = document.getElementById('va-silent-btn');
+    const dot = document.getElementById('va-silent-dot');
+    if(lbl){ lbl.textContent = silent ? '\u{1F507} صامت' : '\u{1F50A} يتكلم'; lbl.style.color = silent ? 'var(--warning)' : 'var(--success)'; }
+    if(btn){ btn.style.background = silent ? 'rgba(255,204,0,0.3)' : 'linear-gradient(90deg,var(--success),#00c470)'; btn.style.borderColor = silent ? 'rgba(255,204,0,0.5)' : 'rgba(0,232,122,0.4)'; }
+    if(dot){ dot.style.right = silent ? 'calc(100% - 24px)' : '2px'; }
+    if(silent && window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  // اعادة ضبط مؤقت الخمول (يقرأ المهلة من الاعدادات)
+  function _resetIdleTimer(){
+    clearTimeout(_idleTimer);
+    if(!_on) return;
+    const stored = localStorage.getItem('va_idle_timeout');
+    const timeout = stored !== null ? parseInt(stored) : IDLE_TIMEOUT;
+    if(timeout === 0) return; // بدون إيقاف تلقائي
+    _idleTimer = setTimeout(()=>{
+      if(_on){
+        const heard = document.getElementById('va-heard');
+        if(heard) heard.innerHTML = '<span style="color:var(--warning)">⏱️ انتهت مهلة الانتظار...</span>';
+        setTimeout(()=>{ stop(); }, 800);
+      }
+    }, timeout);
+  }
 
   // ══════════════════════════════════════════════════════
   // ① قاموس البصمات المخصصة — يُقرأ من localStorage
@@ -27536,8 +27604,9 @@ const VA = (function(){
     bars.forEach(b=>{b.style.height='6px';});
   }
 
-  // نطق
+  // نطق (يحترم وضع الصمت)
   function _speak(txt){
+    if(_isSilent()) return;   // وضع صامت — لا يتكلم
     if(!txt||!window.speechSynthesis)return;
     window.speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(txt.replace(/<[^>]+>/g,'').substring(0,150));
@@ -27571,7 +27640,6 @@ const VA = (function(){
     if(_on)return;
     if(!SpeechRec)return;
     _rec=new SpeechRec();
-    // دعم اللهجات: عراقي، مصري، سعودي، فصحى
     _rec.lang='ar-IQ';
     _rec.continuous=false;
     _rec.interimResults=false;
@@ -27588,43 +27656,60 @@ const VA = (function(){
       }
       const tx=allTexts[0]||'';
       _showHeard(tx+(allTexts.length>1?' <small style="opacity:0.5">('+allTexts.slice(1,3).join(' / ')+')</small>':''));
-      // جرب كل البدائل حتى تنجح
+
+      // ② تنفيذ الامر وإعادة ضبط مؤقت الخمول
       let processed=false;
       for(const alt of allTexts){
         const r=_tryProcess(alt);
-        if(r&&r.length&&r[0].cls!=='err'&&r[0].cls!=='inf'){_showReply(r);_speak(r.map(x=>x.msg).join('، '));processed=true;break;}
+        if(r&&r.length&&r[0].cls!=='err'&&r[0].cls!=='inf'){
+          _showReply(r);
+          _speak(r.map(x=>x.msg).join('، '));
+          processed=true;
+          break;
+        }
       }
-      if(!processed){_process(tx);}
+      if(!processed){ _process(tx); }
       _setHint(_ctx());
+      // ② بعد أي أمر (حتى لو فشل) جدد مؤقت الخمول
+      _resetIdleTimer();
     };
+
     _rec.onerror=e=>{
       _stopWave();
       document.getElementById('va-fab').classList.remove('va-on');
-      if(e.error==='not-allowed'){_on=false;_showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);return;}
+      if(e.error==='not-allowed'){_on=false;clearTimeout(_idleTimer);_showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);return;}
       if(e.error==='aborted'){_on=false;return;}
-      // أعد الاستماع تلقائياً
-      if(_on)_restartTimer=setTimeout(()=>{if(_on)_startListening();},400);
+      // ③ أعد الاستماع تلقائياً — يضمن استمرار الاستماع بين الأوامر
+      if(_on)_restartTimer=setTimeout(()=>{if(_on)_startListening();},300);
     };
+
     _rec.onend=()=>{
       _stopWave();
       document.getElementById('va-fab').classList.remove('va-on');
       if(_on){
-        document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>';
-        _restartTimer=setTimeout(()=>{if(_on)_startListening();},350);
+        // ③ إعادة تشغيل فورية للاستماع المستمر
+        document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.35)">\u{1F3A4} يستمع... تكلم</span>';
+        _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 250);
       }
     };
+
     try{
-      _rec.start();_on=true;_startWave();
+      _rec.start(); _on=true; _startWave();
       document.getElementById('va-fab').classList.add('va-on');
-      document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.4)">🎤 اتكلم الآن...</span>';
+      document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.4)">\u{1F3A4} اتكلم الآن...</span>';
       _setCtxLabel(_ctx());
-    }catch(e){_on=false;_rec=null;}
+      // ① ابدأ مؤقت الخمول عند بدء الاستماع
+      _resetIdleTimer();
+    }catch(e){ _on=false; _rec=null; }
   }
 
   function stop(){
-    clearTimeout(_restartTimer);_on=false;
+    clearTimeout(_restartTimer);
+    clearTimeout(_idleTimer);   // ① أوقف مؤقت الخمول
+    _on=false;
     if(_rec){try{_rec.abort();}catch(e){}_rec=null;}
     _stopWave();
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
     const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
     const heard=document.getElementById('va-heard');if(heard)heard.innerHTML='اضغط الزر للتفعيل...';
   }
@@ -27643,8 +27728,13 @@ const VA = (function(){
   return{toggle,close,stop,
     isEnabled:_isEnabled,
     setEnabled:_setEnabled,
+    isSilent:_isSilent,
+    setSilent:_setSilent,
+    applySilentState:_applySilentState,
+    applyEnabledState:_applyEnabledState,
     loadCustomDict:_loadCustomDict,
-    saveCustomDict:_saveCustomDict
+    saveCustomDict:_saveCustomDict,
+    resetIdleTimer:_resetIdleTimer
   };
 })();
 
@@ -27654,6 +27744,17 @@ const VA = (function(){
 function vaToggleEnabled(){
   const cur = VA.isEnabled();
   VA.setEnabled(!cur);
+}
+
+function vaToggleSilent(){
+  const cur = VA.isSilent();
+  VA.setSilent(!cur);
+}
+
+function vaSaveIdleTimeout(val){
+  localStorage.setItem('va_idle_timeout', val);
+  // تحديث الثابت داخلياً عبر إعادة قراءته عند بدء الاستماع
+  showNotif('تم', 'تم حفظ مهلة الخمول ✅', 'success');
 }
 
 function vaRenderDict(){
@@ -27745,14 +27846,14 @@ function vaImportDict(input){
     if(typeof origToggle==='function') origToggle(id);
     if(id==='stc-voice-assistant'){
       setTimeout(()=>{
-        // تحديث حالة زر التشغيل/الإيقاف
-        const enabled = VA.isEnabled();
-        const lbl = document.getElementById('va-enabled-label');
-        const btn = document.getElementById('va-toggle-btn');
-        const dot = document.getElementById('va-toggle-dot');
-        if(lbl){ lbl.textContent = enabled ? 'مفعّل ✅' : 'موقوف ❌'; lbl.style.color = enabled ? 'var(--success)' : 'var(--danger)'; }
-        if(btn){ btn.style.background = enabled ? 'linear-gradient(90deg,var(--success),#00c470)' : 'rgba(255,34,68,0.3)'; btn.style.borderColor = enabled ? 'rgba(0,232,122,0.4)' : 'rgba(255,34,68,0.4)'; }
-        if(dot){ dot.style.right = enabled ? '2px' : 'calc(100% - 24px)'; }
+        // تحديث حالة التشغيل/الإيقاف
+        VA.applyEnabledState(VA.isEnabled());
+        // تحديث حالة الصمت
+        VA.applySilentState(VA.isSilent());
+        // تحديث قيمة مهلة الخمول
+        const storedTimeout = localStorage.getItem('va_idle_timeout') || '15000';
+        const selEl = document.getElementById('va-idle-timeout');
+        if(selEl) selEl.value = storedTimeout;
         vaRenderDict();
       }, 80);
     }
