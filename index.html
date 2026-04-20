@@ -26238,7 +26238,7 @@ async function _pmSendFile() {
 #va-fab {
   position: fixed;
   bottom: 26px; left: 26px;
-  z-index: 99999;
+  z-index: 2147483647;
   width: 58px; height: 58px;
   border-radius: 50%;
   border: none; cursor: pointer;
@@ -26248,6 +26248,7 @@ async function _pmSendFile() {
   box-shadow: 0 4px 18px rgba(0,212,255,0.5);
   transition: all 0.2s; outline: none;
   user-select: none;
+  pointer-events: all !important;
 }
 #va-fab:hover { transform: scale(1.1); }
 #va-fab.va-on {
@@ -26262,7 +26263,7 @@ async function _pmSendFile() {
 #va-box {
   position: fixed;
   bottom: 94px; left: 14px;
-  z-index: 99998;
+  z-index: 2147483646;
   width: 298px;
   background: linear-gradient(145deg,#070d1c,#0d1528);
   border: 1.5px solid rgba(0,212,255,0.3);
@@ -26363,7 +26364,7 @@ body.light-mode #va-wave.active #va-wave-bars span { background:#005f99; }
 const VA = (function(){
 
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let _rec = null, _on = false, _waveTimer = null;
+  let _rec = null, _on = false, _waveTimer = null, _restartTimer = null;
 
   // ── قاموس التحاليل ──────────────────────────────────────
   const TEST_MAP = {
@@ -26544,6 +26545,12 @@ const VA = (function(){
         if(wizStep === 2) return 'tests';
       }
     }
+    // تحليل البول
+    const uaModal = document.getElementById('m-ua');
+    if(uaModal && (uaModal.style.display==='flex'||uaModal.classList.contains('open'))) return 'ua';
+    // تحليل البراز
+    const stoolModal = document.getElementById('m-stool');
+    if(stoolModal && (stoolModal.style.display==='flex'||stoolModal.classList.contains('open'))) return 'stool';
     if(typeof currentPage !== 'undefined' && currentPage === 'results') return 'results';
     const rs = document.getElementById('sec-results');
     if(rs && (rs.style.display === '' || rs.style.display === 'block')) return 'results';
@@ -26559,10 +26566,34 @@ const VA = (function(){
     const t = txt.toLowerCase().trim();
     let results = [];
 
-    if(ctx === 'patient')     results = _handlePatient(t, txt);
-    else if(ctx === 'tests')  results = _handleTests(t, txt);
-    else if(ctx === 'results')results = _handleResults(t, txt);
+    // أوامر عالمية تعمل في أي سياق
+    if(/(?:^|\s)(اغلق|إغلاق|close|إلغاء|الغاء|cancel)(?:\s|$)/.test(t)){
+      // أغلق أي modal مفتوح
+      const openModals = document.querySelectorAll('.moverlay[style*="flex"],.modal-overlay[style*="flex"]');
+      if(openModals.length){
+        const closeBtn = document.querySelector('.mclose');
+        if(closeBtn) closeBtn.click();
+        else if(typeof closeModal==='function') closeModal();
+        results.push({cls:'ok', msg:'تم الإغلاق'});
+      } else {
+        close();
+        results.push({cls:'ok', msg:'تم إغلاق المساعد'});
+      }
+      _showReply(results);
+      _speak(results.map(r=>r.msg).join('، '));
+      return;
+    }
+
+    if(ctx === 'patient')      results = _handlePatient(t, txt);
+    else if(ctx === 'tests')   results = _handleTests(t, txt);
+    else if(ctx === 'results' || ctx === 'ua' || ctx === 'stool') results = _handleResults(t, txt);
     else results = _handleGeneral(t);
+
+    // fallback: إذا لم يُفهم الأمر في السياق الحالي، جرّب الأوامر العامة
+    if(results.length === 0 || (results.length===1 && results[0].cls==='err')){
+      const gen = _handleGeneral(t);
+      if(gen.length && gen[0].cls!=='inf') results = gen;
+    }
 
     if(results.length === 0){
       results = [{cls:'err', msg:'لم أفهم الأمر — حاول مرة أخرى'}];
@@ -26736,23 +26767,65 @@ const VA = (function(){
     const out = [];
 
     // حفظ وطباعة
-    if(/حفظ وطباعة|حفظ طباعة|طباعة وحفظ|print/.test(t)){
-      if(typeof finalizeAndPrint==='function') setTimeout(()=>finalizeAndPrint(),300);
-      out.push({cls:'ok', msg:'حفظ وطباعة ✅'}); return out;
+    if(/حفظ وطباعة|حفظ.*طباعة|طباعة.*حفظ|save.*print|print.*save/.test(t)){
+      const ctx = _ctx();
+      if(ctx==='ua'){
+        if(typeof saveAndPrintUA==='function') setTimeout(()=>saveAndPrintUA(),300);
+        out.push({cls:'ok', msg:'حفظ وطباعة تحليل البول ✅'});
+      } else if(ctx==='stool'){
+        if(typeof saveAndPrintStool==='function') setTimeout(()=>saveAndPrintStool(),300);
+        out.push({cls:'ok', msg:'حفظ وطباعة تحليل البراز ✅'});
+      } else {
+        if(typeof finalizeAndPrint==='function') setTimeout(()=>finalizeAndPrint(),300);
+        out.push({cls:'ok', msg:'حفظ وطباعة ✅'});
+      }
+      return out;
     }
-    // حفظ نهائي
-    if(/حفظ نهائي|حفظ اكتمل|اكتمل|finalize/.test(t)){
+    // تحميل PDF / تنزيل
+    if(/تنزيل|تحميل|download|pdf/.test(t)){
+      if(typeof downloadPDF==='function') setTimeout(()=>downloadPDF(),300);
+      out.push({cls:'ok', msg:'تحميل PDF ✅'}); return out;
+    }
+    // مشاركة واتساب
+    if(/واتس|واتساب|whatsapp|ارسل|مشاركة|إرسال/.test(t)){
+      const ctx = _ctx();
+      if(ctx==='ua'){
+        if(typeof saveAndShareUAWhatsApp==='function') setTimeout(()=>saveAndShareUAWhatsApp(),300);
+        out.push({cls:'ok', msg:'إرسال تقرير البول عبر واتساب ✅'});
+      } else if(ctx==='stool'){
+        if(typeof saveAndShareStoolWhatsApp==='function') setTimeout(()=>saveAndShareStoolWhatsApp(),300);
+        out.push({cls:'ok', msg:'إرسال تقرير البراز عبر واتساب ✅'});
+      } else {
+        if(typeof shareWhatsApp==='function') setTimeout(()=>shareWhatsApp(),300);
+        out.push({cls:'ok', msg:'مشاركة PDF عبر واتساب ✅'});
+      }
+      return out;
+    }
+    // تأكيد النتائج / حفظ نهائي
+    if(/تأكيد النتائج|تأكيد|حفظ نهائي|حفظ اكتمل|اكتمل|finalize/.test(t)){
       if(typeof finalizeResult==='function') setTimeout(()=>finalizeResult(),300);
-      out.push({cls:'ok', msg:'حفظ نهائي ✅'}); return out;
+      out.push({cls:'ok', msg:'تأكيد النتائج ✅'}); return out;
     }
     // حفظ مسودة
     if(/مسودة|draft|حفظ مؤقت/.test(t)){
       if(typeof saveDraft==='function') saveDraft();
       out.push({cls:'ok', msg:'تم حفظ المسودة ✅'}); return out;
     }
+    // إضافة تحليل جديد
+    if(/اضافة تحليل|تحليل جديد|add test|اضف تحليل/.test(t)){
+      // ابحث عن زر إضافة تحليل في الواجهة الحالية
+      const addBtn = document.querySelector('[onclick*="addTestToReq"],[onclick*="showAddTest"],[onclick*="addTest"]');
+      if(addBtn){ addBtn.click(); out.push({cls:'ok', msg:'فتح قائمة إضافة تحليل ✅'}); }
+      else { out.push({cls:'err', msg:'لم أجد زر إضافة تحليل في هذه الواجهة'}); }
+      return out;
+    }
+    // طباعة فقط
+    if(/(?:^|\s)طباعة(?:\s|$)|print only/.test(t)){
+      if(typeof finalizeAndPrint==='function') setTimeout(()=>finalizeAndPrint(),300);
+      out.push({cls:'ok', msg:'طباعة ✅'}); return out;
+    }
 
-    // إدخال نتيجة — "اسم_التحليل قيمة" أو "اسم_التحليل القيمة كذا"
-    // نبحث عن: [كلمة/كلمتان] [رقم أو نتيجة نوعية]
+    // إدخال نتيجة — "اسم_التحليل قيمة"
     const qualMap = {
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
       'ايجابي':'Positive','موجب':'Positive','positive':'Positive','pos':'Positive',
@@ -26761,25 +26834,20 @@ const VA = (function(){
       'ضعيف':'Weak','weak':'Weak',
     };
 
-    // حاول استخراج: اسم التحليل + القيمة
-    // نمط: "X [و] Y" حيث Y رقم أو نتيجة نوعية
     const lines = raw.split(/[،\n]+/);
     for(const line of lines){
       const l = line.trim();
       if(!l) continue;
 
-      // نتيجة نوعية
       let qualResult = null;
       for(const [k,v] of Object.entries(qualMap)){
         if(l.toLowerCase().includes(k)){ qualResult = v; break; }
       }
 
-      // رقم
       let numResult = null;
       const numPart = l.match(/(\d+(?:[.,]\d+)?)\s*$/);
       if(numPart) numResult = numPart[1].replace(',','.');
       if(!numResult){
-        // أرقام عربية في نهاية الجملة
         const arabicPart = l.replace(/^.*?(?=\s+(?:واحد|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مئة|مائة|مية|الف|ألف))/i,'');
         numResult = _parseNum(arabicPart);
       }
@@ -26787,7 +26855,6 @@ const VA = (function(){
       const val = qualResult || numResult;
       if(!val) continue;
 
-      // استخرج اسم التحليل (كل شيء قبل الرقم/النتيجة)
       let testPart = l;
       if(numResult) testPart = l.replace(numPart[0],'').trim();
       if(qualResult){
@@ -26827,7 +26894,7 @@ const VA = (function(){
 
   // ── أوامر عامة ───────────────────────────────────────
   function _handleGeneral(t){
-    if(/مريض جديد|اضافة مريض|مريض/.test(t)){
+    if(/مريض جديد|اضافة مريض|(?:^|\s)مريض(?:\s|$)/.test(t)){
       if(typeof startNewPatient==='function') startNewPatient();
       return [{cls:'ok', msg:'فتح نافذة مريض جديد'}];
     }
@@ -26835,7 +26902,7 @@ const VA = (function(){
       if(typeof nav==='function') nav('results');
       return [{cls:'ok', msg:'انتقال لإدخال النتائج'}];
     }
-    if(/طباعة|print/.test(t)){
+    if(/(?:^|\s)طباعة(?:\s|$)|print/.test(t)){
       if(typeof nav==='function') nav('print');
       return [{cls:'ok', msg:'انتقال لطباعة النتائج'}];
     }
@@ -26843,12 +26910,28 @@ const VA = (function(){
       if(typeof nav==='function') nav('dashboard');
       return [{cls:'ok', msg:'لوحة التحكم'}];
     }
+    if(/مرضى|المرضى|patients/.test(t)){
+      if(typeof nav==='function') nav('patients');
+      return [{cls:'ok', msg:'صفحة المرضى'}];
+    }
+    if(/طلبات|الطلبات|requests/.test(t)){
+      if(typeof nav==='function') nav('requests');
+      return [{cls:'ok', msg:'صفحة الطلبات'}];
+    }
+    if(/فواتير|الفواتير|invoices/.test(t)){
+      if(typeof nav==='function') nav('invoices');
+      return [{cls:'ok', msg:'صفحة الفواتير'}];
+    }
+    if(/ضبط|اعدادات|الإعدادات|settings/.test(t)){
+      if(typeof nav==='function') nav('settings');
+      return [{cls:'ok', msg:'الإعدادات'}];
+    }
     return [{cls:'inf', msg:'افتح نافذة مريض أو انتقل لإدخال النتائج أولاً'}];
   }
 
   // ── واجهة المستخدم ───────────────────────────────────
   function _setCtxLabel(ctx){
-    const map = {patient:'📝 بيانات مريض', tests:'🧪 تحاليل', results:'📊 نتائج', general:'—'};
+    const map = {patient:'📝 بيانات مريض', tests:'🧪 تحاليل', results:'📊 نتائج', ua:'🧪 تحليل بول', stool:'🧫 تحليل براز', general:'—'};
     const el = document.getElementById('va-hdr-ctx');
     if(el) el.textContent = map[ctx]||'—';
   }
@@ -26866,10 +26949,12 @@ const VA = (function(){
 
   function _setHint(ctx){
     const hints = {
-      patient: 'أمثلة: "اسمه أحمد علي" — "عمره 35 سنة" — "الطبيب سالم" — "رقمه 07701234567" — "التالي"',
-      tests:   'أمثلة: "TSH و FT4 و FT3" — "كوليسترول ودهون ثلاثية" — "cbc" — "انشاء"',
-      results: 'أمثلة: "TSH واحد فاصل خمسة" — "تريغليسيريد مئة وخمسين" — "حفظ وطباعة"',
-      general: 'أمثلة: "مريض جديد" — "إدخال نتائج" — "لوحة التحكم"',
+      patient: 'أمثلة: "اسمه أحمد علي" — "عمره 35" — "الطبيب سالم" — "رقمه 077..." — "التالي" — "إلغاء"',
+      tests:   'أمثلة: "TSH و FT4" — "كوليسترول ودهون ثلاثية" — "cbc" — "إنشاء" — "امسح الكل"',
+      results: 'أمثلة: "TSH واحد فاصل خمسة" — "تأكيد النتائج" — "حفظ وطباعة" — "واتساب" — "تحميل PDF" — "إضافة تحليل"',
+      ua:      'أمثلة: "حفظ وطباعة" — "واتساب" — "إغلاق"',
+      stool:   'أمثلة: "حفظ وطباعة" — "واتساب" — "إغلاق"',
+      general: 'أمثلة: "مريض جديد" — "إدخال نتائج" — "لوحة التحكم" — "مرضى" — "فواتير"',
     };
     const el = document.getElementById('va-hint');
     if(el) el.textContent = hints[ctx]||'';
@@ -26916,49 +27001,78 @@ const VA = (function(){
       return;
     }
     if(_on){ stop(); return; }
+    _startListening();
+  }
 
-    if(!_rec){
-      _rec = new SpeechRec();
-      _rec.lang='ar-IQ';
-      _rec.continuous=false;
-      _rec.interimResults=false;
-      _rec.maxAlternatives=5;
+  function _startListening(){
+    if(_on) return;
+    if(!SpeechRec) return;
 
-      _rec.onresult = e => {
-        const tx = Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
-        _showHeard(tx);
-        _process(tx);
-        _setHint(_ctx());
-      };
-      _rec.onerror = e => {
-        _on=false; _stopWave();
-        document.getElementById('va-fab').classList.remove('va-on');
-        if(e.error==='no-speech') _showReply([{cls:'inf',msg:'لم أسمع شيئاً — حاول مرة أخرى'}]);
-        else if(e.error==='not-allowed') _showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
-      };
-      _rec.onend = () => {
-        _on=false; _stopWave();
-        document.getElementById('va-fab').classList.remove('va-on');
-        document.getElementById('va-heard').innerHTML='اضغط الزر للكلام مرة أخرى';
-      };
-    }
+    // أنشئ instance جديد في كل مرة لتجنب حالات الخطأ
+    _rec = new SpeechRec();
+    _rec.lang='ar-IQ';
+    _rec.continuous=false;      // false أكثر استقراراً من true
+    _rec.interimResults=false;
+    _rec.maxAlternatives=5;
+
+    _rec.onresult = e => {
+      const tx = Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
+      _showHeard(tx);
+      _process(tx);
+      _setHint(_ctx());
+    };
+
+    _rec.onerror = e => {
+      _stopWave();
+      document.getElementById('va-fab').classList.remove('va-on');
+      if(e.error==='no-speech'){
+        // لا شيء — أعد الاستماع تلقائياً
+      } else if(e.error==='not-allowed'){
+        _on=false;
+        _showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);
+        return;
+      } else if(e.error==='aborted'){
+        // تم الإلغاء يدوياً — لا تُعد
+        _on=false; return;
+      }
+      // أعد الاستماع بعد تأخير قصير
+      if(_on){
+        _restartTimer = setTimeout(()=>{ if(_on) _startListening(); }, 400);
+      }
+    };
+
+    _rec.onend = () => {
+      _stopWave();
+      document.getElementById('va-fab').classList.remove('va-on');
+      // أعد الاستماع تلقائياً ما دام المساعد مفعّلاً
+      if(_on){
+        document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.35)">🎤 يستمع... تكلم</span>';
+        _restartTimer = setTimeout(()=>{ if(_on) _startListening(); }, 350);
+      }
+    };
 
     try {
-      _rec.lang='ar-IQ';
       _rec.start();
       _on=true;
       _startWave();
       document.getElementById('va-fab').classList.add('va-on');
       document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.4)">🎤 اتكلم الآن...</span>';
       _setCtxLabel(_ctx());
-    } catch(e){ _rec=null; }
+    } catch(e){
+      _on=false;
+      _rec=null;
+    }
   }
 
   function stop(){
-    if(_rec){ try{_rec.stop();}catch(e){} }
-    _on=false; _stopWave();
+    clearTimeout(_restartTimer);
+    _on=false;
+    if(_rec){ try{_rec.abort();}catch(e){} _rec=null; }
+    _stopWave();
     const fab=document.getElementById('va-fab');
     if(fab) fab.classList.remove('va-on');
+    const heard=document.getElementById('va-heard');
+    if(heard) heard.innerHTML='اضغط الزر للتفعيل...';
   }
 
   function close(){
