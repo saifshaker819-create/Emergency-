@@ -1945,56 +1945,370 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
 
 /* ══════════════════════════════════════════════════════════════
    🎙️ المساعد الصوتي — Voice Assistant CSS
+   z-index فوق كل شيء بما فيها .moverlay (9999999)
 ══════════════════════════════════════════════════════════════ */
-#va-fab{position:fixed;bottom:28px;left:28px;z-index:9800;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(139,63,255,0.45);transition:all 0.3s;font-size:24px;}
-#va-fab:hover{transform:scale(1.08);}
-#va-fab.va-listening{animation:va-pulse 1.2s infinite;background:linear-gradient(135deg,#ff2244,#ff6b00);}
+
+/* ── زر الميكروفون العائم — فوق الجميع ── */
+#va-fab{
+  position:fixed;bottom:28px;left:28px;
+  z-index:10000010;  /* فوق .moverlay (9999999) */
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,#8b3fff,#00d4ff);
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 24px rgba(139,63,255,0.55),0 2px 8px rgba(0,0,0,0.4);
+  transition:transform 0.3s,box-shadow 0.3s;
+  font-size:24px;
+}
+#va-fab:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(139,63,255,0.7);}
+#va-fab.va-listening{
+  animation:va-pulse 1.2s infinite;
+  background:linear-gradient(135deg,#ff2244,#ff6b00);
+}
 #va-fab.va-hidden{display:none!important;}
-@keyframes va-pulse{0%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 0 rgba(255,34,68,0.5);}70%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 18px rgba(255,34,68,0);}100%{box-shadow:0 4px 24px rgba(255,34,68,0.5),0 0 0 0 rgba(255,34,68,0);}}
-#va-panel{position:fixed;bottom:96px;left:16px;z-index:9801;width:300px;background:rgba(7,13,28,0.97);border:1.5px solid rgba(139,63,255,0.5);border-radius:18px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,0.7);display:none;animation:va-slideUp 0.25s ease;backdrop-filter:blur(16px);}
+@keyframes va-pulse{
+  0%  {box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 0   rgba(255,34,68,0.5);}
+  70% {box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 20px rgba(255,34,68,0);}
+  100%{box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 0   rgba(255,34,68,0);}
+}
+
+/* ── لوحة الصوت العائمة — فوق الجميع ── */
+#va-panel{
+  position:fixed;bottom:96px;left:16px;
+  z-index:10000009;
+  width:300px;
+  background:#07091e;
+  border:1.5px solid rgba(139,63,255,0.55);
+  border-radius:18px;padding:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(139,63,255,0.1);
+  display:none;
+  animation:va-slideUp 0.25s ease;
+  backdrop-filter:blur(20px);
+}
 #va-panel.va-open{display:block;}
 @keyframes va-slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* رأس اللوحة */
+#va-panel-title{font-size:12px;font-weight:800;color:#e2e8f0;}
+#va-panel-close{background:none;border:none;color:rgba(255,255,255,0.35);cursor:pointer;font-size:18px;line-height:1;padding:0;}
+#va-panel-close:hover{color:#ff2244;}
+
+/* الموجة */
 #va-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:40px;margin:10px 0;}
-#va-wave span{display:inline-block;width:4px;border-radius:4px;background:linear-gradient(180deg,#8b3fff,#00d4ff);animation:va-wave-bar 0.9s ease-in-out infinite;}
-#va-wave span:nth-child(1){height:12px;animation-delay:0s;}#va-wave span:nth-child(2){height:22px;animation-delay:0.1s;}#va-wave span:nth-child(3){height:32px;animation-delay:0.2s;}#va-wave span:nth-child(4){height:20px;animation-delay:0.3s;}#va-wave span:nth-child(5){height:28px;animation-delay:0.15s;}#va-wave span:nth-child(6){height:14px;animation-delay:0.25s;}#va-wave span:nth-child(7){height:24px;animation-delay:0.05s;}
-@keyframes va-wave-bar{0%,100%{transform:scaleY(0.4);opacity:0.5;}50%{transform:scaleY(1);opacity:1;}}
-#va-wave.va-idle span{animation:none;height:4px!important;opacity:0.3;}
-#va-transcript{font-size:13px;color:#fff;text-align:center;min-height:20px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:8px;border:1px solid rgba(255,255,255,0.08);line-height:1.5;}
-#va-status{font-size:10px;color:rgba(255,255,255,0.5);text-align:center;margin-top:8px;}
+#va-wave span{
+  display:inline-block;width:4px;border-radius:4px;
+  background:linear-gradient(180deg,#8b3fff,#00d4ff);
+  animation:va-wave-bar 0.9s ease-in-out infinite;
+}
+#va-wave span:nth-child(1){height:12px;animation-delay:0s;}
+#va-wave span:nth-child(2){height:22px;animation-delay:0.1s;}
+#va-wave span:nth-child(3){height:32px;animation-delay:0.2s;}
+#va-wave span:nth-child(4){height:20px;animation-delay:0.3s;}
+#va-wave span:nth-child(5){height:28px;animation-delay:0.15s;}
+#va-wave span:nth-child(6){height:14px;animation-delay:0.25s;}
+#va-wave span:nth-child(7){height:24px;animation-delay:0.05s;}
+@keyframes va-wave-bar{0%,100%{transform:scaleY(0.35);opacity:0.4;}50%{transform:scaleY(1);opacity:1;}}
+#va-wave.va-idle span{animation:none;height:4px!important;opacity:0.25;}
+
+/* النص والحالة */
+#va-transcript{
+  font-size:13px;color:#e2e8f0;text-align:center;
+  min-height:22px;padding:7px 10px;
+  background:rgba(255,255,255,0.06);
+  border-radius:8px;border:1px solid rgba(255,255,255,0.09);
+  line-height:1.5;
+}
+#va-status{font-size:10px;color:rgba(200,210,240,0.55);text-align:center;margin-top:8px;}
+
+/* نتيجة الأمر */
 #va-cmd-result{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;display:none;}
-#va-cmd-result.va-ok{background:rgba(0,232,122,0.15);color:#00e87a;border:1px solid rgba(0,232,122,0.3);}
-#va-cmd-result.va-err{background:rgba(255,34,68,0.12);color:#ff2244;border:1px solid rgba(255,34,68,0.2);}
-.va-picker-active *{cursor:crosshair!important;}
-.va-picker-active *:hover{outline:2.5px dashed #8b3fff!important;outline-offset:2px!important;background:rgba(139,63,255,0.07)!important;}
-#va-picker-bar{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#8b3fff,#00d4ff);color:#fff;font-size:13px;font-weight:800;padding:10px 20px;align-items:center;gap:12px;box-shadow:0 2px 20px rgba(139,63,255,0.5);display:none;}
+#va-cmd-result.va-ok {background:rgba(0,232,122,0.15);color:#00e87a;border:1px solid rgba(0,232,122,0.3);}
+#va-cmd-result.va-err{background:rgba(255,34,68,0.12);color:#ff4466;border:1px solid rgba(255,34,68,0.25);}
+
+/* زر الاستماع داخل اللوحة */
+#va-listen-btn{
+  flex:1;padding:8px;border-radius:9px;
+  background:linear-gradient(135deg,#8b3fff,#00d4ff);
+  border:none;color:#fff;font-size:12px;font-weight:800;cursor:pointer;
+  transition:opacity 0.2s;
+}
+#va-listen-btn:hover{opacity:0.85;}
+#va-panel-settings-btn{
+  padding:8px 12px;border-radius:9px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.14);
+  color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;
+  transition:background 0.2s;
+}
+#va-panel-settings-btn:hover{background:rgba(255,255,255,0.14);}
+
+/* ── شريط الاختيار — أعلى الجميع ── */
+#va-picker-bar{
+  position:fixed;top:0;left:0;right:0;
+  z-index:10000020;
+  background:linear-gradient(90deg,#8b3fff,#00d4ff);
+  color:#fff;font-size:13px;font-weight:800;
+  padding:10px 20px;
+  align-items:center;gap:12px;
+  box-shadow:0 3px 20px rgba(139,63,255,0.6);
+  display:none;
+}
 #va-picker-bar.va-active{display:flex;}
-#va-settings-modal{position:fixed;inset:0;z-index:99900;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;padding:16px;}
+#va-picker-cancel{
+  background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.45);
+  color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;
+  font-weight:800;cursor:pointer;transition:background 0.2s;
+}
+#va-picker-cancel:hover{background:rgba(255,255,255,0.35);}
+.va-picker-active *{cursor:crosshair!important;}
+.va-picker-active *:hover{
+  outline:2.5px dashed #8b3fff!important;
+  outline-offset:3px!important;
+  background:rgba(139,63,255,0.09)!important;
+}
+
+/* ── مؤشر الاستماع العلوي ── */
+#va-listening-chip{
+  position:fixed;top:66px;left:50%;transform:translateX(-50%);
+  z-index:10000011;
+  background:rgba(220,30,60,0.94);
+  color:#fff;font-size:12px;font-weight:800;
+  padding:6px 18px;border-radius:20px;
+  display:none;
+  box-shadow:0 4px 20px rgba(255,34,68,0.45);
+  backdrop-filter:blur(10px);
+  white-space:nowrap;
+}
+#va-listening-chip.show{display:flex;align-items:center;gap:7px;}
+#va-chip-dot{
+  width:8px;height:8px;background:#fff;border-radius:50%;
+  animation:va-pulse-sm 0.8s infinite;flex-shrink:0;
+}
+@keyframes va-pulse-sm{0%,100%{opacity:1}50%{opacity:0.35}}
+
+/* ── مودال الإعدادات الكاملة ── */
+#va-settings-modal{
+  position:fixed;inset:0;
+  z-index:10000015;
+  background:rgba(0,0,0,0.82);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
 #va-settings-modal.va-open{display:flex;animation:fadeInBg 0.25s ease;}
-#va-settings-modal-box{background:linear-gradient(135deg,#07091a,#0d1230);border:1.5px solid rgba(139,63,255,0.4);border-radius:18px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 0 60px rgba(139,63,255,0.2),0 20px 60px rgba(0,0,0,0.8);animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);}
-.va-cmd-card{background:rgba(255,255,255,0.04);border:1px solid rgba(139,63,255,0.25);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all 0.2s;}
-.va-cmd-card:hover{border-color:rgba(139,63,255,0.5);background:rgba(139,63,255,0.05);}
+#va-settings-modal-box{
+  background:#07091e;
+  border:1.5px solid rgba(139,63,255,0.45);
+  border-radius:18px;width:100%;max-width:640px;max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 0 60px rgba(139,63,255,0.25),0 20px 60px rgba(0,0,0,0.85);
+  animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+/* رأس المودال */
+#va-settings-modal-box .va-modal-hdr{
+  padding:20px 24px 16px;
+  border-bottom:1px solid rgba(139,63,255,0.2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+#va-settings-modal-box .va-modal-main-title{font-size:16px;font-weight:900;color:#e2e8f0;}
+#va-settings-modal-box .va-modal-sub-title{font-size:11px;color:rgba(180,190,220,0.55);margin-top:2px;}
+/* زر إغلاق المودال */
+.va-modal-close-btn{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);
+  color:rgba(200,210,240,0.6);width:34px;height:34px;border-radius:50%;
+  cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.va-modal-close-btn:hover{background:rgba(255,34,68,0.18);color:#ff4466;border-color:#ff4466;}
+
+/* تبويبات المودال */
+.va-tab-btn{
+  flex:1;padding:8px;border-radius:8px 8px 0 0;
+  font-size:11px;font-weight:800;cursor:pointer;
+  transition:all 0.2s;
+}
+.va-tab-btn.active{
+  background:rgba(139,63,255,0.22);
+  border:1px solid rgba(139,63,255,0.45);
+  border-bottom:none;color:#a78bfa;
+}
+.va-tab-btn:not(.active){background:transparent;border:1px solid transparent;color:rgba(180,190,220,0.4);}
+.va-tab-btn:not(.active):hover{background:rgba(139,63,255,0.08);color:rgba(180,190,220,0.7);}
+
+/* محتوى التبويبات */
+.va-tab-content{display:none;padding-bottom:20px;}
+.va-tab-content.active{display:block;}
+.va-tab-desc{font-size:11px;color:rgba(180,190,220,0.5);margin-bottom:12px;line-height:1.7;}
+
+/* ── بطاقات الأوامر ── */
+.va-cmd-card{
+  background:rgba(139,63,255,0.06);
+  border:1px solid rgba(139,63,255,0.22);
+  border-radius:10px;padding:10px 14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;transition:all 0.2s;
+}
+.va-cmd-card:hover{border-color:rgba(139,63,255,0.45);background:rgba(139,63,255,0.1);}
 .va-cmd-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
 .va-cmd-info{flex:1;min-width:0;}
 .va-cmd-phrase{font-size:12px;font-weight:800;color:#a78bfa;}
-.va-cmd-target{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.va-cmd-del{background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.25);color:#ff2244;border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-.va-cmd-del:hover{background:rgba(255,34,68,0.25);}
-.va-fp-card{background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.va-cmd-target{font-size:11px;color:rgba(180,190,220,0.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.va-cmd-del{
+  background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.28);
+  color:#ff4466;border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;flex-shrink:0;
+}
+.va-cmd-del:hover{background:rgba(255,34,68,0.28);}
+
+/* ── بطاقات البصمة ── */
+.va-fp-card{
+  background:rgba(0,212,255,0.05);
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;
+}
 .va-fp-name{font-size:13px;font-weight:800;color:var(--primary);}
-.va-fp-samples{font-size:10px;color:var(--text2);}
-.va-rec-btn{display:flex;align-items:center;gap:6px;background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.3);color:#ff2244;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.va-fp-samples{font-size:10px;color:rgba(180,190,220,0.55);}
+
+/* ── زر التسجيل ── */
+.va-rec-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.32);
+  color:#ff4466;border-radius:8px;padding:6px 12px;
+  font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;
+  white-space:nowrap;
+}
 .va-rec-btn:hover{background:rgba(255,34,68,0.22);}
-.va-rec-btn.recording{background:rgba(255,34,68,0.25);animation:va-pulse-sm 0.8s infinite;}
-@keyframes va-pulse-sm{0%,100%{opacity:1}50%{opacity:0.6}}
-.va-section-title{font-size:11px;font-weight:900;color:rgba(139,63,255,0.85);letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(139,63,255,0.2);}
-#va-listening-chip{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9900;background:rgba(255,34,68,0.9);color:#fff;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px;display:none;box-shadow:0 4px 20px rgba(255,34,68,0.4);backdrop-filter:blur(10px);}
-#va-listening-chip.show{display:flex;align-items:center;gap:6px;}
-body.light-mode #va-panel{background:rgba(255,255,255,0.97);border-color:rgba(139,63,255,0.4);}
-body.light-mode #va-transcript{background:rgba(0,0,0,0.04);color:#0d1b2a;border-color:rgba(0,0,0,0.1);}
-body.light-mode #va-settings-modal-box{background:linear-gradient(135deg,#ffffff,#f0f4f8);}
-body.light-mode .va-cmd-card{background:#fff;border-color:rgba(139,63,255,0.2);}
-body.light-mode .va-cmd-target{color:#5a6a7a;}
-body.light-mode .va-fp-card{background:#fff;}
+.va-rec-btn.recording{
+  background:rgba(255,34,68,0.28);
+  animation:va-pulse-sm 0.8s infinite;
+}
+
+/* ── عنوان قسم ── */
+.va-section-title{
+  font-size:11px;font-weight:900;
+  color:rgba(139,63,255,0.9);
+  letter-spacing:0.8px;
+  margin:16px 0 8px;padding-bottom:6px;
+  border-bottom:1px solid rgba(139,63,255,0.2);
+}
+
+/* ── مودال الربط — أعلى الجميع ── */
+#va-bind-modal{
+  position:fixed;inset:0;
+  z-index:10000025;
+  background:rgba(0,0,0,0.88);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+#va-bind-modal-box{
+  background:#07091e;
+  border:1.5px solid rgba(139,63,255,0.55);
+  border-radius:16px;max-width:440px;width:100%;padding:24px;
+  box-shadow:0 0 60px rgba(139,63,255,0.35);
+}
+.va-bind-title{font-size:16px;font-weight:900;color:#e2e8f0;margin-bottom:4px;}
+.va-bind-sub  {font-size:11px;color:rgba(180,190,220,0.5);margin-bottom:14px;}
+#va-bind-target-info{
+  background:rgba(139,63,255,0.12);border:1px solid rgba(139,63,255,0.32);
+  border-radius:10px;padding:12px;font-size:12px;color:#a78bfa;
+  margin-bottom:16px;word-break:break-all;line-height:1.6;
+}
+.va-bind-cancel-btn{
+  flex:1;padding:10px;border-radius:9px;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);
+  color:rgba(200,210,240,0.65);cursor:pointer;font-size:13px;font-weight:700;
+  transition:background 0.2s;
+}
+.va-bind-cancel-btn:hover{background:rgba(255,255,255,0.13);}
+.va-bind-confirm-btn{
+  flex:2;padding:10px;border-radius:9px;
+  background:linear-gradient(135deg,#8b3fff,#00d4ff);
+  border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;
+  transition:opacity 0.2s;
+}
+.va-bind-confirm-btn:hover{opacity:0.87;}
+
+/* ═══════════════════════════════════════════
+   🌞 الوضع الفاتح — Light Mode
+   يغطي كل عناصر المساعد الصوتي
+═══════════════════════════════════════════ */
+body.light-mode #va-panel{
+  background:#ffffff;
+  border-color:rgba(139,63,255,0.4);
+  box-shadow:0 8px 40px rgba(0,0,0,0.18);
+}
+body.light-mode #va-panel-title{color:#1a202c;}
+body.light-mode #va-panel-close{color:rgba(30,40,60,0.4);}
+body.light-mode #va-transcript{
+  background:rgba(0,0,0,0.04);color:#1a202c;
+  border-color:rgba(0,0,0,0.1);
+}
+body.light-mode #va-status{color:rgba(30,50,80,0.5);}
+body.light-mode #va-panel-settings-btn{
+  background:rgba(0,0,0,0.06);border-color:rgba(0,0,0,0.15);color:rgba(30,50,80,0.65);
+}
+
+body.light-mode #va-settings-modal{background:rgba(0,0,0,0.55);}
+body.light-mode #va-settings-modal-box{
+  background:#ffffff;
+  border-color:rgba(139,63,255,0.35);
+  box-shadow:0 0 60px rgba(139,63,255,0.12),0 20px 60px rgba(0,0,0,0.2);
+}
+body.light-mode #va-settings-modal-box .va-modal-hdr{border-bottom-color:rgba(0,0,0,0.08);}
+body.light-mode #va-settings-modal-box .va-modal-main-title{color:#1a202c;}
+body.light-mode #va-settings-modal-box .va-modal-sub-title{color:rgba(30,50,80,0.5);}
+body.light-mode .va-modal-close-btn{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.12);color:rgba(30,50,80,0.55);}
+
+body.light-mode .va-tab-btn.active{background:rgba(139,63,255,0.12);border-color:rgba(139,63,255,0.3);color:#6d28d9;}
+body.light-mode .va-tab-btn:not(.active){color:rgba(30,50,80,0.45);}
+body.light-mode .va-tab-btn:not(.active):hover{background:rgba(139,63,255,0.06);color:rgba(30,50,80,0.7);}
+body.light-mode .va-tab-desc{color:rgba(30,50,80,0.55);}
+
+body.light-mode .va-cmd-card{background:#f8f7ff;border-color:rgba(139,63,255,0.18);}
+body.light-mode .va-cmd-card:hover{background:#f0eeff;border-color:rgba(139,63,255,0.38);}
+body.light-mode .va-cmd-phrase{color:#6d28d9;}
+body.light-mode .va-cmd-target{color:rgba(30,50,80,0.55);}
+
+body.light-mode .va-fp-card{background:#f0f9ff;border-color:rgba(0,150,220,0.25);}
+body.light-mode .va-fp-name{color:#0077aa;}
+body.light-mode .va-fp-samples{color:rgba(30,50,80,0.5);}
+body.light-mode .va-section-title{color:#6d28d9;border-bottom-color:rgba(139,63,255,0.18);}
+
+body.light-mode #va-bind-modal{background:rgba(0,0,0,0.6);}
+body.light-mode #va-bind-modal-box{background:#ffffff;border-color:rgba(139,63,255,0.4);}
+body.light-mode .va-bind-title{color:#1a202c;}
+body.light-mode .va-bind-sub  {color:rgba(30,50,80,0.5);}
+body.light-mode #va-bind-target-info{background:#f0eeff;border-color:rgba(139,63,255,0.25);color:#6d28d9;}
+body.light-mode .va-bind-cancel-btn{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.12);color:rgba(30,50,80,0.65);}
+
+/* نصوص إضافية داخل المودالات في الوضع الفاتح */
+body.light-mode #va-settings-modal-box *:not(button):not(input):not(select):not(.va-cmd-phrase):not(.va-fp-name):not(.va-cmd-del):not(.va-rec-btn):not(.va-bind-confirm-btn):not(.va-listen-btn){
+  color:inherit;
+}
+body.light-mode #va-modal-cmds  [style*="color:rgba(255,255,255"],
+body.light-mode #va-modal-dict  [style*="color:rgba(255,255,255"],
+body.light-mode #va-modal-fp    [style*="color:rgba(255,255,255"],
+body.light-mode #va-modal-hist  [style*="color:rgba(255,255,255"]{
+  color:rgba(30,50,80,0.6)!important;
+}
+body.light-mode #va-modal-cmds  [style*="color:#fff"],
+body.light-mode #va-modal-dict  [style*="color:#fff"],
+body.light-mode #va-modal-fp    [style*="color:#fff"],
+body.light-mode #va-modal-hist  [style*="color:#fff"]{
+  color:#1a202c!important;
+}
+body.light-mode #va-modal-hist-list [style*="color:#fff"]{color:#1a202c!important;}
+body.light-mode #va-modal-hist-list [style*="color:rgba"]{color:rgba(30,50,80,0.5)!important;}
+body.light-mode #va-modal-hist-list [style*="border-bottom"]{border-bottom-color:rgba(0,0,0,0.07)!important;}
+body.light-mode #va-modal-builtin-list > div{
+  background:#f0f9ff!important;border-color:rgba(0,150,220,0.2)!important;
+}
+body.light-mode #va-modal-cmds-list [style*="color:rgba(255,255,255"]{color:rgba(30,50,80,0.45)!important;}
+/* حقل بيانات الإعدادات الصوتية داخل الـ accordion */
+body.light-mode #stc-voice .va-section-title{color:#6d28d9;}
+body.light-mode #stc-voice [style*="color:#fff"]{color:#1a202c!important;}
+body.light-mode #stc-voice [style*="color:rgba(255,255,255"]{color:rgba(30,50,80,0.6)!important;}
+body.light-mode #stc-voice [style*="background:rgba(0,0,0"]{background:rgba(0,0,0,0.04)!important;}
+body.light-mode #stc-voice [style*="background:rgba(139,63,255,0.08)"]{background:rgba(139,63,255,0.06)!important;}
+body.light-mode #stc-voice [style*="background:rgba(0,212,255,0.06)"]{background:#f0f9ff!important;}
+body.light-mode #stc-voice [style*="border:1px solid rgba(0,212,255"]{border-color:rgba(0,170,220,0.3)!important;}
 </style>
 </head>
 <body>
@@ -21721,23 +22035,23 @@ document.addEventListener('DOMContentLoaded', function(){
     <div>انقر على أي عنصر لربطه بأمر صوتي</div>
     <div style="font-size:10px;opacity:0.8">اضغط إلغاء للخروج</div>
   </div>
-  <button onclick="vaCancelPicker()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">✕ إلغاء</button>
+  <button id="va-picker-cancel" onclick="vaCancelPicker()">✕ إلغاء</button>
 </div>
 
 <!-- زر الميكروفون العائم -->
-<button id="va-fab" class="va-hidden" onclick="vaToggleListen()" title="المساعد الصوتي">🎙️</button>
+<button id="va-fab" class="va-hidden" onclick="vaToggleListen()" title="المساعد الصوتي (Alt+M)">🎙️</button>
 
 <!-- مؤشر الاستماع -->
 <div id="va-listening-chip">
-  <span style="width:8px;height:8px;background:#fff;border-radius:50%;animation:va-pulse-sm 0.8s infinite;display:inline-block;flex-shrink:0"></span>
+  <span id="va-chip-dot"></span>
   <span id="va-chip-text">جاري الاستماع...</span>
 </div>
 
 <!-- لوحة الصوت العائمة -->
 <div id="va-panel">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-    <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.85)">🎙️ المساعد الصوتي</div>
-    <button onclick="vaClosePanel()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;line-height:1">✕</button>
+    <div id="va-panel-title">🎙️ المساعد الصوتي</div>
+    <button id="va-panel-close" onclick="vaClosePanel()">✕</button>
   </div>
   <div id="va-wave" class="va-idle">
     <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
@@ -21746,42 +22060,42 @@ document.addEventListener('DOMContentLoaded', function(){
   <div id="va-status">اضغط زر الميكروفون للبدء</div>
   <div id="va-cmd-result"></div>
   <div style="margin-top:10px;display:flex;gap:6px">
-    <button onclick="vaToggleListen()" id="va-listen-btn" style="flex:1;padding:8px;border-radius:9px;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;color:#fff;font-size:12px;font-weight:800;cursor:pointer">🎙️ استمع</button>
-    <button onclick="vaOpenFullSettings()" style="padding:8px 12px;border-radius:9px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer">⚙️</button>
+    <button id="va-listen-btn" onclick="vaToggleListen()">🎙️ استمع</button>
+    <button id="va-panel-settings-btn" onclick="vaOpenFullSettings()">⚙️</button>
   </div>
 </div>
 
 <!-- مودال الإعدادات الكاملة -->
 <div id="va-settings-modal">
   <div id="va-settings-modal-box">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid rgba(139,63,255,0.2);display:flex;align-items:center;justify-content:space-between">
+    <div class="va-modal-hdr">
       <div style="display:flex;align-items:center;gap:12px">
         <span style="font-size:28px">🎙️</span>
         <div>
-          <div style="font-size:16px;font-weight:900;color:#fff">إعدادات المساعد الصوتي</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.45)">ربط الأوامر · القاموس · البصمات الصوتية</div>
+          <div class="va-modal-main-title">إعدادات المساعد الصوتي</div>
+          <div class="va-modal-sub-title">ربط الأوامر · القاموس · البصمات الصوتية</div>
         </div>
       </div>
-      <button onclick="vaCloseFullSettings()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center">✕</button>
+      <button class="va-modal-close-btn" onclick="vaCloseFullSettings()">✕</button>
     </div>
     <div style="padding:0 20px">
-      <div style="display:flex;gap:4px;padding:12px 0 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:16px">
-        <button id="va-tab-cmds" onclick="vaModalTab('cmds',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:rgba(139,63,255,0.2);border:1px solid rgba(139,63,255,0.4);border-bottom:none;color:#a78bfa;font-size:11px;font-weight:800;cursor:pointer">🔗 الأوامر</button>
-        <button id="va-tab-dict" onclick="vaModalTab('dict',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">📖 القاموس</button>
-        <button id="va-tab-fp" onclick="vaModalTab('fp',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">🎤 البصمات</button>
-        <button id="va-tab-hist" onclick="vaModalTab('hist',this)" style="flex:1;padding:8px;border-radius:8px 8px 0 0;background:transparent;border:1px solid transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:800;cursor:pointer">📋 السجل</button>
+      <div style="display:flex;gap:4px;padding:12px 0 0;border-bottom:1px solid rgba(139,63,255,0.15);margin-bottom:16px">
+        <button id="va-tab-cmds" class="va-tab-btn active" onclick="vaModalTab('cmds',this)">🔗 الأوامر</button>
+        <button id="va-tab-dict" class="va-tab-btn"        onclick="vaModalTab('dict',this)">📖 القاموس</button>
+        <button id="va-tab-fp"   class="va-tab-btn"        onclick="vaModalTab('fp',this)"  >🎤 البصمات</button>
+        <button id="va-tab-hist" class="va-tab-btn"        onclick="vaModalTab('hist',this)">📋 السجل</button>
       </div>
       <!-- تبويب الأوامر -->
-      <div id="va-modal-cmds" style="padding-bottom:20px">
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;line-height:1.7">اضغط <b style="color:#a78bfa">+ أمر جديد</b> ثم انقر على أي زر أو حقل في الصفحة لربطه بأمر صوتي.</div>
+      <div id="va-modal-cmds" class="va-tab-content active">
+        <div class="va-tab-desc">اضغط <b style="color:#a78bfa">+ أمر جديد</b> ثم انقر على أي زر أو حقل في الصفحة لربطه بأمر صوتي.</div>
         <div id="va-modal-cmds-list"></div>
         <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="vaStartPicker()">＋ إضافة أمر صوتي جديد</button>
-        <div style="margin-top:18px;font-size:11px;font-weight:900;color:rgba(0,212,255,0.7);padding-bottom:8px;border-bottom:1px solid rgba(0,212,255,0.15)">🗺️ أوامر التنقل المدمجة</div>
+        <div class="va-section-title" style="margin-top:18px">🗺️ أوامر التنقل المدمجة</div>
         <div id="va-modal-builtin-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px"></div>
       </div>
       <!-- تبويب القاموس -->
-      <div id="va-modal-dict" style="display:none;padding-bottom:20px">
-        <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px;line-height:1.7">أضف كلمات طبية أو أسماء يتعرف عليها المساعد بدقة أكبر.</div>
+      <div id="va-modal-dict" class="va-tab-content">
+        <div class="va-tab-desc">أضف كلمات طبية أو أسماء يتعرف عليها المساعد بدقة أكبر.</div>
         <div style="display:flex;gap:8px;margin-bottom:14px">
           <input class="fc" id="va-modal-dict-word" placeholder="كلمة أو اسم طبي..." style="flex:1">
           <select class="fc" id="va-modal-dict-cat" style="width:120px">
@@ -21795,24 +22109,24 @@ document.addEventListener('DOMContentLoaded', function(){
         <div id="va-modal-dict-list"></div>
       </div>
       <!-- تبويب البصمات -->
-      <div id="va-modal-fp" style="display:none;padding-bottom:20px">
+      <div id="va-modal-fp" class="va-tab-content">
         <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:16px;margin-bottom:14px">
           <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:6px">🎤 تسجيل بصمة صوتية جديدة</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات متتالية</div>
+          <div class="va-tab-desc" style="margin-bottom:12px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات متتالية</div>
           <div style="display:flex;gap:8px;margin-bottom:10px">
             <input class="fc" id="va-modal-fp-name" placeholder="الاسم المراد تسجيله..." style="flex:1">
             <button class="btn btn-s va-rec-btn" id="va-modal-fp-btn" onclick="vaModalStartFP()">🎤 تسجيل</button>
           </div>
-          <div id="va-modal-fp-status" style="font-size:11px;text-align:center;color:rgba(255,255,255,0.5);min-height:16px"></div>
+          <div id="va-modal-fp-status" style="font-size:11px;text-align:center;min-height:16px"></div>
           <div id="va-modal-fp-samples" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"></div>
         </div>
         <div id="va-modal-fp-list"></div>
       </div>
       <!-- تبويب السجل -->
-      <div id="va-modal-hist" style="display:none;padding-bottom:20px">
+      <div id="va-modal-hist" class="va-tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.7)">آخر الأوامر المنفذة</div>
-          <button onclick="vaClearHistory()" style="background:rgba(255,34,68,0.1);border:1px solid rgba(255,34,68,0.25);color:#ff2244;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer">مسح</button>
+          <div style="font-size:12px;font-weight:800">آخر الأوامر المنفذة</div>
+          <button class="va-cmd-del" onclick="vaClearHistory()">مسح الكل</button>
         </div>
         <div id="va-modal-hist-list" style="max-height:380px;overflow-y:auto"></div>
       </div>
@@ -21821,11 +22135,11 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 <!-- مودال تأكيد ربط الأمر -->
-<div id="va-bind-modal" style="position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.82);display:none;align-items:center;justify-content:center;padding:16px">
-  <div style="background:linear-gradient(135deg,#07091a,#0d1230);border:1.5px solid rgba(139,63,255,0.5);border-radius:16px;max-width:440px;width:100%;padding:24px;box-shadow:0 0 60px rgba(139,63,255,0.3)">
-    <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px">🔗 ربط أمر صوتي</div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:14px">العنصر المحدد:</div>
-    <div id="va-bind-target-info" style="background:rgba(139,63,255,0.1);border:1px solid rgba(139,63,255,0.3);border-radius:10px;padding:12px;font-size:12px;color:#a78bfa;margin-bottom:16px;word-break:break-all"></div>
+<div id="va-bind-modal" style="position:fixed;inset:0;z-index:10000025;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:16px">
+  <div id="va-bind-modal-box">
+    <div class="va-bind-title">🔗 ربط أمر صوتي</div>
+    <div class="va-bind-sub">العنصر المحدد:</div>
+    <div id="va-bind-target-info"></div>
     <div class="fg" style="margin-bottom:14px">
       <label class="fl">🗣️ الأمر الصوتي</label>
       <input class="fc" id="va-bind-phrase" placeholder="مثال: افتح المرضى، ابحث، احفظ...">
@@ -21845,8 +22159,8 @@ document.addEventListener('DOMContentLoaded', function(){
       <input class="fc" id="va-bind-fill-value" placeholder="النص الذي سيُكتب في الحقل...">
     </div>
     <div style="display:flex;gap:8px">
-      <button onclick="vaCancelBind()" style="flex:1;padding:10px;border-radius:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);cursor:pointer;font-size:13px">إلغاء</button>
-      <button onclick="vaConfirmBind()" style="flex:2;padding:10px;border-radius:9px;background:linear-gradient(135deg,#8b3fff,#00d4ff);border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer">✅ حفظ وربط</button>
+      <button class="va-bind-cancel-btn"  onclick="vaCancelBind()">إلغاء</button>
+      <button class="va-bind-confirm-btn" onclick="vaConfirmBind()">✅ حفظ وربط</button>
     </div>
   </div>
 </div>
@@ -22514,14 +22828,10 @@ window.vaCloseFullSettings = function(){
 window.vaModalTab = function(name, btn){
   _VA.currentTab = name;
   ['cmds','dict','fp','hist'].forEach(t=>{
-    const el=document.getElementById('va-modal-'+t); if(el) el.style.display=(t===name?'block':'none');
+    const el=document.getElementById('va-modal-'+t);
+    if(el){ el.classList.toggle('active', t===name); }
     const tb=document.getElementById('va-tab-'+t);
-    if(tb){
-      const active = t===name;
-      tb.style.background = active?'rgba(139,63,255,0.2)':'transparent';
-      tb.style.borderColor = active?'rgba(139,63,255,0.4)':'transparent';
-      tb.style.color       = active?'#a78bfa':'rgba(255,255,255,0.4)';
-    }
+    if(tb){ tb.classList.toggle('active', t===name); }
   });
   if(name==='fp')   vaRenderFP();
   if(name==='hist') vaRenderHistory();
