@@ -1942,373 +1942,6 @@ body.light-mode .fr-accent{color:#059669 !important;}
   direction:rtl; white-space:nowrap;
 }
 body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
-
-/* ══════════════════════════════════════════════════════════════
-   🎙️ المساعد الصوتي — Voice Assistant CSS
-   z-index فوق كل شيء بما فيها .moverlay (9999999)
-══════════════════════════════════════════════════════════════ */
-
-/* ── زر الميكروفون العائم — فوق الجميع ── */
-#va-fab{
-  position:fixed;bottom:28px;left:28px;
-  z-index:10000010;  /* فوق .moverlay (9999999) */
-  width:58px;height:58px;border-radius:50%;
-  background:linear-gradient(135deg,#8b3fff,#00d4ff);
-  border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 24px rgba(139,63,255,0.55),0 2px 8px rgba(0,0,0,0.4);
-  transition:transform 0.3s,box-shadow 0.3s;
-  font-size:24px;
-}
-#va-fab:hover{transform:scale(1.1);box-shadow:0 6px 32px rgba(139,63,255,0.7);}
-#va-fab.va-listening{
-  animation:va-pulse 1.2s infinite;
-  background:linear-gradient(135deg,#ff2244,#ff6b00);
-}
-#va-fab.va-hidden{display:none!important;}
-@keyframes va-pulse{
-  0%  {box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 0   rgba(255,34,68,0.5);}
-  70% {box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 20px rgba(255,34,68,0);}
-  100%{box-shadow:0 4px 24px rgba(255,34,68,0.6),0 0 0 0   rgba(255,34,68,0);}
-}
-
-/* ── لوحة الصوت العائمة — فوق الجميع ── */
-#va-panel{
-  position:fixed;bottom:96px;left:16px;
-  z-index:10000009;
-  width:300px;
-  background:#07091e;
-  border:1.5px solid rgba(139,63,255,0.55);
-  border-radius:18px;padding:16px;
-  box-shadow:0 8px 40px rgba(0,0,0,0.8),0 0 0 1px rgba(139,63,255,0.1);
-  display:none;
-  animation:va-slideUp 0.25s ease;
-  backdrop-filter:blur(20px);
-}
-#va-panel.va-open{display:block;}
-@keyframes va-slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-/* رأس اللوحة */
-#va-panel-title{font-size:12px;font-weight:800;color:#e2e8f0;}
-#va-panel-close{background:none;border:none;color:rgba(255,255,255,0.35);cursor:pointer;font-size:18px;line-height:1;padding:0;}
-#va-panel-close:hover{color:#ff2244;}
-
-/* الموجة */
-#va-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:40px;margin:10px 0;}
-#va-wave span{
-  display:inline-block;width:4px;border-radius:4px;
-  background:linear-gradient(180deg,#8b3fff,#00d4ff);
-  animation:va-wave-bar 0.9s ease-in-out infinite;
-}
-#va-wave span:nth-child(1){height:12px;animation-delay:0s;}
-#va-wave span:nth-child(2){height:22px;animation-delay:0.1s;}
-#va-wave span:nth-child(3){height:32px;animation-delay:0.2s;}
-#va-wave span:nth-child(4){height:20px;animation-delay:0.3s;}
-#va-wave span:nth-child(5){height:28px;animation-delay:0.15s;}
-#va-wave span:nth-child(6){height:14px;animation-delay:0.25s;}
-#va-wave span:nth-child(7){height:24px;animation-delay:0.05s;}
-@keyframes va-wave-bar{0%,100%{transform:scaleY(0.35);opacity:0.4;}50%{transform:scaleY(1);opacity:1;}}
-#va-wave.va-idle span{animation:none;height:4px!important;opacity:0.25;}
-
-/* النص والحالة */
-#va-transcript{
-  font-size:13px;color:#e2e8f0;text-align:center;
-  min-height:22px;padding:7px 10px;
-  background:rgba(255,255,255,0.06);
-  border-radius:8px;border:1px solid rgba(255,255,255,0.09);
-  line-height:1.5;
-}
-#va-status{font-size:10px;color:rgba(200,210,240,0.55);text-align:center;margin-top:8px;}
-
-/* نتيجة الأمر */
-#va-cmd-result{margin-top:10px;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:700;text-align:center;display:none;}
-#va-cmd-result.va-ok {background:rgba(0,232,122,0.15);color:#00e87a;border:1px solid rgba(0,232,122,0.3);}
-#va-cmd-result.va-err{background:rgba(255,34,68,0.12);color:#ff4466;border:1px solid rgba(255,34,68,0.25);}
-
-/* زر الاستماع داخل اللوحة */
-#va-listen-btn{
-  flex:1;padding:8px;border-radius:9px;
-  background:linear-gradient(135deg,#8b3fff,#00d4ff);
-  border:none;color:#fff;font-size:12px;font-weight:800;cursor:pointer;
-  transition:opacity 0.2s;
-}
-#va-listen-btn:hover{opacity:0.85;}
-#va-panel-settings-btn{
-  padding:8px 12px;border-radius:9px;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.14);
-  color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;
-  transition:background 0.2s;
-}
-#va-panel-settings-btn:hover{background:rgba(255,255,255,0.14);}
-
-/* ── شريط الاختيار — أعلى الجميع ── */
-#va-picker-bar{
-  position:fixed;top:0;left:0;right:0;
-  z-index:10000020;
-  background:linear-gradient(90deg,#8b3fff,#00d4ff);
-  color:#fff;font-size:13px;font-weight:800;
-  padding:10px 20px;
-  align-items:center;gap:12px;
-  box-shadow:0 3px 20px rgba(139,63,255,0.6);
-  display:none;
-}
-#va-picker-bar.va-active{display:flex;}
-#va-picker-cancel{
-  background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.45);
-  color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;
-  font-weight:800;cursor:pointer;transition:background 0.2s;
-}
-#va-picker-cancel:hover{background:rgba(255,255,255,0.35);}
-.va-picker-active *{cursor:crosshair!important;}
-.va-picker-active *:hover{
-  outline:2.5px dashed #8b3fff!important;
-  outline-offset:3px!important;
-  background:rgba(139,63,255,0.09)!important;
-}
-
-/* ── مؤشر الاستماع العلوي ── */
-#va-listening-chip{
-  position:fixed;top:66px;left:50%;transform:translateX(-50%);
-  z-index:10000011;
-  background:rgba(220,30,60,0.94);
-  color:#fff;font-size:12px;font-weight:800;
-  padding:6px 18px;border-radius:20px;
-  display:none;
-  box-shadow:0 4px 20px rgba(255,34,68,0.45);
-  backdrop-filter:blur(10px);
-  white-space:nowrap;
-}
-#va-listening-chip.show{display:flex;align-items:center;gap:7px;}
-#va-chip-dot{
-  width:8px;height:8px;background:#fff;border-radius:50%;
-  animation:va-pulse-sm 0.8s infinite;flex-shrink:0;
-}
-@keyframes va-pulse-sm{0%,100%{opacity:1}50%{opacity:0.35}}
-
-/* ── مودال الإعدادات الكاملة ── */
-#va-settings-modal{
-  position:fixed;inset:0;
-  z-index:10000015;
-  background:rgba(0,0,0,0.82);
-  display:none;align-items:center;justify-content:center;padding:16px;
-}
-#va-settings-modal.va-open{display:flex;animation:fadeInBg 0.25s ease;}
-#va-settings-modal-box{
-  background:#07091e;
-  border:1.5px solid rgba(139,63,255,0.45);
-  border-radius:18px;width:100%;max-width:640px;max-height:90vh;
-  overflow-y:auto;
-  box-shadow:0 0 60px rgba(139,63,255,0.25),0 20px 60px rgba(0,0,0,0.85);
-  animation:popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
-}
-/* رأس المودال */
-#va-settings-modal-box .va-modal-hdr{
-  padding:20px 24px 16px;
-  border-bottom:1px solid rgba(139,63,255,0.2);
-  display:flex;align-items:center;justify-content:space-between;
-}
-#va-settings-modal-box .va-modal-main-title{font-size:16px;font-weight:900;color:#e2e8f0;}
-#va-settings-modal-box .va-modal-sub-title{font-size:11px;color:rgba(180,190,220,0.55);margin-top:2px;}
-/* زر إغلاق المودال */
-.va-modal-close-btn{
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);
-  color:rgba(200,210,240,0.6);width:34px;height:34px;border-radius:50%;
-  cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;
-  transition:all 0.2s;
-}
-.va-modal-close-btn:hover{background:rgba(255,34,68,0.18);color:#ff4466;border-color:#ff4466;}
-
-/* تبويبات المودال */
-.va-tab-btn{
-  flex:1;padding:8px;border-radius:8px 8px 0 0;
-  font-size:11px;font-weight:800;cursor:pointer;
-  transition:all 0.2s;
-}
-.va-tab-btn.active{
-  background:rgba(139,63,255,0.22);
-  border:1px solid rgba(139,63,255,0.45);
-  border-bottom:none;color:#a78bfa;
-}
-.va-tab-btn:not(.active){background:transparent;border:1px solid transparent;color:rgba(180,190,220,0.4);}
-.va-tab-btn:not(.active):hover{background:rgba(139,63,255,0.08);color:rgba(180,190,220,0.7);}
-
-/* محتوى التبويبات */
-.va-tab-content{display:none;padding-bottom:20px;}
-.va-tab-content.active{display:block;}
-.va-tab-desc{font-size:11px;color:rgba(180,190,220,0.5);margin-bottom:12px;line-height:1.7;}
-
-/* ── بطاقات الأوامر ── */
-.va-cmd-card{
-  background:rgba(139,63,255,0.06);
-  border:1px solid rgba(139,63,255,0.22);
-  border-radius:10px;padding:10px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:10px;transition:all 0.2s;
-}
-.va-cmd-card:hover{border-color:rgba(139,63,255,0.45);background:rgba(139,63,255,0.1);}
-.va-cmd-icon{font-size:20px;flex-shrink:0;width:32px;text-align:center;}
-.va-cmd-info{flex:1;min-width:0;}
-.va-cmd-phrase{font-size:12px;font-weight:800;color:#a78bfa;}
-.va-cmd-target{font-size:11px;color:rgba(180,190,220,0.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.va-cmd-del{
-  background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.28);
-  color:#ff4466;border-radius:7px;padding:4px 9px;font-size:10px;font-weight:700;
-  cursor:pointer;transition:all 0.2s;flex-shrink:0;
-}
-.va-cmd-del:hover{background:rgba(255,34,68,0.28);}
-
-/* ── بطاقات البصمة ── */
-.va-fp-card{
-  background:rgba(0,212,255,0.05);
-  border:1px solid rgba(0,212,255,0.2);
-  border-radius:10px;padding:12px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:10px;
-}
-.va-fp-name{font-size:13px;font-weight:800;color:var(--primary);}
-.va-fp-samples{font-size:10px;color:rgba(180,190,220,0.55);}
-
-/* ── زر التسجيل ── */
-.va-rec-btn{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(255,34,68,0.12);border:1px solid rgba(255,34,68,0.32);
-  color:#ff4466;border-radius:8px;padding:6px 12px;
-  font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;
-  white-space:nowrap;
-}
-.va-rec-btn:hover{background:rgba(255,34,68,0.22);}
-.va-rec-btn.recording{
-  background:rgba(255,34,68,0.28);
-  animation:va-pulse-sm 0.8s infinite;
-}
-
-/* ── عنوان قسم ── */
-.va-section-title{
-  font-size:11px;font-weight:900;
-  color:rgba(139,63,255,0.9);
-  letter-spacing:0.8px;
-  margin:16px 0 8px;padding-bottom:6px;
-  border-bottom:1px solid rgba(139,63,255,0.2);
-}
-
-/* ── مودال الربط — أعلى الجميع ── */
-#va-bind-modal{
-  position:fixed;inset:0;
-  z-index:10000025;
-  background:rgba(0,0,0,0.88);
-  display:none;align-items:center;justify-content:center;padding:16px;
-}
-#va-bind-modal-box{
-  background:#07091e;
-  border:1.5px solid rgba(139,63,255,0.55);
-  border-radius:16px;max-width:440px;width:100%;padding:24px;
-  box-shadow:0 0 60px rgba(139,63,255,0.35);
-}
-.va-bind-title{font-size:16px;font-weight:900;color:#e2e8f0;margin-bottom:4px;}
-.va-bind-sub  {font-size:11px;color:rgba(180,190,220,0.5);margin-bottom:14px;}
-#va-bind-target-info{
-  background:rgba(139,63,255,0.12);border:1px solid rgba(139,63,255,0.32);
-  border-radius:10px;padding:12px;font-size:12px;color:#a78bfa;
-  margin-bottom:16px;word-break:break-all;line-height:1.6;
-}
-.va-bind-cancel-btn{
-  flex:1;padding:10px;border-radius:9px;
-  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);
-  color:rgba(200,210,240,0.65);cursor:pointer;font-size:13px;font-weight:700;
-  transition:background 0.2s;
-}
-.va-bind-cancel-btn:hover{background:rgba(255,255,255,0.13);}
-.va-bind-confirm-btn{
-  flex:2;padding:10px;border-radius:9px;
-  background:linear-gradient(135deg,#8b3fff,#00d4ff);
-  border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;
-  transition:opacity 0.2s;
-}
-.va-bind-confirm-btn:hover{opacity:0.87;}
-
-/* ═══════════════════════════════════════════
-   🌞 الوضع الفاتح — Light Mode
-   يغطي كل عناصر المساعد الصوتي
-═══════════════════════════════════════════ */
-body.light-mode #va-panel{
-  background:#ffffff;
-  border-color:rgba(139,63,255,0.4);
-  box-shadow:0 8px 40px rgba(0,0,0,0.18);
-}
-body.light-mode #va-panel-title{color:#1a202c;}
-body.light-mode #va-panel-close{color:rgba(30,40,60,0.4);}
-body.light-mode #va-transcript{
-  background:rgba(0,0,0,0.04);color:#1a202c;
-  border-color:rgba(0,0,0,0.1);
-}
-body.light-mode #va-status{color:rgba(30,50,80,0.5);}
-body.light-mode #va-panel-settings-btn{
-  background:rgba(0,0,0,0.06);border-color:rgba(0,0,0,0.15);color:rgba(30,50,80,0.65);
-}
-
-body.light-mode #va-settings-modal{background:rgba(0,0,0,0.55);}
-body.light-mode #va-settings-modal-box{
-  background:#ffffff;
-  border-color:rgba(139,63,255,0.35);
-  box-shadow:0 0 60px rgba(139,63,255,0.12),0 20px 60px rgba(0,0,0,0.2);
-}
-body.light-mode #va-settings-modal-box .va-modal-hdr{border-bottom-color:rgba(0,0,0,0.08);}
-body.light-mode #va-settings-modal-box .va-modal-main-title{color:#1a202c;}
-body.light-mode #va-settings-modal-box .va-modal-sub-title{color:rgba(30,50,80,0.5);}
-body.light-mode .va-modal-close-btn{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.12);color:rgba(30,50,80,0.55);}
-
-body.light-mode .va-tab-btn.active{background:rgba(139,63,255,0.12);border-color:rgba(139,63,255,0.3);color:#6d28d9;}
-body.light-mode .va-tab-btn:not(.active){color:rgba(30,50,80,0.45);}
-body.light-mode .va-tab-btn:not(.active):hover{background:rgba(139,63,255,0.06);color:rgba(30,50,80,0.7);}
-body.light-mode .va-tab-desc{color:rgba(30,50,80,0.55);}
-
-body.light-mode .va-cmd-card{background:#f8f7ff;border-color:rgba(139,63,255,0.18);}
-body.light-mode .va-cmd-card:hover{background:#f0eeff;border-color:rgba(139,63,255,0.38);}
-body.light-mode .va-cmd-phrase{color:#6d28d9;}
-body.light-mode .va-cmd-target{color:rgba(30,50,80,0.55);}
-
-body.light-mode .va-fp-card{background:#f0f9ff;border-color:rgba(0,150,220,0.25);}
-body.light-mode .va-fp-name{color:#0077aa;}
-body.light-mode .va-fp-samples{color:rgba(30,50,80,0.5);}
-body.light-mode .va-section-title{color:#6d28d9;border-bottom-color:rgba(139,63,255,0.18);}
-
-body.light-mode #va-bind-modal{background:rgba(0,0,0,0.6);}
-body.light-mode #va-bind-modal-box{background:#ffffff;border-color:rgba(139,63,255,0.4);}
-body.light-mode .va-bind-title{color:#1a202c;}
-body.light-mode .va-bind-sub  {color:rgba(30,50,80,0.5);}
-body.light-mode #va-bind-target-info{background:#f0eeff;border-color:rgba(139,63,255,0.25);color:#6d28d9;}
-body.light-mode .va-bind-cancel-btn{background:rgba(0,0,0,0.05);border-color:rgba(0,0,0,0.12);color:rgba(30,50,80,0.65);}
-
-/* نصوص إضافية داخل المودالات في الوضع الفاتح */
-body.light-mode #va-settings-modal-box *:not(button):not(input):not(select):not(.va-cmd-phrase):not(.va-fp-name):not(.va-cmd-del):not(.va-rec-btn):not(.va-bind-confirm-btn):not(.va-listen-btn){
-  color:inherit;
-}
-body.light-mode #va-modal-cmds  [style*="color:rgba(255,255,255"],
-body.light-mode #va-modal-dict  [style*="color:rgba(255,255,255"],
-body.light-mode #va-modal-fp    [style*="color:rgba(255,255,255"],
-body.light-mode #va-modal-hist  [style*="color:rgba(255,255,255"]{
-  color:rgba(30,50,80,0.6)!important;
-}
-body.light-mode #va-modal-cmds  [style*="color:#fff"],
-body.light-mode #va-modal-dict  [style*="color:#fff"],
-body.light-mode #va-modal-fp    [style*="color:#fff"],
-body.light-mode #va-modal-hist  [style*="color:#fff"]{
-  color:#1a202c!important;
-}
-body.light-mode #va-modal-hist-list [style*="color:#fff"]{color:#1a202c!important;}
-body.light-mode #va-modal-hist-list [style*="color:rgba"]{color:rgba(30,50,80,0.5)!important;}
-body.light-mode #va-modal-hist-list [style*="border-bottom"]{border-bottom-color:rgba(0,0,0,0.07)!important;}
-body.light-mode #va-modal-builtin-list > div{
-  background:#f0f9ff!important;border-color:rgba(0,150,220,0.2)!important;
-}
-body.light-mode #va-modal-cmds-list [style*="color:rgba(255,255,255"]{color:rgba(30,50,80,0.45)!important;}
-/* حقل بيانات الإعدادات الصوتية داخل الـ accordion */
-body.light-mode #stc-voice .va-section-title{color:#6d28d9;}
-body.light-mode #stc-voice [style*="color:#fff"]{color:#1a202c!important;}
-body.light-mode #stc-voice [style*="color:rgba(255,255,255"]{color:rgba(30,50,80,0.6)!important;}
-body.light-mode #stc-voice [style*="background:rgba(0,0,0"]{background:rgba(0,0,0,0.04)!important;}
-body.light-mode #stc-voice [style*="background:rgba(139,63,255,0.08)"]{background:rgba(139,63,255,0.06)!important;}
-body.light-mode #stc-voice [style*="background:rgba(0,212,255,0.06)"]{background:#f0f9ff!important;}
-body.light-mode #stc-voice [style*="border:1px solid rgba(0,212,255"]{border-color:rgba(0,170,220,0.3)!important;}
 </style>
 </head>
 <body>
@@ -4134,124 +3767,6 @@ body.light-mode #stc-voice [style*="border:1px solid rgba(0,212,255"]{border-col
             </div>
 
             <button class="btn btn-p btn-lg" style="width:100%;margin-top:14px" onclick="saveWaitScreenSettings()">💾 حفظ إعدادات شاشة الانتظار</button>
-          </div>
-        </div>
-
-
-        <!-- 🎙️ المساعد الصوتي -->
-        <div class="st-card" id="stc-voice">
-          <div class="st-card-hdr" onclick="toggleStCard('stc-voice')">
-            <div style="display:flex;align-items:center;gap:12px">
-              <span style="font-size:22px">🎙️</span>
-              <div>
-                <div class="st-card-title">المساعد الصوتي</div>
-                <div class="st-card-sub">تحكم بأي حقل أو زر بصوتك — ربط ذكي وبصمات صوتية</div>
-              </div>
-            </div>
-            <span class="st-card-arrow" id="arr-stc-voice">▼</span>
-          </div>
-          <div class="st-card-body" id="body-stc-voice" style="display:none">
-
-            <!-- تفعيل / تعطيل -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(139,63,255,0.08);border:1px solid rgba(139,63,255,0.3);border-radius:12px;margin-bottom:16px">
-              <div>
-                <div style="font-size:14px;font-weight:800;color:#fff">🎙️ تفعيل المساعد الصوتي</div>
-                <div style="font-size:11px;color:var(--text2);margin-top:2px">يظهر زر الميكروفون العائم في الشاشة</div>
-              </div>
-              <div class="perm-tog" id="va-toggle-btn" onclick="vaToggleEnabled()" title="تفعيل/تعطيل">
-                <div class="perm-tog-t"></div>
-              </div>
-            </div>
-
-            <!-- اللغة -->
-            <div class="fg" style="margin-bottom:16px">
-              <label class="fl">🌐 لغة التعرف على الكلام</label>
-              <select class="fc" id="va-lang-sel" onchange="vaSaveLang()">
-                <option value="ar-IQ">العربية (العراق)</option>
-                <option value="ar-SA">العربية (السعودية)</option>
-                <option value="ar">العربية (عام)</option>
-                <option value="en-US">الإنجليزية (US)</option>
-              </select>
-            </div>
-
-            <!-- قسم: ربط الأوامر -->
-            <div class="va-section-title">🔗 أوامر مربوطة بعناصر البرنامج</div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.7">
-              اضغط <b style="color:#a78bfa">+ إضافة أمر جديد</b> ثم اختر العنصر بالنقر عليه في أي مكان في البرنامج، ثم حدد الأمر الصوتي الذي سيتحكم به.
-            </div>
-            <div id="va-cmds-list" style="margin-bottom:10px">
-              <!-- تُحشى ديناميكياً -->
-              <div id="va-cmds-empty" style="text-align:center;padding:16px;color:var(--text2);font-size:12px">لا توجد أوامر مضافة بعد</div>
-            </div>
-            <button class="btn btn-p" style="width:100%" onclick="vaStartPicker()">＋ إضافة أمر صوتي جديد</button>
-
-            <!-- قسم: أوامر التنقل المدمجة -->
-            <div class="va-section-title">🗺️ أوامر التنقل المدمجة</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px" id="va-builtin-list">
-              <!-- تُحشى ديناميكياً -->
-            </div>
-
-            <!-- قسم: القاموس والبصمات -->
-            <div class="va-section-title">📖 القاموس الطبي والبصمات الصوتية</div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.7">
-              أضف كلمات طبية أو أسماء مرضى ليتعرف عليها المساعد بدقة. يمكنك تسجيل بصمة صوتية لكل اسم (3 عينات) لتحسين دقة التعرف.
-            </div>
-
-            <!-- إضافة كلمة للقاموس -->
-            <div style="display:flex;gap:8px;margin-bottom:12px">
-              <input class="fc" id="va-dict-word" placeholder="كلمة أو اسم..." style="flex:1">
-              <button class="btn btn-s" onclick="vaAddDictWord()">＋ إضافة</button>
-            </div>
-            <div id="va-dict-list" style="margin-bottom:14px">
-              <div id="va-dict-empty" style="text-align:center;padding:12px;color:var(--text2);font-size:12px">القاموس فارغ</div>
-            </div>
-
-            <!-- بصمات صوتية -->
-            <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:14px;margin-bottom:14px">
-              <div style="font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px">🎤 تسجيل بصمة صوتية لاسم</div>
-              <div style="font-size:11px;color:var(--text2);margin-bottom:10px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات لأفضل دقة</div>
-              <div style="display:flex;gap:8px;margin-bottom:10px">
-                <input class="fc" id="va-fp-name-input" placeholder="اسم المريض أو الطبيب..." style="flex:1">
-                <button class="btn btn-s va-rec-btn" id="va-fp-rec-btn" onclick="vaStartFingerprint()">🎤 تسجيل</button>
-              </div>
-              <div id="va-fp-status" style="font-size:11px;color:var(--text2);text-align:center;min-height:16px"></div>
-              <div id="va-fp-list" style="margin-top:10px"></div>
-            </div>
-
-            <!-- إعدادات متقدمة -->
-            <div class="va-section-title">⚙️ إعدادات متقدمة</div>
-            <div style="display:flex;flex-direction:column;gap:10px">
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div>
-                  <div style="font-size:12px;font-weight:700;color:var(--text)">رد صوتي (Text-to-Speech)</div>
-                  <div style="font-size:10px;color:var(--text2)">ينطق المساعد باسم الأمر المنفّذ</div>
-                </div>
-                <div class="perm-tog" id="va-tts-toggle" onclick="vaToggleTTS()" title="رد صوتي">
-                  <div class="perm-tog-t"></div>
-                </div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div>
-                  <div style="font-size:12px;font-weight:700;color:var(--text)">الاستماع المستمر</div>
-                  <div style="font-size:10px;color:var(--text2)">يستمر الاستماع بعد كل أمر بدون الضغط مجدداً</div>
-                </div>
-                <div class="perm-tog" id="va-continuous-toggle" onclick="vaToggleContinuous()" title="مستمر">
-                  <div class="perm-tog-t"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- سجل الأوامر -->
-            <div class="va-section-title">📋 سجل آخر الأوامر</div>
-            <div id="va-history-list" style="max-height:200px;overflow-y:auto;font-size:11px;color:var(--text2)">
-              <div style="text-align:center;padding:12px">لا يوجد سجل بعد</div>
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:14px">
-              <button class="btn btn-sm" style="flex:1;background:rgba(255,34,68,0.1);border-color:rgba(255,34,68,0.3);color:var(--danger)" onclick="vaResetAll()">🗑️ مسح كل الإعدادات</button>
-              <button class="btn btn-p btn-sm" style="flex:1" onclick="vaOpenFullSettings()">🖥️ واجهة الإعدادات الكاملة</button>
-            </div>
-
           </div>
         </div>
 
@@ -22023,841 +21538,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 </script>
-
-<!-- ═══════════════════════════════════════════════════════
-     🎙️ واجهة المساعد الصوتي — HTML
-═══════════════════════════════════════════════════════ -->
-
-<!-- شريط وضع الاختيار -->
-<div id="va-picker-bar">
-  <span style="font-size:20px">🎯</span>
-  <div style="flex:1">
-    <div>انقر على أي عنصر لربطه بأمر صوتي</div>
-    <div style="font-size:10px;opacity:0.8">اضغط إلغاء للخروج</div>
-  </div>
-  <button id="va-picker-cancel" onclick="vaCancelPicker()">✕ إلغاء</button>
-</div>
-
-<!-- زر الميكروفون العائم -->
-<button id="va-fab" class="va-hidden" onclick="vaToggleListen()" title="المساعد الصوتي (Alt+M)">🎙️</button>
-
-<!-- مؤشر الاستماع -->
-<div id="va-listening-chip">
-  <span id="va-chip-dot"></span>
-  <span id="va-chip-text">جاري الاستماع...</span>
-</div>
-
-<!-- لوحة الصوت العائمة -->
-<div id="va-panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-    <div id="va-panel-title">🎙️ المساعد الصوتي</div>
-    <button id="va-panel-close" onclick="vaClosePanel()">✕</button>
-  </div>
-  <div id="va-wave" class="va-idle">
-    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-  </div>
-  <div id="va-transcript">قل أمراً...</div>
-  <div id="va-status">اضغط زر الميكروفون للبدء</div>
-  <div id="va-cmd-result"></div>
-  <div style="margin-top:10px;display:flex;gap:6px">
-    <button id="va-listen-btn" onclick="vaToggleListen()">🎙️ استمع</button>
-    <button id="va-panel-settings-btn" onclick="vaOpenFullSettings()">⚙️</button>
-  </div>
-</div>
-
-<!-- مودال الإعدادات الكاملة -->
-<div id="va-settings-modal">
-  <div id="va-settings-modal-box">
-    <div class="va-modal-hdr">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:28px">🎙️</span>
-        <div>
-          <div class="va-modal-main-title">إعدادات المساعد الصوتي</div>
-          <div class="va-modal-sub-title">ربط الأوامر · القاموس · البصمات الصوتية</div>
-        </div>
-      </div>
-      <button class="va-modal-close-btn" onclick="vaCloseFullSettings()">✕</button>
-    </div>
-    <div style="padding:0 20px">
-      <div style="display:flex;gap:4px;padding:12px 0 0;border-bottom:1px solid rgba(139,63,255,0.15);margin-bottom:16px">
-        <button id="va-tab-cmds" class="va-tab-btn active" onclick="vaModalTab('cmds',this)">🔗 الأوامر</button>
-        <button id="va-tab-dict" class="va-tab-btn"        onclick="vaModalTab('dict',this)">📖 القاموس</button>
-        <button id="va-tab-fp"   class="va-tab-btn"        onclick="vaModalTab('fp',this)"  >🎤 البصمات</button>
-        <button id="va-tab-hist" class="va-tab-btn"        onclick="vaModalTab('hist',this)">📋 السجل</button>
-      </div>
-      <!-- تبويب الأوامر -->
-      <div id="va-modal-cmds" class="va-tab-content active">
-        <div class="va-tab-desc">اضغط <b style="color:#a78bfa">+ أمر جديد</b> ثم انقر على أي زر أو حقل في الصفحة لربطه بأمر صوتي.</div>
-        <div id="va-modal-cmds-list"></div>
-        <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="vaStartPicker()">＋ إضافة أمر صوتي جديد</button>
-        <div class="va-section-title" style="margin-top:18px">🗺️ أوامر التنقل المدمجة</div>
-        <div id="va-modal-builtin-list" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px"></div>
-      </div>
-      <!-- تبويب القاموس -->
-      <div id="va-modal-dict" class="va-tab-content">
-        <div class="va-tab-desc">أضف كلمات طبية أو أسماء يتعرف عليها المساعد بدقة أكبر.</div>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <input class="fc" id="va-modal-dict-word" placeholder="كلمة أو اسم طبي..." style="flex:1">
-          <select class="fc" id="va-modal-dict-cat" style="width:120px">
-            <option value="name">اسم شخص</option>
-            <option value="test">تحليل طبي</option>
-            <option value="cmd">أمر</option>
-            <option value="other">أخرى</option>
-          </select>
-          <button class="btn btn-p btn-sm" onclick="vaModalAddDict()">＋</button>
-        </div>
-        <div id="va-modal-dict-list"></div>
-      </div>
-      <!-- تبويب البصمات -->
-      <div id="va-modal-fp" class="va-tab-content">
-        <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:16px;margin-bottom:14px">
-          <div style="font-size:13px;font-weight:800;color:var(--primary);margin-bottom:6px">🎤 تسجيل بصمة صوتية جديدة</div>
-          <div class="va-tab-desc" style="margin-bottom:12px">اكتب الاسم ثم اضغط تسجيل — قل الاسم 3 مرات متتالية</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <input class="fc" id="va-modal-fp-name" placeholder="الاسم المراد تسجيله..." style="flex:1">
-            <button class="btn btn-s va-rec-btn" id="va-modal-fp-btn" onclick="vaModalStartFP()">🎤 تسجيل</button>
-          </div>
-          <div id="va-modal-fp-status" style="font-size:11px;text-align:center;min-height:16px"></div>
-          <div id="va-modal-fp-samples" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"></div>
-        </div>
-        <div id="va-modal-fp-list"></div>
-      </div>
-      <!-- تبويب السجل -->
-      <div id="va-modal-hist" class="va-tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:800">آخر الأوامر المنفذة</div>
-          <button class="va-cmd-del" onclick="vaClearHistory()">مسح الكل</button>
-        </div>
-        <div id="va-modal-hist-list" style="max-height:380px;overflow-y:auto"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- مودال تأكيد ربط الأمر -->
-<div id="va-bind-modal" style="position:fixed;inset:0;z-index:10000025;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;padding:16px">
-  <div id="va-bind-modal-box">
-    <div class="va-bind-title">🔗 ربط أمر صوتي</div>
-    <div class="va-bind-sub">العنصر المحدد:</div>
-    <div id="va-bind-target-info"></div>
-    <div class="fg" style="margin-bottom:14px">
-      <label class="fl">🗣️ الأمر الصوتي</label>
-      <input class="fc" id="va-bind-phrase" placeholder="مثال: افتح المرضى، ابحث، احفظ...">
-      <div style="font-size:10px;color:var(--text2);margin-top:4px">قل هذا الأمر وسينفذ المساعد التفاعل مع العنصر</div>
-    </div>
-    <div class="fg" style="margin-bottom:14px">
-      <label class="fl">🏷️ نوع التفاعل</label>
-      <select class="fc" id="va-bind-action" onchange="vaBindActionChange()">
-        <option value="click">نقر (click)</option>
-        <option value="focus">تركيز (focus) — للحقول النصية</option>
-        <option value="fill">ملء تلقائي (fill)</option>
-        <option value="toggle">تبديل checkbox/switch</option>
-      </select>
-    </div>
-    <div class="fg" id="va-bind-fill-row" style="display:none;margin-bottom:14px">
-      <label class="fl">📝 النص الذي سيُملأ تلقائياً</label>
-      <input class="fc" id="va-bind-fill-value" placeholder="النص الذي سيُكتب في الحقل...">
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="va-bind-cancel-btn"  onclick="vaCancelBind()">إلغاء</button>
-      <button class="va-bind-confirm-btn" onclick="vaConfirmBind()">✅ حفظ وربط</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════
-     🎙️ محرك المساعد الصوتي — JavaScript Engine
-═══════════════════════════════════════════════════════ -->
-<script>
-(function(){
-'use strict';
-
-/* ── ثوابت التخزين ── */
-const VA_KEYS = {
-  enabled:    'va_enabled',
-  lang:       'va_lang',
-  tts:        'va_tts',
-  continuous: 'va_continuous',
-  commands:   'va_commands',
-  dict:       'va_dict',
-  fingerprints:'va_fingerprints',
-  history:    'va_history'
-};
-
-/* ── الأوامر المدمجة لصفحات البرنامج ── */
-const VA_BUILTIN = [
-  {id:'nav-patients',  phrases:['المرضى','افتح المرضى','قائمة المرضى'],           icon:'👥', label:'المرضى',       action:()=>typeof nav==='function'&&nav('patients')},
-  {id:'nav-new-req',   phrases:['طلب جديد','أضف طلب','فحص جديد'],                icon:'➕', label:'طلب جديد',     action:()=>typeof nav==='function'&&nav('new-request')},
-  {id:'nav-results',   phrases:['النتائج','إدخال النتائج','ادخل نتيجة'],          icon:'🔬', label:'النتائج',       action:()=>typeof nav==='function'&&nav('results')},
-  {id:'nav-invoices',  phrases:['الفواتير','افتح الفواتير','الدفعات'],            icon:'💰', label:'الفواتير',      action:()=>typeof nav==='function'&&nav('invoices')},
-  {id:'nav-settings',  phrases:['الإعدادات','افتح الإعدادات','الضبط'],           icon:'⚙️', label:'الإعدادات',    action:()=>typeof nav==='function'&&nav('settings')},
-  {id:'nav-reports',   phrases:['التقارير','افتح التقارير','الإحصائيات'],        icon:'📊', label:'التقارير',      action:()=>typeof nav==='function'&&nav('reports')},
-  {id:'nav-tests-db',  phrases:['قاعدة التحاليل','التحاليل','قاعدة الفحوصات'],  icon:'🔬', label:'قاعدة التحاليل',action:()=>typeof nav==='function'&&nav('tests-db')},
-  {id:'nav-database',  phrases:['قاعدة البيانات','النسخ الاحتياطي','الداتا'],   icon:'💾', label:'قاعدة البيانات', action:()=>typeof nav==='function'&&nav('database')},
-  {id:'nav-queue',     phrases:['الطابور','قائمة الانتظار','الدور'],             icon:'🚶', label:'قائمة الانتظار',action:()=>typeof nav==='function'&&nav('queue')},
-  {id:'nav-ai',        phrases:['الذكاء الاصطناعي','المساعد الذكي','ذكاء'],     icon:'🤖', label:'الذكاء الاصطناعي',action:()=>typeof nav==='function'&&nav('ai')},
-  {id:'global-save',   phrases:['احفظ','حفظ','سيف'],                             icon:'💾', label:'حفظ',           action:()=>{const b=document.querySelector('.btn-p[onclick*="save"],button[onclick*="save"]');b&&b.click();}},
-  {id:'global-search', phrases:['ابحث','بحث','فتش'],                             icon:'🔍', label:'بحث',           action:()=>{const s=document.querySelector('#pt-search,#search,input[placeholder*="بحث"]');if(s){s.focus();s.select();}}},
-  {id:'global-print',  phrases:['اطبع','طباعة','پرنت'],                          icon:'🖨️', label:'طباعة',        action:()=>{const b=document.querySelector('button[onclick*="print"],button[onclick*="Print"]');b?b.click():window.print();}},
-  {id:'va-open-set',   phrases:['إعدادات الصوت','إعدادات المساعد','فتح الإعدادات الصوتية'],icon:'🎙️',label:'إعدادات الصوت',action:()=>vaOpenFullSettings()},
-];
-
-/* ── حالة المساعد ── */
-let _VA = {
-  enabled: false, tts: true, continuous: false, lang: 'ar-IQ',
-  listening: false, recognition: null,
-  commands: [], dict: [], fingerprints: [], history: [],
-  pickerActive: false, pendingEl: null,
-  fpSession: null,  // جلسة تسجيل البصمة
-  currentTab: 'cmds'
-};
-
-/* ── تحميل من localStorage ── */
-function vaLoad(){
-  _VA.enabled    = localStorage.getItem(VA_KEYS.enabled) === '1';
-  _VA.lang       = localStorage.getItem(VA_KEYS.lang)    || 'ar-IQ';
-  _VA.tts        = localStorage.getItem(VA_KEYS.tts)     !== '0';
-  _VA.continuous = localStorage.getItem(VA_KEYS.continuous) === '1';
-  try{ _VA.commands    = JSON.parse(localStorage.getItem(VA_KEYS.commands)    ||'[]'); }catch(e){_VA.commands=[];}
-  try{ _VA.dict        = JSON.parse(localStorage.getItem(VA_KEYS.dict)        ||'[]'); }catch(e){_VA.dict=[];}
-  try{ _VA.fingerprints= JSON.parse(localStorage.getItem(VA_KEYS.fingerprints)||'[]'); }catch(e){_VA.fingerprints=[];}
-  try{ _VA.history     = JSON.parse(localStorage.getItem(VA_KEYS.history)     ||'[]'); }catch(e){_VA.history=[];}
-}
-
-function vaSave(key){
-  if(key==='commands'||!key)    localStorage.setItem(VA_KEYS.commands,    JSON.stringify(_VA.commands));
-  if(key==='dict'||!key)        localStorage.setItem(VA_KEYS.dict,        JSON.stringify(_VA.dict));
-  if(key==='fingerprints'||!key)localStorage.setItem(VA_KEYS.fingerprints,JSON.stringify(_VA.fingerprints));
-  if(key==='history'||!key)     localStorage.setItem(VA_KEYS.history,     JSON.stringify(_VA.history));
-}
-
-/* ── تهيئة ── */
-function vaInit(){
-  vaLoad();
-  vaApplyEnabled();
-  vaApplyToggles();
-  vaRenderAll();
-  // اختصار لوحة المفاتيح: Alt+M
-  document.addEventListener('keydown',e=>{
-    if(e.altKey&&e.key==='m'){e.preventDefault();vaToggleListen();}
-    if(e.key==='Escape'&&_VA.pickerActive) vaCancelPicker();
-  });
-}
-
-function vaApplyEnabled(){
-  const fab = document.getElementById('va-fab');
-  if(!fab) return;
-  if(_VA.enabled){ fab.classList.remove('va-hidden'); }
-  else { fab.classList.add('va-hidden'); document.getElementById('va-panel').classList.remove('va-open'); }
-  // sync toggle in settings card
-  const tog = document.getElementById('va-toggle-btn');
-  if(tog){ tog.classList.toggle('on', _VA.enabled); }
-}
-
-function vaApplyToggles(){
-  const ttsTog = document.getElementById('va-tts-toggle');
-  const conTog = document.getElementById('va-continuous-toggle');
-  if(ttsTog) ttsTog.classList.toggle('on', _VA.tts);
-  if(conTog) conTog.classList.toggle('on', _VA.continuous);
-  const langSel = document.getElementById('va-lang-sel');
-  if(langSel) langSel.value = _VA.lang;
-}
-
-/* ── تفعيل / تعطيل ── */
-window.vaToggleEnabled = function(){
-  _VA.enabled = !_VA.enabled;
-  localStorage.setItem(VA_KEYS.enabled, _VA.enabled?'1':'0');
-  vaApplyEnabled();
-  if(!_VA.enabled && _VA.listening) vaStopListen();
-  if(typeof showNotif==='function')
-    showNotif(_VA.enabled?'المساعد الصوتي':'إيقاف','المساعد الصوتي '+ (_VA.enabled?'مفعّل 🎙️':'متوقف ⏹️'), _VA.enabled?'success':'info');
-};
-
-window.vaToggleTTS = function(){
-  _VA.tts = !_VA.tts;
-  localStorage.setItem(VA_KEYS.tts, _VA.tts?'1':'0');
-  vaApplyToggles();
-};
-
-window.vaToggleContinuous = function(){
-  _VA.continuous = !_VA.continuous;
-  localStorage.setItem(VA_KEYS.continuous, _VA.continuous?'1':'0');
-  vaApplyToggles();
-};
-
-window.vaSaveLang = function(){
-  const s = document.getElementById('va-lang-sel');
-  if(s){ _VA.lang = s.value; localStorage.setItem(VA_KEYS.lang, _VA.lang); }
-};
-
-/* ═══════════════════════════════════════
-   🎙️ محرك التعرف على الكلام
-═══════════════════════════════════════ */
-function vaBuildRecognition(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition) return null;
-  const r = new SpeechRecognition();
-  r.lang = _VA.lang;
-  r.interimResults = true;
-  r.maxAlternatives = 5;
-  r.continuous = false;
-
-  // حقن الكلمات في قاموس البرنامج (grammar)
-  if(window.SpeechGrammarList){
-    const gl = new SpeechGrammarList();
-    const words = [
-      ..._VA.dict.map(d=>d.word),
-      ..._VA.fingerprints.map(f=>f.name),
-      ...VA_BUILTIN.flatMap(b=>b.phrases),
-      ..._VA.commands.map(c=>c.phrase)
-    ].filter(Boolean);
-    if(words.length){
-      gl.addFromString('#JSGF V1.0; grammar custom; public <custom> = '+words.join(' | ')+';', 1);
-      r.grammars = gl;
-    }
-  }
-
-  r.onresult = e=>{
-    let interim='', final='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    const transcript = (final||interim).trim();
-    vaUpdateTranscript(transcript, !final);
-    if(final) vaProcessCommand(final.trim());
-  };
-  r.onerror = e=>{
-    console.warn('[VA] error:', e.error);
-    if(e.error==='no-speech') vaSetStatus('لا يوجد صوت — حاول مجدداً');
-    else vaSetStatus('خطأ: '+e.error);
-    vaSetListeningUI(false);
-    _VA.listening = false;
-  };
-  r.onend = ()=>{
-    if(_VA.continuous && _VA.listening){ r.start(); return; }
-    vaSetListeningUI(false);
-    _VA.listening = false;
-  };
-  return r;
-}
-
-window.vaToggleListen = function(){
-  if(!_VA.enabled){
-    if(typeof showNotif==='function') showNotif('تنبيه','فعّل المساعد الصوتي أولاً من الإعدادات 🎙️','info');
-    return;
-  }
-  if(_VA.listening){ vaStopListen(); return; }
-  vaStartListen();
-};
-
-function vaStartListen(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){
-    vaSetStatus('المتصفح لا يدعم التعرف على الكلام');
-    if(typeof showNotif==='function') showNotif('غير مدعوم','متصفحك لا يدعم التعرف الصوتي — استخدم Chrome','error');
-    return;
-  }
-  _VA.recognition = vaBuildRecognition();
-  if(!_VA.recognition) return;
-  try{
-    _VA.recognition.start();
-    _VA.listening = true;
-    vaSetListeningUI(true);
-    vaSetTranscript('أستمع...');
-    vaSetStatus('جاري الاستماع — تكلم الآن');
-    // فتح اللوحة تلقائياً
-    document.getElementById('va-panel').classList.add('va-open');
-  }catch(e){ console.error('[VA]',e); }
-}
-
-function vaStopListen(){
-  _VA.listening = false;
-  if(_VA.recognition){ try{_VA.recognition.stop();}catch(e){} _VA.recognition=null; }
-  vaSetListeningUI(false);
-  vaSetStatus('توقف الاستماع');
-}
-
-function vaSetListeningUI(on){
-  const fab  = document.getElementById('va-fab');
-  const wave = document.getElementById('va-wave');
-  const chip = document.getElementById('va-listening-chip');
-  const btn  = document.getElementById('va-listen-btn');
-  if(fab)  fab.classList.toggle('va-listening', on);
-  if(wave) wave.classList.toggle('va-idle', !on);
-  if(chip){ chip.classList.toggle('show', on); }
-  if(btn)  btn.textContent = on ? '⏹️ إيقاف' : '🎙️ استمع';
-}
-
-function vaSetTranscript(txt){ const el=document.getElementById('va-transcript'); if(el) el.textContent=txt; }
-function vaUpdateTranscript(txt, interim){
-  const el=document.getElementById('va-transcript');
-  if(!el) return;
-  el.textContent = txt || (interim?'...':'قل أمراً...');
-  el.style.opacity = interim ? '0.6' : '1';
-}
-function vaSetStatus(txt){ const el=document.getElementById('va-status'); if(el) el.textContent=txt; }
-
-/* ═══════════════════════════════════════
-   🧠 معالجة الأوامر
-═══════════════════════════════════════ */
-function vaProcessCommand(text){
-  const clean = text.trim().toLowerCase().replace(/[.,،؟?!]/g,'');
-  vaSetStatus('تم التعرف: ' + text);
-
-  // ① تحقق من البصمات الصوتية (مطابقة الأسماء)
-  let matched = vaMatchFingerprint(clean);
-
-  // ② مطابقة الأوامر المخصصة
-  let cmd = vaMatchCommand(_VA.commands, clean);
-
-  // ③ مطابقة الأوامر المدمجة
-  let builtin = vaMatchCommand(VA_BUILTIN.map(b=>({phrase:b.phrases.join('|'), _b:b, id:b.id})), clean, true);
-
-  if(cmd){
-    vaExecuteCustomCmd(cmd, text);
-  } else if(builtin){
-    vaExecuteBuiltin(builtin._b||builtin, text);
-  } else {
-    vaShowResult('⚠️ لا يوجد أمر مطابق: "'+text+'"', false);
-    vaAddHistory(text, null, false);
-  }
-
-  if(!_VA.continuous) vaStopListen();
-}
-
-function vaMatchCommand(cmds, text, isBuiltin){
-  let best = null, bestScore = 0;
-  for(const c of cmds){
-    const phrases = isBuiltin ? c.phrase : c.phrase;
-    const list = typeof phrases==='string' ? phrases.split('|') : [phrases];
-    for(const p of list){
-      const score = vaSimilarity(text, p.toLowerCase().trim());
-      if(score > bestScore && score >= 0.6){ bestScore=score; best=c; }
-    }
-  }
-  return best;
-}
-
-// مقارنة شبه جمل (Jaccard-like)
-function vaSimilarity(a, b){
-  if(a===b) return 1;
-  if(a.includes(b)||b.includes(a)) return 0.9;
-  const sa = new Set(a.split(' ')), sb = new Set(b.split(' '));
-  let inter=0;
-  for(const w of sa) if(sb.has(w)) inter++;
-  const union = sa.size+sb.size-inter;
-  return union===0 ? 0 : inter/union;
-}
-
-function vaMatchFingerprint(text){
-  for(const fp of _VA.fingerprints){
-    if(text.includes(fp.name.toLowerCase())) return fp;
-    for(const s of (fp.samples||[])){
-      if(vaSimilarity(text, s.toLowerCase()) >= 0.8) return fp;
-    }
-  }
-  return null;
-}
-
-function vaExecuteCustomCmd(cmd, text){
-  const el = document.querySelector(cmd.selector);
-  if(!el){ vaShowResult('⚠️ العنصر لم يُعثر عليه (ربما تغيرت الصفحة)', false); return; }
-  try{
-    if(cmd.action==='click')        el.click();
-    else if(cmd.action==='focus')   { el.focus(); el.select&&el.select(); }
-    else if(cmd.action==='fill')    { el.value=cmd.fillValue||''; el.dispatchEvent(new Event('input',{bubbles:true})); el.focus(); }
-    else if(cmd.action==='toggle')  { el.click(); }
-    vaShowResult('✅ تم تنفيذ: '+cmd.phrase, true);
-    vaAddHistory(text, cmd.phrase, true);
-    if(_VA.tts) vaSpeak(cmd.phrase);
-  }catch(e){ vaShowResult('❌ خطأ في التنفيذ', false); }
-}
-
-function vaExecuteBuiltin(b, text){
-  try{
-    b.action();
-    vaShowResult('✅ '+b.label, true);
-    vaAddHistory(text, b.label, true);
-    if(_VA.tts) vaSpeak(b.label);
-  }catch(e){ vaShowResult('❌ خطأ', false); }
-}
-
-function vaShowResult(msg, ok){
-  const el=document.getElementById('va-cmd-result');
-  if(!el) return;
-  el.textContent=msg;
-  el.className='va-cmd-result '+(ok?'va-ok':'va-err');
-  el.style.display='block';
-  setTimeout(()=>{el.style.display='none';},3000);
-}
-
-/* ── Text-to-Speech ── */
-function vaSpeak(text){
-  if(!_VA.tts||!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = _VA.lang; u.rate=1; u.pitch=1;
-  speechSynthesis.speak(u);
-}
-
-/* ── السجل ── */
-function vaAddHistory(input, matched, ok){
-  _VA.history.unshift({ input, matched, ok, t: Date.now() });
-  if(_VA.history.length>100) _VA.history.pop();
-  vaSave('history');
-  vaRenderHistory();
-}
-
-window.vaClearHistory = function(){
-  _VA.history=[];
-  vaSave('history');
-  vaRenderHistory();
-};
-
-/* ═══════════════════════════════════════
-   🎯 وضع اختيار العنصر (Picker Mode)
-═══════════════════════════════════════ */
-window.vaStartPicker = function(){
-  // إغلاق المودال مؤقتاً
-  document.getElementById('va-settings-modal').classList.remove('va-open');
-  document.getElementById('va-bind-modal').style.display='none';
-
-  _VA.pickerActive = true;
-  document.body.classList.add('va-picker-active');
-  document.getElementById('va-picker-bar').classList.add('va-active');
-  document.addEventListener('click', vaPickerClick, true);
-};
-
-function vaPickerClick(e){
-  if(e.target.closest('#va-picker-bar')) return;
-  e.preventDefault(); e.stopPropagation();
-  _VA.pendingEl = e.target;
-  vaCancelPicker();
-  vaShowBindModal(e.target);
-}
-
-window.vaCancelPicker = function(){
-  _VA.pickerActive = false;
-  document.body.classList.remove('va-picker-active');
-  document.getElementById('va-picker-bar').classList.remove('va-active');
-  document.removeEventListener('click', vaPickerClick, true);
-};
-
-/* ── مودال الربط ── */
-function vaShowBindModal(el){
-  const info = vaDescribeEl(el);
-  document.getElementById('va-bind-target-info').innerHTML =
-    '<b>العنصر:</b> '+info.tag+'<br>'+
-    (info.text?'<b>النص:</b> '+info.text+'<br>':'')+
-    (info.id?'<b>ID:</b> '+info.id+'<br>':'')+
-    '<b>المحدد:</b> <code style="font-size:10px;opacity:0.7">'+info.selector+'</code>';
-  document.getElementById('va-bind-phrase').value = info.text||'';
-  document.getElementById('va-bind-action').value = info.isInput?'focus':'click';
-  document.getElementById('va-bind-fill-row').style.display = info.isInput?'block':'none';
-  document.getElementById('va-bind-modal').style.display='flex';
-}
-
-window.vaBindActionChange = function(){
-  const act = document.getElementById('va-bind-action').value;
-  document.getElementById('va-bind-fill-row').style.display = act==='fill'?'block':'none';
-};
-
-window.vaCancelBind = function(){
-  document.getElementById('va-bind-modal').style.display='none';
-  _VA.pendingEl = null;
-};
-
-window.vaConfirmBind = function(){
-  const phrase = (document.getElementById('va-bind-phrase').value||'').trim();
-  if(!phrase){ alert('أدخل الأمر الصوتي أولاً'); return; }
-  if(!_VA.pendingEl){ vaCancelBind(); return; }
-  const info  = vaDescribeEl(_VA.pendingEl);
-  const action= document.getElementById('va-bind-action').value;
-  const fill  = document.getElementById('va-bind-fill-value').value;
-  const cmd = { id:'cmd_'+Date.now(), phrase, selector:info.selector, label:info.text||info.tag, action, fillValue:fill, icon: info.isInput?'⌨️':'🖱️' };
-  _VA.commands.push(cmd);
-  vaSave('commands');
-  vaRenderAll();
-  vaCancelBind();
-  document.getElementById('va-settings-modal').classList.add('va-open');
-  if(typeof showNotif==='function') showNotif('تم الربط','✅ الأمر "'+phrase+'" مربوط بـ "'+cmd.label+'"','success');
-};
-
-/* ── توصيف العنصر وإنشاء CSS selector ── */
-function vaDescribeEl(el){
-  const tag  = el.tagName.toLowerCase();
-  const text = (el.textContent||el.value||el.placeholder||el.title||el.getAttribute('aria-label')||'').trim().slice(0,50);
-  const id   = el.id;
-  const isInput = ['input','textarea','select'].includes(tag);
-  let selector = tag;
-  if(id) selector = '#'+id;
-  else if(el.className){
-    const cls = el.className.toString().trim().split(/\s+/).filter(c=>c&&!c.startsWith('va-')).slice(0,3).join('.');
-    if(cls) selector = tag+'.'+cls;
-  }
-  // إذا كان المحدد غير فريد نضيف nth-of-type
-  if(!id){
-    try{
-      const els = document.querySelectorAll(selector);
-      if(els.length>1){
-        const idx = Array.from(els).indexOf(el);
-        if(idx>=0) selector += ':nth-of-type('+(idx+1)+')';
-      }
-    }catch(e){}
-  }
-  return {tag, text, id, selector, isInput};
-}
-
-/* ═══════════════════════════════════════
-   📖 القاموس
-═══════════════════════════════════════ */
-window.vaAddDictWord = function(){
-  const inp = document.getElementById('va-dict-word');
-  if(!inp||!inp.value.trim()) return;
-  _VA.dict.push({word:inp.value.trim(), cat:'other', id:'d'+Date.now()});
-  inp.value='';
-  vaSave('dict');
-  vaRenderDict();
-};
-
-window.vaModalAddDict = function(){
-  const w = (document.getElementById('va-modal-dict-word')||{}).value||'';
-  const c = (document.getElementById('va-modal-dict-cat')||{}).value||'other';
-  if(!w.trim()) return;
-  _VA.dict.push({word:w.trim(), cat:c, id:'d'+Date.now()});
-  document.getElementById('va-modal-dict-word').value='';
-  vaSave('dict');
-  vaRenderDict();
-};
-
-window.vaRemoveDictWord = function(id){
-  _VA.dict = _VA.dict.filter(d=>d.id!==id);
-  vaSave('dict');
-  vaRenderDict();
-};
-
-/* ═══════════════════════════════════════
-   🎤 البصمة الصوتية
-═══════════════════════════════════════ */
-let _fpRec = null;
-
-function vaStartFPSession(nameInputId, statusId, samplesId, btnId){
-  const name = (document.getElementById(nameInputId)||{}).value||'';
-  if(!name.trim()){
-    const s=document.getElementById(statusId); if(s) s.textContent='أدخل الاسم أولاً';
-    return;
-  }
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){ alert('المتصفح لا يدعم التعرف الصوتي'); return; }
-
-  const btn = document.getElementById(btnId);
-  if(btn) btn.classList.add('recording');
-
-  let samples = [], sampleCount = 0;
-  const MAX = 3;
-
-  function nextSample(){
-    if(sampleCount >= MAX){ finalizeFP(name, samples, statusId, samplesId, btnId); return; }
-    const r = new SpeechRecognition();
-    r.lang = _VA.lang; r.interimResults=false; r.maxAlternatives=1;
-    const s=document.getElementById(statusId);
-    if(s) s.textContent = '🎙️ قل الاسم ('+((sampleCount+1))+'/'+MAX+')...';
-    r.onresult = ev=>{
-      const t = ev.results[0][0].transcript.trim();
-      samples.push(t); sampleCount++;
-      vaRenderFPSamples(samples, samplesId);
-      if(sampleCount<MAX) setTimeout(nextSample,800);
-      else nextSample();
-    };
-    r.onerror = ()=>{ const s2=document.getElementById(statusId); if(s2) s2.textContent='❌ خطأ في التسجيل — حاول مجدداً'; if(btn) btn.classList.remove('recording'); };
-    r.onend = ()=>{ if(sampleCount<MAX && _fpRec===r) setTimeout(nextSample,400); };
-    _fpRec = r;
-    r.start();
-  }
-  nextSample();
-}
-
-function finalizeFP(name, samples, statusId, samplesId, btnId){
-  const btn = document.getElementById(btnId);
-  if(btn) btn.classList.remove('recording');
-  const s = document.getElementById(statusId);
-  // تحقق إذا كان الاسم موجوداً
-  const existing = _VA.fingerprints.find(f=>f.name===name);
-  if(existing){ existing.samples = [...(existing.samples||[]), ...samples]; }
-  else { _VA.fingerprints.push({id:'fp'+Date.now(), name, samples}); }
-  vaSave('fingerprints');
-  // أضف للقاموس تلقائياً
-  if(!_VA.dict.find(d=>d.word===name)){
-    _VA.dict.push({word:name, cat:'name', id:'d'+Date.now()});
-    vaSave('dict');
-  }
-  if(s) s.textContent = '✅ تم حفظ البصمة الصوتية للاسم "'+name+'"';
-  vaRenderAll();
-  if(typeof showNotif==='function') showNotif('تم التسجيل','✅ بصمة صوتية محفوظة: '+name,'success');
-}
-
-function vaRenderFPSamples(samples, containerId){
-  const c=document.getElementById(containerId);
-  if(!c) return;
-  c.innerHTML = samples.map((s,i)=>'<span style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--primary)">✓ عينة '+(i+1)+': '+s+'</span>').join('');
-}
-
-window.vaStartFingerprint = function(){ vaStartFPSession('va-fp-name-input','va-fp-status','va-fp-samples-preview','va-fp-rec-btn'); };
-window.vaModalStartFP     = function(){ vaStartFPSession('va-modal-fp-name','va-modal-fp-status','va-modal-fp-samples','va-modal-fp-btn'); };
-
-window.vaRemoveFP = function(id){
-  _VA.fingerprints = _VA.fingerprints.filter(f=>f.id!==id);
-  vaSave('fingerprints');
-  vaRenderFP();
-};
-
-/* ═══════════════════════════════════════
-   🖥️ واجهة المستخدم — Render
-═══════════════════════════════════════ */
-function vaRenderAll(){
-  vaRenderCmds();
-  vaRenderBuiltin();
-  vaRenderDict();
-  vaRenderFP();
-  vaRenderHistory();
-}
-
-function vaRenderCmds(){
-  const targets = ['va-modal-cmds-list'];
-  targets.forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    if(!_VA.commands.length){ c.innerHTML='<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.35);font-size:12px">لا توجد أوامر مضافة بعد</div>'; return; }
-    c.innerHTML = _VA.commands.map(cmd=>`
-      <div class="va-cmd-card">
-        <div class="va-cmd-icon">${cmd.icon||'🎙️'}</div>
-        <div class="va-cmd-info">
-          <div class="va-cmd-phrase">"${cmd.phrase}"</div>
-          <div class="va-cmd-target">${vaActionLabel(cmd.action)} · ${cmd.label||cmd.selector}</div>
-        </div>
-        <button class="va-cmd-del" onclick="vaDeleteCmd('${cmd.id}')">✕</button>
-      </div>`).join('');
-  });
-}
-
-function vaActionLabel(a){ return {click:'نقر',focus:'تركيز',fill:'ملء',toggle:'تبديل'}[a]||a; }
-
-window.vaDeleteCmd = function(id){
-  _VA.commands = _VA.commands.filter(c=>c.id!==id);
-  vaSave('commands');
-  vaRenderCmds();
-};
-
-function vaRenderBuiltin(){
-  const targets = ['va-modal-builtin-list'];
-  targets.forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    c.innerHTML = VA_BUILTIN.map(b=>`
-      <div style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:8px 10px;font-size:11px">
-        <div style="font-weight:800;color:var(--primary);margin-bottom:3px">${b.icon} ${b.label}</div>
-        <div style="color:rgba(255,255,255,0.4);font-size:10px">${b.phrases[0]}</div>
-      </div>`).join('');
-  });
-}
-
-function vaRenderDict(){
-  const targets = ['va-modal-dict-list'];
-  targets.forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    if(!_VA.dict.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">القاموس فارغ</div>'; return; }
-    const catIcons = {name:'👤',test:'🔬',cmd:'🗣️',other:'📝'};
-    c.innerHTML = _VA.dict.map(d=>`
-      <div class="va-cmd-card" style="padding:8px 12px">
-        <span style="font-size:16px">${catIcons[d.cat]||'📝'}</span>
-        <div class="va-cmd-info"><div class="va-cmd-phrase" style="font-size:13px">${d.word}</div><div class="va-cmd-target">${{name:'اسم شخص',test:'تحليل طبي',cmd:'أمر',other:'أخرى'}[d.cat]||'أخرى'}</div></div>
-        <button class="va-cmd-del" onclick="vaRemoveDictWord('${d.id}')">✕</button>
-      </div>`).join('');
-  });
-}
-
-function vaRenderFP(){
-  const targets = ['va-modal-fp-list'];
-  targets.forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    if(!_VA.fingerprints.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">لا توجد بصمات مسجلة</div>'; return; }
-    c.innerHTML = _VA.fingerprints.map(fp=>`
-      <div class="va-fp-card">
-        <span style="font-size:22px">🎤</span>
-        <div style="flex:1">
-          <div class="va-fp-name">${fp.name}</div>
-          <div class="va-fp-samples">${(fp.samples||[]).length} عينة صوتية</div>
-          <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">
-            ${(fp.samples||[]).map((s,i)=>'<span style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:5px;padding:2px 6px;font-size:9px;color:var(--primary)">'+s+'</span>').join('')}
-          </div>
-        </div>
-        <button class="va-cmd-del" onclick="vaRemoveFP('${fp.id}')">✕</button>
-      </div>`).join('');
-  });
-}
-
-function vaRenderHistory(){
-  const targets = ['va-modal-hist-list'];
-  targets.forEach(id=>{
-    const c=document.getElementById(id); if(!c) return;
-    if(!_VA.history.length){ c.innerHTML='<div style="text-align:center;padding:14px;color:rgba(255,255,255,0.35);font-size:12px">لا يوجد سجل بعد</div>'; return; }
-    c.innerHTML = _VA.history.slice(0,60).map(h=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px">
-        <span>${h.ok?'✅':'⚠️'}</span>
-        <div style="flex:1">
-          <div style="color:#fff">${h.input}</div>
-          ${h.matched?'<div style="color:rgba(255,255,255,0.4);font-size:10px">→ '+h.matched+'</div>':''}
-        </div>
-        <div style="color:rgba(255,255,255,0.3);font-size:9px;white-space:nowrap">${new Date(h.t).toLocaleTimeString('ar-IQ')}</div>
-      </div>`).join('');
-  });
-}
-
-/* ═══════════════════════════════════════
-   🖥️ مودال الإعدادات الكاملة
-═══════════════════════════════════════ */
-window.vaOpenFullSettings = function(){
-  vaRenderAll();
-  document.getElementById('va-settings-modal').classList.add('va-open');
-  vaModalTab('cmds', document.getElementById('va-tab-cmds'));
-};
-
-window.vaCloseFullSettings = function(){
-  document.getElementById('va-settings-modal').classList.remove('va-open');
-};
-
-window.vaModalTab = function(name, btn){
-  _VA.currentTab = name;
-  ['cmds','dict','fp','hist'].forEach(t=>{
-    const el=document.getElementById('va-modal-'+t);
-    if(el){ el.classList.toggle('active', t===name); }
-    const tb=document.getElementById('va-tab-'+t);
-    if(tb){ tb.classList.toggle('active', t===name); }
-  });
-  if(name==='fp')   vaRenderFP();
-  if(name==='hist') vaRenderHistory();
-  if(name==='dict') vaRenderDict();
-  if(name==='cmds') vaRenderCmds();
-};
-
-window.vaClosePanel = function(){
-  document.getElementById('va-panel').classList.remove('va-open');
-  if(_VA.listening) vaStopListen();
-};
-
-window.vaResetAll = function(){
-  if(!confirm('سيتم مسح جميع إعدادات المساعد الصوتي. متأكد؟')) return;
-  Object.values(VA_KEYS).forEach(k=>localStorage.removeItem(k));
-  vaLoad(); vaApplyEnabled(); vaApplyToggles(); vaRenderAll();
-  if(typeof showNotif==='function') showNotif('تم المسح','تم مسح جميع إعدادات المساعد الصوتي','info');
-};
-
-/* ── تهيئة عند تحميل الصفحة ── */
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', vaInit);
-else vaInit();
-
-})();
-</script>
-
 </body>
 </html>
 
@@ -27501,4 +26181,1128 @@ async function _pmSendFile() {
     if (btn) btn.classList.remove('loading');
   }
 }
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     🎙️  LAB DIRECT — المساعد الصوتي الذكي
+     قل "لاب مباشر" لتفعيل المساعد
+══════════════════════════════════════════════════════════ -->
+<script>
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎙️  LAB DIRECT — المساعد الصوتي الذكي لـ MedLab Pro
+   الإصدار: 2.0  |  wake word: "لاب مباشر"
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* ─── إعدادات عامة ─── */
+  const WAKE_WORD_VARIANTS = [
+    'لاب مباشر','lab مباشر','لاب direct','lab direct',
+    'لاب ديركت','لاب دايركت','لاب ديرك','لاب مباشرة',
+    'lab مباشره','لآب مباشر','لاب مباشره'
+  ];
+  const IDLE_TIMEOUT_MS    = 30000;  // 30 ثانية بدون أمر → عودة لوضع الانتظار
+  const LISTEN_PAUSE_MS    = 1500;   // توقف قصير بعد كل جملة للتأكد أنها اكتملت
+
+  /* ─── حالة المساعد ─── */
+  let vaState      = 'sleeping'; // sleeping | ready | listening | processing
+  let recognition  = null;
+  let idleTimer    = null;
+  let lastTranscript = '';
+  let pendingQueue = [];         // جمل تنتظر المعالجة
+  let processingLock = false;
+
+  /* ─── خريطة تشابه الحروف الإنجليزية/العربية للتحاليل ─── */
+  const PHONETIC_ALIASES = {
+    // Thyroid
+    'تي إس إتش':'TSH','تي اس اتش':'TSH','تي اس ه':'TSH','تش':'TSH','tsh':'TSH',
+    'تي فور':'T4','تي أربعة':'T4','t4':'T4','t 4':'T4',
+    'تي ثري':'T3','تي ثلاثة':'T3','t3':'T3',
+    'في تي ثري':'FT3','في تي أربعة':'FT4','ft3':'FT3','ft4':'FT4',
+    'free t3':'FT3','free t4':'FT4',
+    // CBC
+    'سي بي سي':'CBC','cbc':'CBC','صورة دم كاملة':'CBC','صورة دم':'CBC',
+    'دم كامل':'CBC','عد دم كامل':'CBC','عد الدم الكامل':'CBC',
+    // Liver
+    'إل إف تي':'LFT','lft':'LFT','وظائف الكبد':'LFT','كبد':'LFT',
+    'ألت':'ALT','alt':'ALT','أست':'AST','ast':'AST',
+    'بيليروبين':'BILI','bilirubin':'BILI',
+    // Kidney
+    'كي إف تي':'KFT','kft':'KFT','وظائف الكلى':'KFT','كلى':'BUN','كلية':'BUN',
+    'يوريا':'BUN','bun':'BUN','كرياتينين':'CREAT','creatinine':'CREAT',
+    'يوريك':'UA','uric acid':'UA','حمض اليوريك':'UA',
+    // Lipid
+    'ليبيد':'LIPID','lipid':'LIPID','دهون':'LIPID','دهنيات':'LIPID',
+    'كوليسترول':'CHOL','cholesterol':'CHOL',
+    'تريغليسريد':'TG','triglycerides':'TG','tg':'TG',
+    'إتش دي إل':'HDL','hdl':'HDL','إل دي إل':'LDL','ldl':'LDL',
+    // Diabetes
+    'سكر صيام':'FBS','سكر':'FBS','fbs':'FBS','فبس':'FBS',
+    'سكر عشوائي':'RBS','rbs':'RBS',
+    'hba1c':'HBA1C','إتش بي أيه وان سي':'HBA1C','سكر تراكمي':'HBA1C',
+    'هيموجلوبين سكري':'HBA1C',
+    // Urine
+    'بول':'GUE','بول كامل':'GUE','تحليل بول':'GUE','gue':'GUE',
+    'فحص بول':'GUE',
+    // Coagulation
+    'بي تي':'PT','pt':'PT','إي بي تي تي':'aPTT','aptt':'aPTT',
+    'تجلط':'PT',
+    // Hormones
+    'بي إتش سي جي':'BHCG','bhcg':'BHCG','حمل':'BHCG','اختبار حمل':'BHCG',
+    'إف إس إتش':'FSH','fsh':'FSH','إل إتش':'LH','lh':'LH',
+    'برولاكتين':'PRL','prolactin':'PRL','prl':'PRL',
+    'تيستوستيرون':'TEST','testosterone':'TEST',
+    // Inflammation
+    'سي آر بي':'CRP','crp':'CRP','cرp':'CRP',
+    'esr':'ESR','إي إس آر':'ESR','ترسب':'ESR',
+    'procalcitonin':'PCT','بروكالسيتونين':'PCT',
+    // Vitamins
+    'فيتامين دي':'VD','vitamin d':'VD','vit d':'VD',
+    'فيتامين بي 12':'B12','b12':'B12','فيتامين ب 12':'B12',
+    'حديد':'FER','فيريتين':'FER','ferritin':'FER',
+    // Infection
+    'hiv':'HIV','إيدز':'HIV','إتش آي في':'HIV',
+    'hbsag':'HBsAg','التهاب كبد':'HBsAg','هيباتيتس':'HBsAg',
+    'hcv':'HCV','سي':'HCV','إتش سي في':'HCV',
+    'vdrl':'VDRL','زهري':'VDRL',
+    'برسيلا':'BRUCELLA','brucella':'BRUCELLA',
+    'widal':'WIDAL','ويدال':'WIDAL',
+    // Special
+    'ثقافة':'CULTURE','زرع':'CULTURE','culture':'CULTURE',
+    'يوريا نفس':'UBT','ubt':'UBT',
+    'psa':'PSA','بي إس أيه':'PSA',
+    'cea':'CEA','أورام':'CEA',
+    // Electrolytes
+    'كهارل':'ELEC','electrolytes':'ELEC','صوديوم':'NA','بوتاسيوم':'K',
+    'na':'NA','k':'K','cl':'CL','كلور':'CL',
+    // Stool
+    'براز':'STOOL','stool':'STOOL','فحص براز':'STOOL',
+    // Semen
+    'سائل منوي':'SEMEN','semen':'SEMEN','تحليل سائل منوي':'SEMEN',
+  };
+
+  /* ─── أسماء الصفحات / التنقل ─── */
+  const NAV_ALIASES = {
+    'لوحة التحكم'    : 'dashboard',
+    'الرئيسية'       : 'dashboard',
+    'داشبورد'        : 'dashboard',
+    'المرضى'         : 'patients',
+    'قائمة المرضى'   : 'patients',
+    'الطلبات'        : 'requests',
+    'النتائج'        : 'results',
+    'إدخال النتائج'  : 'results',
+    'الطباعة'        : 'print',
+    'طباعة'          : 'print',
+    'الأطباء'        : 'doctors',
+    'الفواتير'       : 'invoices',
+    'الحسابات'       : 'billing',
+    'التقارير'       : 'reports',
+    'المخزون'        : 'inventory',
+    'الإعدادات'      : 'settings',
+    'انتظار'         : 'waitqueue',
+    'طابور الانتظار' : 'waitqueue',
+    'esr'            : 'esr',
+    'عداد esr'       : 'esr',
+    'الجودة'         : 'quality',
+    'ضبط الجودة'     : 'quality',
+    'التحاليل'       : 'tests-db',
+    'قاعدة التحاليل' : 'tests-db',
+    'الباقات'        : 'packages',
+    'بول كامل تفصيلي': 'ua',
+    'تحليل البول'    : 'ua',
+    'فحص البراز'     : 'stool',
+    'تحليل البراز'   : 'stool',
+    'تحليل السائل'   : 'semen',
+    'الزرع'          : 'culture',
+    'نتائج الزرع'    : 'culture',
+  };
+
+  /* ─── خريطة الألقاب للجنس ─── */
+  const TITLE_GENDER = {
+    'السيد':'male','الحاج':'male','الاستاذ':'male',
+    'الطفل':'male','الدكتور':'male',
+    'السيدة':'female','الآنسة':'female','الحاجة':'female',
+    'الاستاذة':'female','الطفلة':'female','الدكتورة':'female',
+  };
+
+  /* ══════════════════════════════════════════════════════
+     1.  UI — الفقاعة والشاشة
+  ══════════════════════════════════════════════════════ */
+  function buildUI() {
+    /* CSS */
+    const style = document.createElement('style');
+    style.textContent = `
+      #va-bubble{
+        position:fixed;bottom:22px;left:22px;z-index:99999;
+        width:58px;height:58px;border-radius:50%;
+        background:linear-gradient(135deg,#00d4ff,#0055cc);
+        border:none;cursor:pointer;
+        box-shadow:0 4px 20px rgba(0,212,255,0.5);
+        display:flex;align-items:center;justify-content:center;
+        font-size:26px;transition:all 0.3s;
+        animation:va-idle-pulse 3s infinite;
+      }
+      #va-bubble.ready{
+        background:linear-gradient(135deg,#00ff99,#00aa55);
+        box-shadow:0 4px 24px rgba(0,255,153,0.6);
+        animation:va-ready-pulse 1.2s infinite;
+      }
+      #va-bubble.listening{
+        background:linear-gradient(135deg,#ff4466,#cc0033);
+        box-shadow:0 4px 28px rgba(255,50,80,0.7);
+        animation:va-listen-pulse 0.6s infinite;
+      }
+      #va-bubble.processing{
+        background:linear-gradient(135deg,#ffaa00,#cc6600);
+        animation:va-spin 1s linear infinite;
+      }
+      @keyframes va-idle-pulse{
+        0%,100%{box-shadow:0 4px 20px rgba(0,212,255,0.5)}
+        50%{box-shadow:0 4px 30px rgba(0,212,255,0.9)}
+      }
+      @keyframes va-ready-pulse{
+        0%,100%{transform:scale(1)}50%{transform:scale(1.08)}
+      }
+      @keyframes va-listen-pulse{
+        0%,100%{transform:scale(1)}50%{transform:scale(1.14)}
+      }
+      @keyframes va-spin{
+        from{transform:rotate(0deg)}to{transform:rotate(360deg)}
+      }
+      #va-panel{
+        position:fixed;bottom:90px;left:22px;z-index:99998;
+        width:320px;
+        background:#070e1f;
+        border:1.5px solid rgba(0,212,255,0.35);
+        border-radius:16px;
+        padding:16px;
+        box-shadow:0 12px 40px rgba(0,0,0,0.8);
+        font-family:'Cairo',sans-serif;
+        display:none;
+        transition:all 0.3s;
+      }
+      #va-panel.show{display:block;}
+      #va-status-badge{
+        display:inline-block;
+        font-size:11px;font-weight:800;
+        padding:3px 10px;border-radius:20px;
+        background:rgba(0,212,255,0.12);
+        color:#00d4ff;border:1px solid rgba(0,212,255,0.3);
+        margin-bottom:10px;
+      }
+      #va-transcript{
+        min-height:48px;
+        background:rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:10px;padding:10px 12px;
+        font-size:14px;color:#e8f0ff;
+        font-weight:600;direction:rtl;text-align:right;
+        margin-bottom:10px;word-break:break-word;
+      }
+      #va-response{
+        min-height:36px;
+        font-size:13px;color:#00ff99;
+        font-weight:700;direction:rtl;text-align:right;
+        padding:0 4px;
+      }
+      #va-wakeword-hint{
+        font-size:11px;color:rgba(255,255,255,0.35);
+        text-align:center;margin-top:10px;direction:rtl;
+      }
+      #va-toggle-btn{
+        position:absolute;top:10px;left:12px;
+        background:none;border:none;color:rgba(255,255,255,0.4);
+        font-size:18px;cursor:pointer;
+      }
+      #va-commands-btn{
+        font-size:10px;color:rgba(0,212,255,0.6);
+        cursor:pointer;text-decoration:underline;
+        background:none;border:none;
+        font-family:'Cairo',sans-serif;
+        margin-top:6px;display:block;width:100%;text-align:center;
+      }
+      #va-cmds-list{
+        display:none;
+        font-size:11px;color:rgba(255,255,255,0.55);
+        direction:rtl;margin-top:8px;
+        line-height:1.8;
+      }
+      #va-cmds-list b{color:#00d4ff;}
+      .va-bar{
+        display:flex;gap:3px;align-items:flex-end;
+        height:28px;margin:8px auto 4px;width:fit-content;
+      }
+      .va-bar span{
+        width:4px;border-radius:4px;
+        background:#00d4ff;
+        animation:va-wave 1s ease-in-out infinite;
+      }
+      .va-bar span:nth-child(1){height:8px;animation-delay:0s}
+      .va-bar span:nth-child(2){height:16px;animation-delay:0.1s}
+      .va-bar span:nth-child(3){height:24px;animation-delay:0.2s}
+      .va-bar span:nth-child(4){height:16px;animation-delay:0.3s}
+      .va-bar span:nth-child(5){height:8px;animation-delay:0.4s}
+      @keyframes va-wave{
+        0%,100%{transform:scaleY(0.5)}50%{transform:scaleY(1.3)}
+      }
+    `;
+    document.head.appendChild(style);
+
+    /* Bubble */
+    const bubble = document.createElement('button');
+    bubble.id = 'va-bubble';
+    bubble.title = 'المساعد الصوتي — قل "لاب مباشر" للتفعيل';
+    bubble.textContent = '🎙️';
+    bubble.onclick = togglePanel;
+    document.body.appendChild(bubble);
+
+    /* Panel */
+    const panel = document.createElement('div');
+    panel.id = 'va-panel';
+    panel.innerHTML = `
+      <button id="va-toggle-btn" onclick="document.getElementById('va-panel').classList.remove('show')">✕</button>
+      <div id="va-status-badge">😴 في الانتظار</div>
+      <div class="va-bar" id="va-wave-bars" style="display:none">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div id="va-transcript">قل "<b style="color:#00d4ff">لاب مباشر</b>" لتفعيل المساعد...</div>
+      <div id="va-response"></div>
+      <div id="va-wakeword-hint">🎯 كلمة التنشيط: <b style="color:#00d4ff">لاب مباشر</b></div>
+      <button id="va-commands-btn" onclick="toggleCmdList()">💡 عرض الأوامر المتاحة</button>
+      <div id="va-cmds-list">
+        <b>📋 تسجيل مريض:</b><br>
+        "مريض جديد" — "السيد علي حسين، عمره 35، هاتف 07701234567"<br>
+        "الجنس أنثى" — "اللقب السيدة"<br><br>
+        <b>🧪 اختيار تحاليل:</b><br>
+        "أضف TSH" — "أضف صورة دم وسكر وكوليسترول"<br>
+        "احذف TSH" — "امسح الكل"<br>
+        "التالي" — "السابق" — "أنهِ الطلب"<br><br>
+        <b>📊 إدخال نتائج:</b><br>
+        "اختر طلب رقم 1001" — "النتيجة الأولى 5.2"<br>
+        "احفظ وطباعة" — "احفظ المسودة"<br><br>
+        <b>🔀 تنقل:</b><br>
+        "افتح المرضى" — "اذهب للنتائج"<br>
+        "مريض جديد" — "اذهب للطباعة"<br><br>
+        <b>🔇 إيقاف:</b><br>
+        "توقف" — "نام" — "أوقف المساعد"
+      </div>
+    `;
+    document.body.appendChild(panel);
+  }
+
+  function togglePanel() {
+    document.getElementById('va-panel').classList.toggle('show');
+  }
+
+  function toggleCmdList() {
+    const el = document.getElementById('va-cmds-list');
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function setUIState(state, statusText, transcriptText, responseText) {
+    const bubble = document.getElementById('va-bubble');
+    const badge  = document.getElementById('va-status-badge');
+    const trans  = document.getElementById('va-transcript');
+    const resp   = document.getElementById('va-response');
+    const bars   = document.getElementById('va-wave-bars');
+    const hint   = document.getElementById('va-wakeword-hint');
+
+    bubble.className = state;
+    badge.textContent = statusText;
+    if (transcriptText !== undefined) trans.innerHTML = transcriptText;
+    if (responseText   !== undefined) resp.innerHTML  = responseText;
+
+    const isListening = (state === 'listening' || state === 'ready');
+    bars.style.display = isListening ? 'flex' : 'none';
+    hint.style.display = (state === 'sleeping') ? 'block' : 'none';
+  }
+
+  /* ══════════════════════════════════════════════════════
+     2.  محرك التعرف على الكلام
+  ══════════════════════════════════════════════════════ */
+  function initRecognition() {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn('[VA] SpeechRecognition غير مدعوم');
+      return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.continuous    = true;
+    recognition.interimResults = true;
+    recognition.lang           = 'ar-IQ'; // عراقي أولاً
+    recognition.maxAlternatives = 3;
+
+    recognition.onstart = () => {
+      console.log('[VA] بدأ الاستماع');
+    };
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i];
+        const txt = res[0].transcript.trim();
+        if (res.isFinal) {
+          // جمع كل البدائل
+          const alts = [];
+          for (let a = 0; a < res.length; a++) alts.push(res[a].transcript.trim());
+          handleFinalTranscript(alts);
+        } else {
+          interim = txt;
+          document.getElementById('va-transcript').innerHTML =
+            `<span style="color:rgba(255,255,255,0.4)">${interim}</span>`;
+        }
+      }
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech') return;
+      console.warn('[VA] خطأ:', e.error);
+    };
+
+    recognition.onend = () => {
+      // إعادة التشغيل تلقائياً إذا لم يكن في وضع النوم
+      if (vaState !== 'sleeping') {
+        try { recognition.start(); } catch(_) {}
+      }
+    };
+
+    recognition.start();
+  }
+
+  /* ══════════════════════════════════════════════════════
+     3.  منطق الـ Wake Word والأوامر
+  ══════════════════════════════════════════════════════ */
+  function handleFinalTranscript(alternatives) {
+    const mainText = alternatives[0].toLowerCase().trim();
+
+    /* --- حالة النوم: نبحث فقط عن كلمة التنشيط --- */
+    if (vaState === 'sleeping') {
+      const woke = WAKE_WORD_VARIANTS.some(w =>
+        mainText.includes(w.toLowerCase()) ||
+        alternatives.some(a => a.toLowerCase().includes(w.toLowerCase()))
+      );
+      if (woke) {
+        wakeUp();
+        // هل يوجد أمر بعد كلمة التنشيط مباشرة؟
+        let remainder = mainText;
+        for (const w of WAKE_WORD_VARIANTS) {
+          remainder = remainder.replace(w.toLowerCase(), '').trim();
+        }
+        if (remainder.length > 2) {
+          setTimeout(() => processCommand(remainder), 300);
+        }
+      }
+      return;
+    }
+
+    /* --- في وضع الاستماع: نعالج الأمر --- */
+    resetIdleTimer();
+    updateTranscript(mainText);
+
+    // أوامر الإيقاف
+    const stopWords = ['توقف','نام','أوقف المساعد','اسكت','انتهى','وقف'];
+    if (stopWords.some(s => mainText.includes(s))) {
+      sleep();
+      return;
+    }
+
+    processCommand(mainText);
+  }
+
+  function wakeUp() {
+    vaState = 'ready';
+    setUIState('ready', '✅ جاهز — تكلم!', '🎯 أنا معك، ماذا تريد؟', '');
+    document.getElementById('va-panel').classList.add('show');
+    speak('أنا معك');
+    resetIdleTimer();
+  }
+
+  function sleep() {
+    vaState = 'sleeping';
+    clearTimeout(idleTimer);
+    setUIState('', '😴 في الانتظار', 'قل "<b style="color:#00d4ff">لاب مباشر</b>" للتفعيل...', '');
+    speak('تمام، في انتظارك');
+  }
+
+  function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (vaState !== 'sleeping') sleep();
+    }, IDLE_TIMEOUT_MS);
+  }
+
+  function updateTranscript(text) {
+    document.getElementById('va-transcript').textContent = text;
+  }
+
+  function respondWith(msg, type = 'success') {
+    const colors = { success:'#00ff99', error:'#ff4466', info:'#00d4ff', warn:'#ffaa00' };
+    document.getElementById('va-response').innerHTML =
+      `<span style="color:${colors[type]||'#00ff99'}">${msg}</span>`;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     4.  معالج الأوامر الرئيسي
+  ══════════════════════════════════════════════════════ */
+  function processCommand(text) {
+    if (!text || text.length < 1) return;
+    vaState = 'processing';
+    setUIState('processing', '⚙️ أعالج...', undefined, undefined);
+
+    // تطبيع النص
+    const t = normalizeText(text);
+    console.log('[VA] أمر:', t);
+
+    // محاولة تنفيذ أوامر متعددة في جملة واحدة
+    const handled = tryMultiCommand(t);
+
+    setTimeout(() => {
+      if (vaState === 'processing') {
+        vaState = 'ready';
+        setUIState('ready', '✅ جاهز — تكلم!', undefined, undefined);
+      }
+    }, 800);
+
+    if (!handled) {
+      respondWith('لم أفهم الأمر، حاول مجدداً', 'warn');
+      speak('لم أفهم، حاول مجدداً');
+    }
+  }
+
+  /* ─── تطبيع النص ─── */
+  function normalizeText(t) {
+    return t
+      .replace(/أ|إ|آ/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  /* ─── محاولة أوامر متعددة ─── */
+  function tryMultiCommand(t) {
+    // إذا كانت الجملة تحتوي "أضف X و Y و Z"
+    // أو تحتوي على أوامر مستقلة منفصلة بـ "و" أو ","
+    let handled = false;
+
+    // --- تنقل ---
+    if (cmdNavigate(t))  { handled = true; }
+    // --- مريض جديد ---
+    if (cmdNewPatient(t))  { handled = true; }
+    // --- تفاصيل المريض ---
+    if (cmdPatientDetails(t)) { handled = true; }
+    // --- اختيار تحاليل (إضافة/حذف/إنهاء/تالي) ---
+    if (cmdTests(t)) { handled = true; }
+    // --- النتائج ---
+    if (cmdResults(t)) { handled = true; }
+    // --- طباعة / حفظ ---
+    if (cmdSavePrint(t)) { handled = true; }
+    // --- حقل ESR ---
+    if (cmdESR(t)) { handled = true; }
+
+    return handled;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     5.  أوامر التنقل بين الصفحات
+  ══════════════════════════════════════════════════════ */
+  function cmdNavigate(t) {
+    const navTriggers = ['افتح','اذهب','روح','انتقل','اعرض','اظهر','عرض'];
+    const hasTrigger  = navTriggers.some(tr => t.includes(tr));
+
+    // مطابقة مباشرة
+    for (const [alias, page] of Object.entries(NAV_ALIASES)) {
+      const norm = normalizeText(alias);
+      if (t.includes(norm) && (hasTrigger || true)) {
+        if (typeof nav === 'function') {
+          nav(page);
+          respondWith(`✅ انتقلت إلى: ${alias}`, 'success');
+          speak(`تم`);
+          return true;
+        }
+      }
+    }
+
+    // "مريض جديد" مباشر
+    if (t.includes('مريض جديد') || t.includes('سجل مريض') || t.includes('اضف مريض')) {
+      if (typeof startNewPatient === 'function') {
+        startNewPatient();
+        respondWith('✅ فتح نموذج مريض جديد', 'success');
+        speak('افتحت نموذج مريض جديد');
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     6.  أوامر بيانات المريض (الخطوة 1)
+  ══════════════════════════════════════════════════════ */
+  function cmdNewPatient(t) {
+    if (
+      t.includes('مريض جديد') || t.includes('سجل مريض') ||
+      t.includes('اضف مريض') || t.includes('مريضة جديده')
+    ) {
+      if (typeof startNewPatient === 'function') {
+        startNewPatient();
+        respondWith('✅ فتح نموذج مريض جديد', 'success');
+        speak('فتحت نموذج مريض جديد');
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function cmdPatientDetails(t) {
+    let acted = false;
+
+    // اللقب
+    for (const [title, gender] of Object.entries(TITLE_GENDER)) {
+      const norm = normalizeText(title);
+      if (t.includes(norm) || t.includes('اللقب ' + norm) || t.startsWith(norm)) {
+        const nameInp = document.getElementById('wp-name');
+        if (nameInp) {
+          // استخراج الاسم بعد اللقب
+          if (typeof selectTitle === 'function') {
+            selectTitle(title, gender);
+            respondWith(`✅ اللقب: ${title}`, 'success');
+            acted = true;
+          }
+        }
+      }
+    }
+
+    // الجنس
+    if (t.includes('ذكر') || t.includes('رجل') || t.includes('ولد')) {
+      setGender('male');
+      respondWith('✅ الجنس: ذكر');
+      acted = true;
+    }
+    if (t.includes('انثى') || t.includes('بنت') || t.includes('مراه') || t.includes('امراه')) {
+      setGender('female');
+      respondWith('✅ الجنس: أنثى');
+      acted = true;
+    }
+
+    // الاسم — "اسمه X" | "اسمها X" | جملة بعد اللقب
+    const nameMatch = t.match(/اسمه\s+(.+?)(?:\s+عمره|\s+عمرها|\s+عمر|\s+هاتف|$)/) ||
+                      t.match(/اسمها\s+(.+?)(?:\s+عمرها|\s+عمره|\s+عمر|\s+هاتف|$)/) ||
+                      t.match(/الاسم\s+(.+?)(?:\s+عمر|\s+هاتف|$)/);
+    if (nameMatch) {
+      setWizField('wp-name', toProperArabic(nameMatch[1].trim()));
+      respondWith(`✅ الاسم: ${nameMatch[1].trim()}`);
+      acted = true;
+    }
+
+    // العمر — "عمره X" | "عمرها X" | "عمر X سنه"
+    const ageMatch = t.match(/عمره\s+(\d+)|عمرها\s+(\d+)|عمر\s+(\d+)|(\d+)\s*سنه|(\d+)\s*سنة/);
+    if (ageMatch) {
+      const age = ageMatch[1] || ageMatch[2] || ageMatch[3] || ageMatch[4] || ageMatch[5];
+      setWizField('wp-age-y', age);
+      // تشغيل الحساب
+      const fn = window.calcAgeCompound || window.calcAgeFromDob;
+      if (typeof fn === 'function') fn();
+      respondWith(`✅ العمر: ${age} سنة`);
+      acted = true;
+    }
+
+    // الأشهر — "وعمره سنه وثلاثة اشهر"
+    const monthMatch = t.match(/(\d+)\s*شهر|(\d+)\s*أشهر/);
+    if (monthMatch) {
+      const m = monthMatch[1] || monthMatch[2];
+      setWizField('wp-age-m', m);
+      acted = true;
+    }
+
+    // الهاتف — "هاتف X" | "رقم X" | سلسلة أرقام 10-11 رقم
+    const phoneMatch = t.match(/هاتف\s*([\d\s]+)|رقم\s*([\d\s]+)/) ||
+                       t.match(/(\b07\d[\d\s]{8,9}\b)/);
+    if (phoneMatch) {
+      const phone = (phoneMatch[1] || phoneMatch[2]).replace(/\s/g, '');
+      setWizField('wp-phone', phone);
+      respondWith(`✅ الهاتف: ${phone}`);
+      acted = true;
+    }
+
+    // الطبيب — "طبيبه X" | "من عند دكتور X" | "الطبيب X"
+    const drMatch = t.match(/طبيبه\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
+                    t.match(/الطبيب\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
+                    t.match(/دكتور\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
+                    t.match(/دكتوره\s+(.+?)(?:\s+هاتف|\s+عمر|$)/);
+    if (drMatch) {
+      setDoctorByName(drMatch[1].trim());
+      respondWith(`✅ الطبيب: ${drMatch[1].trim()}`);
+      acted = true;
+    }
+
+    // تحليل الجملة الكاملة: "السيد علي حسن عمره 42 هاتف 07701234567"
+    if (!acted) {
+      acted = parseFullPatientSentence(t) || acted;
+    }
+
+    return acted;
+  }
+
+  function parseFullPatientSentence(t) {
+    // نمط: [لقب؟] [اسم] [عمره|عمرها X] [هاتف X]
+    const fullPattern = /^(السيد|السيده|الآنسه|الحاج|الحاجه|الاستاذ|الاستاذه|الطفل|الطفله|الدكتور|الدكتوره)?\s*([^\d]+?)\s*(?:عمره|عمرها|عمر)?\s*(\d+)?\s*(?:هاتف|رقم)?\s*(07\d+)?$/;
+    const m = t.match(fullPattern);
+    if (!m) return false;
+
+    let acted = false;
+    const [, rawTitle, rawName, rawAge, rawPhone] = m;
+
+    if (rawTitle) {
+      const canonical = Object.keys(TITLE_GENDER).find(k =>
+        normalizeText(k) === normalizeText(rawTitle)
+      );
+      if (canonical && typeof selectTitle === 'function') {
+        selectTitle(canonical, TITLE_GENDER[canonical]);
+        acted = true;
+      }
+    }
+    if (rawName && rawName.trim().length > 1) {
+      setWizField('wp-name', rawName.trim());
+      acted = true;
+    }
+    if (rawAge) {
+      setWizField('wp-age-y', rawAge);
+      const fn = window.calcAgeCompound || window.calcAgeFromDob;
+      if (typeof fn === 'function') fn();
+      acted = true;
+    }
+    if (rawPhone) {
+      setWizField('wp-phone', rawPhone);
+      acted = true;
+    }
+
+    if (acted) {
+      respondWith('✅ تم ملء بيانات المريض', 'success');
+      speak('تم');
+    }
+    return acted;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     7.  أوامر اختيار التحاليل (الخطوة 2)
+  ══════════════════════════════════════════════════════ */
+  function cmdTests(t) {
+    let acted = false;
+
+    // التالي / الخطوة التالية
+    if (t.includes('التالي') || t.includes('الخطوه التاليه') || t.includes('انتقل للتالي')) {
+      if (typeof wizNext === 'function') {
+        wizNext();
+        respondWith('✅ الخطوة التالية', 'success');
+        speak('تم');
+        acted = true;
+      }
+    }
+
+    // السابق / رجوع
+    if (t.includes('السابق') || t.includes('رجوع') || t.includes('رجع') || t.includes('ارجع')) {
+      if (typeof wizBack === 'function') {
+        wizBack();
+        respondWith('✅ رجعت للخطوة السابقة');
+        speak('تم');
+        acted = true;
+      }
+    }
+
+    // إنهاء الطلب / حفظ وإنشاء
+    if (
+      t.includes('انهي الطلب') || t.includes('أنهِ الطلب') ||
+      t.includes('انهاء الطلب') || t.includes('حفظ وانشاء') ||
+      t.includes('تأكيد الطلب') || t.includes('اكمل الطلب')
+    ) {
+      if (typeof wizFinish === 'function') {
+        wizFinish();
+        respondWith('✅ تم إنشاء الطلب!', 'success');
+        speak('تم إنشاء الطلب');
+        acted = true;
+      }
+    }
+
+    // مسح كل التحاليل المختارة
+    if (t.includes('امسح الكل') || t.includes('امسح جميع') || t.includes('احذف الكل')) {
+      if (typeof wizSelectedTests !== 'undefined') {
+        wizSelectedTests.length = 0;
+        if (typeof renderWizTestList === 'function') renderWizTestList();
+        if (typeof renderWizRightPanel === 'function') renderWizRightPanel();
+        respondWith('✅ تم مسح جميع التحاليل');
+        speak('تم المسح');
+        acted = true;
+      }
+    }
+
+    // إضافة تحاليل — "أضف X" | "اضف X و Y و Z"
+    const addTriggers = ['اضف','أضف','اختار','اختر','حط','ضع','سجل تحليل','احتاج'];
+    const hasAdd = addTriggers.some(tr => t.includes(tr));
+    if (hasAdd) {
+      const testCodes = extractTestCodes(t);
+      if (testCodes.length > 0) {
+        let addedNames = [];
+        testCodes.forEach(code => {
+          const result = addTestByCode(code);
+          if (result) addedNames.push(result);
+        });
+        if (addedNames.length > 0) {
+          respondWith(`✅ أُضيف: ${addedNames.join('، ')}`, 'success');
+          speak(`أضفت ${addedNames.length} تحليل`);
+          acted = true;
+        }
+      }
+    }
+
+    // حذف تحليل
+    const remTriggers = ['احذف','حذف','شيل','ازيل','ارفع'];
+    const hasRem = remTriggers.some(tr => t.includes(tr));
+    if (hasRem) {
+      const testCodes = extractTestCodes(t);
+      if (testCodes.length > 0) {
+        let removedNames = [];
+        testCodes.forEach(code => {
+          const result = removeTestByCode(code);
+          if (result) removedNames.push(result);
+        });
+        if (removedNames.length > 0) {
+          respondWith(`✅ حُذف: ${removedNames.join('، ')}`, 'info');
+          speak('تم الحذف');
+          acted = true;
+        }
+      }
+    }
+
+    // إضافة باقة / مجموعة — "أضف باقة الروتين"
+    if (t.includes('باقه') || t.includes('باقة') || t.includes('مجموعه') || t.includes('مجموعة')) {
+      respondWith('💡 افتح قائمة الباقات واختر منها', 'info');
+      acted = true;
+    }
+
+    return acted;
+  }
+
+  /* ─── استخراج رموز التحاليل من النص ─── */
+  function extractTestCodes(t) {
+    const codes = [];
+
+    // البحث في PHONETIC_ALIASES
+    for (const [alias, code] of Object.entries(PHONETIC_ALIASES)) {
+      if (t.includes(normalizeText(alias))) {
+        if (!codes.includes(code)) codes.push(code);
+      }
+    }
+
+    // أرقام مثل TSH, CBC بالإنجليزي
+    const engCodes = t.match(/\b[a-z]{2,6}(?:\d[a-z]?)?\b/gi) || [];
+    engCodes.forEach(c => {
+      const upper = c.toUpperCase();
+      const mapped = PHONETIC_ALIASES[c.toLowerCase()];
+      if (mapped && !codes.includes(mapped)) codes.push(mapped);
+      else if (upper.length >= 2 && !codes.includes(upper)) {
+        // تحقق إذا كان موجوداً في قاعدة التحاليل
+        if (typeof tests !== 'undefined') {
+          const found = tests.find(t =>
+            t.code && t.code.toUpperCase() === upper
+          );
+          if (found && !codes.includes(upper)) codes.push(upper);
+        }
+      }
+    });
+
+    return [...new Set(codes)];
+  }
+
+  /* ─── إضافة تحليل بالرمز ─── */
+  function addTestByCode(code) {
+    if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
+    const test = tests.find(t =>
+      (t.code && t.code.toUpperCase() === code.toUpperCase()) ||
+      (t.id   && t.id.toUpperCase()   === code.toUpperCase())
+    );
+    if (!test) return null;
+
+    const alreadyIn = wizSelectedTests &&
+      wizSelectedTests.find(x => x.id === test.id);
+    if (!alreadyIn) {
+      toggleWizTest(test.id);
+    }
+    return test.code || test.nameEn;
+  }
+
+  /* ─── حذف تحليل بالرمز ─── */
+  function removeTestByCode(code) {
+    if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
+    const test = tests.find(t =>
+      (t.code && t.code.toUpperCase() === code.toUpperCase()) ||
+      (t.id   && t.id.toUpperCase()   === code.toUpperCase())
+    );
+    if (!test) return null;
+    const inList = wizSelectedTests && wizSelectedTests.find(x => x.id === test.id);
+    if (inList) toggleWizTest(test.id);
+    return test.code || test.nameEn;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     8.  أوامر إدخال النتائج
+  ══════════════════════════════════════════════════════ */
+  function cmdResults(t) {
+    let acted = false;
+
+    // اختيار طلب من القائمة
+    const reqMatch = t.match(/اختر طلب\s*(?:رقم)?\s*(\d+)/) ||
+                     t.match(/طلب\s*(?:رقم)?\s*(\d+)/) ||
+                     t.match(/رقم\s*(\d+)/);
+    if (reqMatch && (t.includes('طلب') || t.includes('رقم'))) {
+      const reqNum = reqMatch[1];
+      const sel = document.getElementById('res-req-sel');
+      if (sel) {
+        const opt = Array.from(sel.options).find(o => o.text.includes(reqNum) || o.value.includes(reqNum));
+        if (opt) {
+          sel.value = opt.value;
+          sel.dispatchEvent(new Event('change'));
+          respondWith(`✅ اخترت طلب ${reqNum}`, 'success');
+          speak('تم');
+          acted = true;
+        }
+      }
+    }
+
+    // إدخال نتيجة رقمية — "النتيجة الأولى X" | "نتيجة X" | "الحقل رقم N هو X"
+    const resMatch =
+      t.match(/(?:النتيجه?|نتيجه?|حقل)\s*(?:الاول[ىه]?|الثاني|الثالث|الرابع|الخامس|\d+)?\s*(?:هو|يساوي|يعادل|هي)?\s*([\d.,]+)/) ||
+      t.match(/([\d.,]+)\s*(?:للاول[ىه]?|للحقل الاول)/);
+
+    if (resMatch) {
+      const val = resMatch[1].replace(',', '.');
+      const rowNum = extractRowNumber(t);
+      setResultValue(rowNum, val);
+      respondWith(`✅ النتيجة: ${val}`);
+      speak('تم');
+      acted = true;
+    }
+
+    // "الحقل الأول X الحقل الثاني Y ..."
+    const multiRes = extractMultiResults(t);
+    if (multiRes.length > 0) {
+      multiRes.forEach(({idx, val}) => setResultValue(idx, val));
+      respondWith(`✅ أُدخلت ${multiRes.length} نتيجة`);
+      speak('تم إدخال النتائج');
+      acted = true;
+    }
+
+    return acted;
+  }
+
+  function extractRowNumber(t) {
+    if (t.includes('الاول') || t.includes('الاولي') || t.includes('الاوله')) return 0;
+    if (t.includes('الثاني') || t.includes('الثانيه')) return 1;
+    if (t.includes('الثالث') || t.includes('الثالثه')) return 2;
+    if (t.includes('الرابع') || t.includes('الرابعه')) return 3;
+    if (t.includes('الخامس') || t.includes('الخامسه')) return 4;
+    if (t.includes('السادس')) return 5;
+    const nm = t.match(/(?:رقم|حقل)\s*(\d+)/);
+    if (nm) return parseInt(nm[1]) - 1;
+    return 0;
+  }
+
+  function setResultValue(rowIndex, value) {
+    const inputs = document.querySelectorAll('#res-entry-tbody .res-input');
+    if (!inputs || inputs.length === 0) return;
+    const target = inputs[Math.min(rowIndex, inputs.length - 1)];
+    if (target) {
+      target.value = value;
+      target.dispatchEvent(new Event('input'));
+      target.dispatchEvent(new Event('change'));
+      // التنقل بالسهم
+      target.focus();
+    }
+  }
+
+  function extractMultiResults(t) {
+    const results = [];
+    const ordinals = ['الاول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن'];
+    ordinals.forEach((ord, idx) => {
+      const re = new RegExp(ord + '[ىيه]?\\s*(?:هو|هي|يساوي|يعادل|\\=)?\\s*([\\d.,]+)');
+      const m = t.match(re);
+      if (m) results.push({ idx, val: m[1].replace(',', '.') });
+    });
+    return results;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     9.  أوامر الحفظ والطباعة
+  ══════════════════════════════════════════════════════ */
+  function cmdSavePrint(t) {
+    let acted = false;
+
+    // حفظ وطباعة
+    if (
+      t.includes('احفظ وطباعه') || t.includes('احفظ وطبع') ||
+      t.includes('حفظ وطباعه') || t.includes('حفظ وطبع') ||
+      t.includes('اطبع وحفظ')
+    ) {
+      const btn = document.querySelector('[onclick="finalizeAndPrint()"]');
+      if (btn) { btn.click(); respondWith('✅ حفظ وطباعة!', 'success'); speak('تم'); acted = true; }
+    }
+
+    // حفظ المسودة
+    if (t.includes('احفظ المسوده') || t.includes('مسوده') || t.includes('حفظ مسوده')) {
+      if (typeof saveDraft === 'function') {
+        saveDraft();
+        respondWith('✅ تم حفظ المسودة', 'success');
+        speak('تم');
+        acted = true;
+      }
+    }
+
+    // طباعة
+    if (t.includes('اطبع') || t.includes('طباعه') || t.includes('print')) {
+      if (typeof finalizeAndPrint === 'function') {
+        finalizeAndPrint();
+        respondWith('✅ جاري الطباعة', 'success');
+        speak('جاري الطباعة');
+        acted = true;
+      }
+    }
+
+    // حفظ نتائج
+    if (
+      t.includes('احفظ النتائج') || t.includes('حفظ النتائج') ||
+      t.includes('احفظ التعديلات') || t.includes('تاكيد النتائج')
+    ) {
+      const saveBtn = document.querySelector('[onclick="vrSaveResults()"]');
+      if (saveBtn) { saveBtn.click(); respondWith('✅ تم حفظ النتائج', 'success'); speak('تم'); acted = true; }
+    }
+
+    return acted;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     10. أمر ESR
+  ══════════════════════════════════════════════════════ */
+  function cmdESR(t) {
+    let acted = false;
+
+    // اسم مريض ESR
+    const esrNameMatch = t.match(/esr\s+(?:مريض|للمريض)?\s*(.+)/) ||
+                         t.match(/(?:ترسب|esr)\s+اسمه\s+(.+)/);
+    if (esrNameMatch) {
+      const esrNameEl = document.getElementById('esr-pt-name');
+      if (esrNameEl) {
+        esrNameEl.value = esrNameMatch[1].trim();
+        respondWith(`✅ ESR - اسم المريض: ${esrNameMatch[1].trim()}`);
+        acted = true;
+      }
+    }
+
+    // تشغيل ESR
+    if (t.includes('ابدا esr') || t.includes('شغل esr') || t.includes('بدء esr')) {
+      const startBtn = document.querySelector('[onclick="startESR()"]');
+      if (startBtn) { startBtn.click(); respondWith('✅ بدأ عداد ESR', 'success'); speak('تم'); acted = true; }
+    }
+
+    return acted;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     11. مساعدات
+  ══════════════════════════════════════════════════════ */
+  function setWizField(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = value;
+    el.dispatchEvent(new Event('input'));
+    el.dispatchEvent(new Event('change'));
+    el.focus();
+    el.blur();
+  }
+
+  function setGender(g) {
+    const sel = document.getElementById('wp-gender');
+    if (sel) {
+      sel.value = g;
+      sel.dispatchEvent(new Event('change'));
+      if (typeof wizPatient !== 'undefined') wizPatient.gender = g;
+    }
+  }
+
+  function setDoctorByName(nameQuery) {
+    const sel = document.getElementById('wp-doctor');
+    if (!sel) return;
+    const nq = normalizeText(nameQuery);
+    const opt = Array.from(sel.options).find(o =>
+      normalizeText(o.textContent).includes(nq) ||
+      normalizeText(o.value).includes(nq)
+    );
+    if (opt) {
+      sel.value = opt.value;
+      sel.dispatchEvent(new Event('change'));
+    }
+  }
+
+  function toProperArabic(text) {
+    // تحسين كتابة الاسم (الحرف الأول كبير للأسماء الإنجليزية)
+    return text;
+  }
+
+  /* ─── TTS بسيط ─── */
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang  = 'ar-SA';
+    utt.rate  = 1.1;
+    utt.pitch = 1;
+    utt.volume = 0.7;
+    window.speechSynthesis.speak(utt);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     12. تهيئة وتشغيل
+  ══════════════════════════════════════════════════════ */
+  function init() {
+    buildUI();
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      const bubble = document.getElementById('va-bubble');
+      if (bubble) {
+        bubble.title = 'المتصفح لا يدعم التعرف على الصوت';
+        bubble.style.opacity = '0.4';
+        bubble.style.cursor  = 'not-allowed';
+      }
+      document.getElementById('va-transcript').textContent =
+        '⚠️ المتصفح لا يدعم الميكروفون. استخدم Chrome.';
+      return;
+    }
+
+    // طلب إذن الميكروفون
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(() => {
+        initRecognition();
+        setUIState('', '😴 في الانتظار', undefined, undefined);
+      })
+      .catch(() => {
+        document.getElementById('va-transcript').textContent =
+          '⚠️ لم يُسمح بالميكروفون. تحقق من الإعدادات.';
+      });
+  }
+
+  /* ─── تشغيل بعد تحميل الصفحة ─── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 1200);
+  }
+
+  /* ─── تصدير للاستخدام الخارجي ─── */
+  window.VALabDirect = { wakeUp, sleep, processCommand };
+
+})();
 </script>
