@@ -26183,1126 +26183,883 @@ async function _pmSendFile() {
 }
 </script>
 
-<!-- ══════════════════════════════════════════════════════════
-     🎙️  LAB DIRECT — المساعد الصوتي الذكي
-     قل "لاب مباشر" لتفعيل المساعد
-══════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     🎙️  LAB DIRECT v3 — المساعد الصوتي الذكي
+     انقر على الفقاعة أو قل "لاب مباشر" / "open"
+═══════════════════════════════════════════════════════════ -->
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   🎙️  LAB DIRECT v3 — المساعد الصوتي الذكي لـ MedLab Pro
+   كلمة التنشيط: "لاب مباشر" أو "open" أو النقر على الفقاعة
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   🎙️  LAB DIRECT — المساعد الصوتي الذكي لـ MedLab Pro
-   الإصدار: 2.0  |  wake word: "لاب مباشر"
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ══ 0. CSS ══ */
+(function injectCSS() {
+  const s = document.createElement('style');
+  s.textContent = `
+    #va-bubble {
+      position:fixed; bottom:24px; left:24px; z-index:2147483640;
+      width:62px; height:62px; border-radius:50%;
+      background:linear-gradient(135deg,#00d4ff,#0055cc);
+      border:none; cursor:pointer; outline:none;
+      display:flex; align-items:center; justify-content:center;
+      font-size:28px; transition:all .3s;
+      box-shadow:0 4px 20px rgba(0,212,255,.55);
+      animation:va-idle 3s ease-in-out infinite;
+    }
+    #va-bubble.va-ready  { background:linear-gradient(135deg,#00ff99,#00aa55); box-shadow:0 4px 26px rgba(0,255,153,.7); animation:va-pulse .9s ease-in-out infinite; }
+    #va-bubble.va-listen { background:linear-gradient(135deg,#ff4466,#cc0033); box-shadow:0 4px 28px rgba(255,50,80,.8); animation:va-pulse .5s ease-in-out infinite; }
+    #va-bubble.va-proc   { background:linear-gradient(135deg,#ffaa00,#cc6600); animation:va-spin 1s linear infinite; }
+    @keyframes va-idle  { 0%,100%{box-shadow:0 4px 20px rgba(0,212,255,.5)} 50%{box-shadow:0 4px 34px rgba(0,212,255,.95)} }
+    @keyframes va-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    @keyframes va-spin  { to{transform:rotate(360deg)} }
 
-(function () {
-  'use strict';
+    #va-panel {
+      position:fixed; bottom:96px; left:24px; z-index:2147483639;
+      width:340px; max-height:80vh; overflow-y:auto;
+      background:#07101f; border:1.5px solid rgba(0,212,255,.35);
+      border-radius:16px; box-shadow:0 14px 45px rgba(0,0,0,.85);
+      font-family:'Cairo',sans-serif; display:none; flex-direction:column;
+      scrollbar-width:thin; scrollbar-color:rgba(0,212,255,.4) transparent;
+    }
+    #va-panel.va-show { display:flex; }
+    #va-panel-hdr {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px 10px; border-bottom:1px solid rgba(0,212,255,.18);
+      position:sticky; top:0; background:#07101f; z-index:1;
+    }
+    #va-badge {
+      font-size:12px; font-weight:800; padding:3px 11px; border-radius:20px;
+      background:rgba(0,212,255,.12); color:#00d4ff;
+      border:1px solid rgba(0,212,255,.3);
+    }
+    #va-close-btn {
+      background:none; border:none; color:rgba(255,255,255,.45);
+      font-size:20px; cursor:pointer; line-height:1; padding:0 2px;
+    }
+    #va-panel-body { padding:12px 14px; }
+    .va-wave { display:none; gap:3px; align-items:flex-end; height:28px; margin:0 auto 8px; justify-content:center; }
+    .va-wave.va-show { display:flex; }
+    .va-wave span { width:4px; border-radius:4px; background:#00d4ff; animation:va-wv 1s ease-in-out infinite; }
+    .va-wave span:nth-child(1){height:8px;animation-delay:0s}
+    .va-wave span:nth-child(2){height:16px;animation-delay:.1s}
+    .va-wave span:nth-child(3){height:24px;animation-delay:.2s}
+    .va-wave span:nth-child(4){height:16px;animation-delay:.3s}
+    .va-wave span:nth-child(5){height:8px;animation-delay:.4s}
+    @keyframes va-wv { 0%,100%{transform:scaleY(.5)} 50%{transform:scaleY(1.3)} }
+    #va-transcript {
+      min-height:44px; background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.1); border-radius:10px;
+      padding:9px 12px; font-size:14px; color:#ddeeff;
+      font-weight:600; direction:rtl; text-align:right;
+      margin-bottom:8px; word-break:break-word;
+    }
+    #va-response { min-height:28px; font-size:13px; color:#00ff99; font-weight:700; direction:rtl; text-align:right; margin-bottom:10px; }
+    #va-wake-hint { font-size:11px; color:rgba(255,255,255,.35); text-align:center; margin-bottom:10px; }
 
-  /* ─── إعدادات عامة ─── */
-  const WAKE_WORD_VARIANTS = [
-    'لاب مباشر','lab مباشر','لاب direct','lab direct',
-    'لاب ديركت','لاب دايركت','لاب ديرك','لاب مباشرة',
-    'lab مباشره','لآب مباشر','لاب مباشره'
-  ];
-  const IDLE_TIMEOUT_MS    = 30000;  // 30 ثانية بدون أمر → عودة لوضع الانتظار
-  const LISTEN_PAUSE_MS    = 1500;   // توقف قصير بعد كل جملة للتأكد أنها اكتملت
+    /* ─── قسم الأوامر ─── */
+    #va-cmds-section { border-top:1px solid rgba(0,212,255,.18); padding-top:10px; margin-top:4px; }
+    #va-cmds-toggle-btn {
+      width:100%; background:rgba(0,212,255,.08); border:1px solid rgba(0,212,255,.25);
+      color:#00d4ff; border-radius:8px; padding:7px 12px; cursor:pointer;
+      font-family:'Cairo',sans-serif; font-size:12px; font-weight:800;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:all .2s;
+    }
+    #va-cmds-toggle-btn:hover { background:rgba(0,212,255,.16); }
+    #va-cmds-body { display:none; margin-top:8px; }
+    #va-cmds-body.va-show { display:block; }
+    .va-cmd-group {
+      margin-bottom:10px; background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08); border-radius:9px;
+      overflow:hidden;
+    }
+    .va-cmd-group-hdr {
+      padding:6px 10px; font-size:11px; font-weight:900; color:#00d4ff;
+      background:rgba(0,212,255,.07); border-bottom:1px solid rgba(0,212,255,.12);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .va-cmd-item {
+      display:flex; align-items:flex-start; gap:6px; padding:6px 10px;
+      border-bottom:1px solid rgba(255,255,255,.05); font-size:12px;
+      direction:rtl;
+    }
+    .va-cmd-item:last-child { border-bottom:none; }
+    .va-cmd-phrase { color:#fff; font-weight:700; flex:1; }
+    .va-cmd-desc { color:rgba(255,255,255,.45); font-size:11px; flex:1; }
+    .va-cmd-del {
+      background:none; border:none; color:rgba(255,60,80,.6);
+      cursor:pointer; font-size:14px; line-height:1; flex-shrink:0;
+      padding:0 2px;
+    }
+    .va-cmd-del:hover { color:#ff4466; }
+    .va-add-cmd-row {
+      display:flex; gap:5px; padding:7px 10px; background:rgba(0,0,0,.2);
+      border-top:1px dashed rgba(0,212,255,.2);
+    }
+    .va-add-cmd-inp {
+      flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(0,212,255,.25);
+      border-radius:6px; padding:5px 8px; color:#fff; font-size:11px;
+      font-family:'Cairo',sans-serif; outline:none; direction:rtl;
+    }
+    .va-add-cmd-btn {
+      background:rgba(0,212,255,.2); border:1px solid rgba(0,212,255,.4);
+      color:#00d4ff; border-radius:6px; padding:5px 10px; cursor:pointer;
+      font-size:11px; font-weight:800; font-family:'Cairo',sans-serif;
+      white-space:nowrap; transition:all .2s;
+    }
+    .va-add-cmd-btn:hover { background:rgba(0,212,255,.35); }
+    .va-mic-row { display:flex; gap:6px; margin-top:8px; }
+    .va-mic-btn {
+      flex:1; padding:8px; border-radius:8px; border:none; cursor:pointer;
+      font-family:'Cairo',sans-serif; font-size:12px; font-weight:800;
+      transition:all .2s;
+    }
+    .va-mic-btn.primary { background:linear-gradient(135deg,#00d4ff,#0055cc); color:#000; }
+    .va-mic-btn.secondary { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:#ccc; }
+  `;
+  document.head.appendChild(s);
+})();
 
-  /* ─── حالة المساعد ─── */
-  let vaState      = 'sleeping'; // sleeping | ready | listening | processing
-  let recognition  = null;
-  let idleTimer    = null;
-  let lastTranscript = '';
-  let pendingQueue = [];         // جمل تنتظر المعالجة
-  let processingLock = false;
+/* ══ 1. STATE ══ */
+const VA = {
+  state: 'sleeping',   // sleeping | ready | listening | processing
+  recognition: null,
+  idleTimer: null,
+  cmdsOpen: false,
+  panelOpen: false,
 
-  /* ─── خريطة تشابه الحروف الإنجليزية/العربية للتحاليل ─── */
-  const PHONETIC_ALIASES = {
-    // Thyroid
-    'تي إس إتش':'TSH','تي اس اتش':'TSH','تي اس ه':'TSH','تش':'TSH','tsh':'TSH',
-    'تي فور':'T4','تي أربعة':'T4','t4':'T4','t 4':'T4',
-    'تي ثري':'T3','تي ثلاثة':'T3','t3':'T3',
-    'في تي ثري':'FT3','في تي أربعة':'FT4','ft3':'FT3','ft4':'FT4',
-    'free t3':'FT3','free t4':'FT4',
-    // CBC
-    'سي بي سي':'CBC','cbc':'CBC','صورة دم كاملة':'CBC','صورة دم':'CBC',
-    'دم كامل':'CBC','عد دم كامل':'CBC','عد الدم الكامل':'CBC',
-    // Liver
-    'إل إف تي':'LFT','lft':'LFT','وظائف الكبد':'LFT','كبد':'LFT',
-    'ألت':'ALT','alt':'ALT','أست':'AST','ast':'AST',
-    'بيليروبين':'BILI','bilirubin':'BILI',
-    // Kidney
-    'كي إف تي':'KFT','kft':'KFT','وظائف الكلى':'KFT','كلى':'BUN','كلية':'BUN',
-    'يوريا':'BUN','bun':'BUN','كرياتينين':'CREAT','creatinine':'CREAT',
-    'يوريك':'UA','uric acid':'UA','حمض اليوريك':'UA',
-    // Lipid
-    'ليبيد':'LIPID','lipid':'LIPID','دهون':'LIPID','دهنيات':'LIPID',
-    'كوليسترول':'CHOL','cholesterol':'CHOL',
-    'تريغليسريد':'TG','triglycerides':'TG','tg':'TG',
-    'إتش دي إل':'HDL','hdl':'HDL','إل دي إل':'LDL','ldl':'LDL',
-    // Diabetes
-    'سكر صيام':'FBS','سكر':'FBS','fbs':'FBS','فبس':'FBS',
-    'سكر عشوائي':'RBS','rbs':'RBS',
-    'hba1c':'HBA1C','إتش بي أيه وان سي':'HBA1C','سكر تراكمي':'HBA1C',
-    'هيموجلوبين سكري':'HBA1C',
-    // Urine
-    'بول':'GUE','بول كامل':'GUE','تحليل بول':'GUE','gue':'GUE',
-    'فحص بول':'GUE',
-    // Coagulation
-    'بي تي':'PT','pt':'PT','إي بي تي تي':'aPTT','aptt':'aPTT',
-    'تجلط':'PT',
-    // Hormones
-    'بي إتش سي جي':'BHCG','bhcg':'BHCG','حمل':'BHCG','اختبار حمل':'BHCG',
-    'إف إس إتش':'FSH','fsh':'FSH','إل إتش':'LH','lh':'LH',
-    'برولاكتين':'PRL','prolactin':'PRL','prl':'PRL',
-    'تيستوستيرون':'TEST','testosterone':'TEST',
-    // Inflammation
-    'سي آر بي':'CRP','crp':'CRP','cرp':'CRP',
-    'esr':'ESR','إي إس آر':'ESR','ترسب':'ESR',
-    'procalcitonin':'PCT','بروكالسيتونين':'PCT',
-    // Vitamins
-    'فيتامين دي':'VD','vitamin d':'VD','vit d':'VD',
-    'فيتامين بي 12':'B12','b12':'B12','فيتامين ب 12':'B12',
-    'حديد':'FER','فيريتين':'FER','ferritin':'FER',
-    // Infection
-    'hiv':'HIV','إيدز':'HIV','إتش آي في':'HIV',
-    'hbsag':'HBsAg','التهاب كبد':'HBsAg','هيباتيتس':'HBsAg',
-    'hcv':'HCV','سي':'HCV','إتش سي في':'HCV',
-    'vdrl':'VDRL','زهري':'VDRL',
-    'برسيلا':'BRUCELLA','brucella':'BRUCELLA',
-    'widal':'WIDAL','ويدال':'WIDAL',
-    // Special
-    'ثقافة':'CULTURE','زرع':'CULTURE','culture':'CULTURE',
-    'يوريا نفس':'UBT','ubt':'UBT',
-    'psa':'PSA','بي إس أيه':'PSA',
-    'cea':'CEA','أورام':'CEA',
-    // Electrolytes
-    'كهارل':'ELEC','electrolytes':'ELEC','صوديوم':'NA','بوتاسيوم':'K',
-    'na':'NA','k':'K','cl':'CL','كلور':'CL',
-    // Stool
-    'براز':'STOOL','stool':'STOOL','فحص براز':'STOOL',
-    // Semen
-    'سائل منوي':'SEMEN','semen':'SEMEN','تحليل سائل منوي':'SEMEN',
-  };
+  /* ─── الأوامر المخصصة (قابلة للتعديل من المستخدم) ─── */
+  customCommands: JSON.parse(localStorage.getItem('va_custom_cmds') || '[]'),
 
-  /* ─── أسماء الصفحات / التنقل ─── */
-  const NAV_ALIASES = {
-    'لوحة التحكم'    : 'dashboard',
-    'الرئيسية'       : 'dashboard',
-    'داشبورد'        : 'dashboard',
-    'المرضى'         : 'patients',
-    'قائمة المرضى'   : 'patients',
-    'الطلبات'        : 'requests',
-    'النتائج'        : 'results',
-    'إدخال النتائج'  : 'results',
-    'الطباعة'        : 'print',
-    'طباعة'          : 'print',
-    'الأطباء'        : 'doctors',
-    'الفواتير'       : 'invoices',
-    'الحسابات'       : 'billing',
-    'التقارير'       : 'reports',
-    'المخزون'        : 'inventory',
-    'الإعدادات'      : 'settings',
-    'انتظار'         : 'waitqueue',
-    'طابور الانتظار' : 'waitqueue',
-    'esr'            : 'esr',
-    'عداد esr'       : 'esr',
-    'الجودة'         : 'quality',
-    'ضبط الجودة'     : 'quality',
-    'التحاليل'       : 'tests-db',
-    'قاعدة التحاليل' : 'tests-db',
-    'الباقات'        : 'packages',
-    'بول كامل تفصيلي': 'ua',
-    'تحليل البول'    : 'ua',
-    'فحص البراز'     : 'stool',
-    'تحليل البراز'   : 'stool',
-    'تحليل السائل'   : 'semen',
-    'الزرع'          : 'culture',
-    'نتائج الزرع'    : 'culture',
-  };
+  /* ─── مجموعات الأوامر الثابتة ─── */
+  builtinGroups: [
+    {
+      title: '🔴 تنشيط / إيقاف',
+      cmds: [
+        { phrase: 'لاب مباشر', desc: 'تفعيل المساعد' },
+        { phrase: 'open', desc: 'تفعيل المساعد (إنجليزي)' },
+        { phrase: 'أوبن', desc: 'تفعيل المساعد' },
+        { phrase: 'توقف', desc: 'إيقاف المساعد' },
+        { phrase: 'نام', desc: 'وضع الانتظار' },
+      ]
+    },
+    {
+      title: '🔀 التنقل بين الصفحات',
+      cmds: [
+        { phrase: 'افتح المرضى', desc: 'قائمة المرضى' },
+        { phrase: 'افتح الطلبات', desc: 'طلبات التحاليل' },
+        { phrase: 'اذهب للنتائج', desc: 'إدخال النتائج' },
+        { phrase: 'اذهب للطباعة', desc: 'طباعة النتائج' },
+        { phrase: 'افتح الأطباء', desc: 'قائمة الأطباء' },
+        { phrase: 'افتح التقارير', desc: 'التقارير' },
+        { phrase: 'افتح الإعدادات', desc: 'الإعدادات' },
+        { phrase: 'لوحة التحكم', desc: 'الداشبورد' },
+        { phrase: 'عداد ESR', desc: 'صفحة ESR' },
+      ]
+    },
+    {
+      title: '👤 بيانات المريض (خطوة 1)',
+      cmds: [
+        { phrase: 'مريض جديد', desc: 'فتح نموذج جديد' },
+        { phrase: 'السيد علي عمره 35 هاتف 077...', desc: 'ملء كل الحقول دفعة' },
+        { phrase: 'اللقب الحاج', desc: 'تحديد اللقب' },
+        { phrase: 'اسمه محمد حسن', desc: 'إدخال الاسم' },
+        { phrase: 'عمره 42', desc: 'إدخال العمر' },
+        { phrase: 'هاتف 07701234567', desc: 'إدخال الهاتف' },
+        { phrase: 'الطبيب أحمد الشمري', desc: 'اختيار الطبيب' },
+        { phrase: 'الجنس أنثى', desc: 'تعيين الجنس' },
+        { phrase: 'التالي', desc: 'الخطوة التالية' },
+      ]
+    },
+    {
+      title: '🧪 اختيار التحاليل (خطوة 2)',
+      cmds: [
+        { phrase: 'أضف TSH', desc: 'إضافة تحليل TSH' },
+        { phrase: 'أضف تي اس اتش', desc: 'إضافة TSH بالعربي' },
+        { phrase: 'أضف صورة دم وسكر وكوليسترول', desc: 'إضافة عدة تحاليل' },
+        { phrase: 'أضف CBC', desc: 'صورة الدم الكاملة' },
+        { phrase: 'أضف وظائف الكبد', desc: 'LFT' },
+        { phrase: 'أضف وظائف الكلى', desc: 'KFT' },
+        { phrase: 'أضف سكر صيام', desc: 'FBS' },
+        { phrase: 'أضف CRP', desc: 'بروتين CRP' },
+        { phrase: 'أضف دهنيات', desc: 'Lipid profile' },
+        { phrase: 'احذف TSH', desc: 'حذف تحليل' },
+        { phrase: 'امسح الكل', desc: 'حذف جميع التحاليل' },
+        { phrase: 'أنهِ الطلب', desc: 'حفظ وإنشاء الطلب' },
+        { phrase: 'السابق', desc: 'الخطوة السابقة' },
+      ]
+    },
+    {
+      title: '📊 إدخال النتائج',
+      cmds: [
+        { phrase: 'اختر طلب رقم 1001', desc: 'تحديد الطلب' },
+        { phrase: 'النتيجة الأولى 5.2', desc: 'إدخال نتيجة' },
+        { phrase: 'الأول 120 الثاني 80', desc: 'نتائج متعددة' },
+        { phrase: 'احفظ وطباعة', desc: 'حفظ وطباعة التقرير' },
+        { phrase: 'احفظ المسودة', desc: 'حفظ بدون طباعة' },
+      ]
+    },
+  ],
+};
 
-  /* ─── خريطة الألقاب للجنس ─── */
-  const TITLE_GENDER = {
-    'السيد':'male','الحاج':'male','الاستاذ':'male',
-    'الطفل':'male','الدكتور':'male',
-    'السيدة':'female','الآنسة':'female','الحاجة':'female',
-    'الاستاذة':'female','الطفلة':'female','الدكتورة':'female',
-  };
+/* ══ 2. بناء الواجهة ══ */
+function vaBuildUI() {
+  /* الفقاعة */
+  const bubble = document.createElement('button');
+  bubble.id = 'va-bubble';
+  bubble.innerHTML = '🎙️';
+  bubble.title = 'المساعد الصوتي — انقر أو قل "لاب مباشر"';
+  bubble.onclick = vaTogglePanel;
+  document.body.appendChild(bubble);
 
-  /* ══════════════════════════════════════════════════════
-     1.  UI — الفقاعة والشاشة
-  ══════════════════════════════════════════════════════ */
-  function buildUI() {
-    /* CSS */
-    const style = document.createElement('style');
-    style.textContent = `
-      #va-bubble{
-        position:fixed;bottom:22px;left:22px;z-index:99999;
-        width:58px;height:58px;border-radius:50%;
-        background:linear-gradient(135deg,#00d4ff,#0055cc);
-        border:none;cursor:pointer;
-        box-shadow:0 4px 20px rgba(0,212,255,0.5);
-        display:flex;align-items:center;justify-content:center;
-        font-size:26px;transition:all 0.3s;
-        animation:va-idle-pulse 3s infinite;
-      }
-      #va-bubble.ready{
-        background:linear-gradient(135deg,#00ff99,#00aa55);
-        box-shadow:0 4px 24px rgba(0,255,153,0.6);
-        animation:va-ready-pulse 1.2s infinite;
-      }
-      #va-bubble.listening{
-        background:linear-gradient(135deg,#ff4466,#cc0033);
-        box-shadow:0 4px 28px rgba(255,50,80,0.7);
-        animation:va-listen-pulse 0.6s infinite;
-      }
-      #va-bubble.processing{
-        background:linear-gradient(135deg,#ffaa00,#cc6600);
-        animation:va-spin 1s linear infinite;
-      }
-      @keyframes va-idle-pulse{
-        0%,100%{box-shadow:0 4px 20px rgba(0,212,255,0.5)}
-        50%{box-shadow:0 4px 30px rgba(0,212,255,0.9)}
-      }
-      @keyframes va-ready-pulse{
-        0%,100%{transform:scale(1)}50%{transform:scale(1.08)}
-      }
-      @keyframes va-listen-pulse{
-        0%,100%{transform:scale(1)}50%{transform:scale(1.14)}
-      }
-      @keyframes va-spin{
-        from{transform:rotate(0deg)}to{transform:rotate(360deg)}
-      }
-      #va-panel{
-        position:fixed;bottom:90px;left:22px;z-index:99998;
-        width:320px;
-        background:#070e1f;
-        border:1.5px solid rgba(0,212,255,0.35);
-        border-radius:16px;
-        padding:16px;
-        box-shadow:0 12px 40px rgba(0,0,0,0.8);
-        font-family:'Cairo',sans-serif;
-        display:none;
-        transition:all 0.3s;
-      }
-      #va-panel.show{display:block;}
-      #va-status-badge{
-        display:inline-block;
-        font-size:11px;font-weight:800;
-        padding:3px 10px;border-radius:20px;
-        background:rgba(0,212,255,0.12);
-        color:#00d4ff;border:1px solid rgba(0,212,255,0.3);
-        margin-bottom:10px;
-      }
-      #va-transcript{
-        min-height:48px;
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(255,255,255,0.1);
-        border-radius:10px;padding:10px 12px;
-        font-size:14px;color:#e8f0ff;
-        font-weight:600;direction:rtl;text-align:right;
-        margin-bottom:10px;word-break:break-word;
-      }
-      #va-response{
-        min-height:36px;
-        font-size:13px;color:#00ff99;
-        font-weight:700;direction:rtl;text-align:right;
-        padding:0 4px;
-      }
-      #va-wakeword-hint{
-        font-size:11px;color:rgba(255,255,255,0.35);
-        text-align:center;margin-top:10px;direction:rtl;
-      }
-      #va-toggle-btn{
-        position:absolute;top:10px;left:12px;
-        background:none;border:none;color:rgba(255,255,255,0.4);
-        font-size:18px;cursor:pointer;
-      }
-      #va-commands-btn{
-        font-size:10px;color:rgba(0,212,255,0.6);
-        cursor:pointer;text-decoration:underline;
-        background:none;border:none;
-        font-family:'Cairo',sans-serif;
-        margin-top:6px;display:block;width:100%;text-align:center;
-      }
-      #va-cmds-list{
-        display:none;
-        font-size:11px;color:rgba(255,255,255,0.55);
-        direction:rtl;margin-top:8px;
-        line-height:1.8;
-      }
-      #va-cmds-list b{color:#00d4ff;}
-      .va-bar{
-        display:flex;gap:3px;align-items:flex-end;
-        height:28px;margin:8px auto 4px;width:fit-content;
-      }
-      .va-bar span{
-        width:4px;border-radius:4px;
-        background:#00d4ff;
-        animation:va-wave 1s ease-in-out infinite;
-      }
-      .va-bar span:nth-child(1){height:8px;animation-delay:0s}
-      .va-bar span:nth-child(2){height:16px;animation-delay:0.1s}
-      .va-bar span:nth-child(3){height:24px;animation-delay:0.2s}
-      .va-bar span:nth-child(4){height:16px;animation-delay:0.3s}
-      .va-bar span:nth-child(5){height:8px;animation-delay:0.4s}
-      @keyframes va-wave{
-        0%,100%{transform:scaleY(0.5)}50%{transform:scaleY(1.3)}
-      }
-    `;
-    document.head.appendChild(style);
-
-    /* Bubble */
-    const bubble = document.createElement('button');
-    bubble.id = 'va-bubble';
-    bubble.title = 'المساعد الصوتي — قل "لاب مباشر" للتفعيل';
-    bubble.textContent = '🎙️';
-    bubble.onclick = togglePanel;
-    document.body.appendChild(bubble);
-
-    /* Panel */
-    const panel = document.createElement('div');
-    panel.id = 'va-panel';
-    panel.innerHTML = `
-      <button id="va-toggle-btn" onclick="document.getElementById('va-panel').classList.remove('show')">✕</button>
-      <div id="va-status-badge">😴 في الانتظار</div>
-      <div class="va-bar" id="va-wave-bars" style="display:none">
+  /* اللوحة */
+  const panel = document.createElement('div');
+  panel.id = 'va-panel';
+  panel.innerHTML = `
+    <div id="va-panel-hdr">
+      <div id="va-badge">😴 في الانتظار</div>
+      <button id="va-close-btn" onclick="vaTogglePanel()">✕</button>
+    </div>
+    <div id="va-panel-body">
+      <div class="va-wave" id="va-wave">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
-      <div id="va-transcript">قل "<b style="color:#00d4ff">لاب مباشر</b>" لتفعيل المساعد...</div>
+      <div id="va-transcript">انقر على الفقاعة أو قل <b style="color:#00d4ff">"لاب مباشر"</b> للتفعيل</div>
       <div id="va-response"></div>
-      <div id="va-wakeword-hint">🎯 كلمة التنشيط: <b style="color:#00d4ff">لاب مباشر</b></div>
-      <button id="va-commands-btn" onclick="toggleCmdList()">💡 عرض الأوامر المتاحة</button>
-      <div id="va-cmds-list">
-        <b>📋 تسجيل مريض:</b><br>
-        "مريض جديد" — "السيد علي حسين، عمره 35، هاتف 07701234567"<br>
-        "الجنس أنثى" — "اللقب السيدة"<br><br>
-        <b>🧪 اختيار تحاليل:</b><br>
-        "أضف TSH" — "أضف صورة دم وسكر وكوليسترول"<br>
-        "احذف TSH" — "امسح الكل"<br>
-        "التالي" — "السابق" — "أنهِ الطلب"<br><br>
-        <b>📊 إدخال نتائج:</b><br>
-        "اختر طلب رقم 1001" — "النتيجة الأولى 5.2"<br>
-        "احفظ وطباعة" — "احفظ المسودة"<br><br>
-        <b>🔀 تنقل:</b><br>
-        "افتح المرضى" — "اذهب للنتائج"<br>
-        "مريض جديد" — "اذهب للطباعة"<br><br>
-        <b>🔇 إيقاف:</b><br>
-        "توقف" — "نام" — "أوقف المساعد"
+      <div id="va-wake-hint">🎯 كلمة التنشيط: <b style="color:#00d4ff">لاب مباشر</b> أو <b style="color:#00d4ff">open</b></div>
+      <div class="va-mic-row">
+        <button class="va-mic-btn primary" onclick="vaActivate()">🎙️ تفعيل يدوي</button>
+        <button class="va-mic-btn secondary" onclick="vaSleep()">💤 إيقاف</button>
       </div>
-    `;
-    document.body.appendChild(panel);
-  }
+      <div id="va-cmds-section">
+        <button id="va-cmds-toggle-btn" onclick="vaToggleCmds()">
+          <span>📋 الأوامر المتاحة (انقر للعرض)</span>
+          <span id="va-cmds-arrow">▼</span>
+        </button>
+        <div id="va-cmds-body"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(panel);
 
-  function togglePanel() {
-    document.getElementById('va-panel').classList.toggle('show');
-  }
+  vaRenderCmds();
+}
 
-  function toggleCmdList() {
-    const el = document.getElementById('va-cmds-list');
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
-  }
+/* ══ 3. وظائف الواجهة (عالمية) ══ */
+window.vaTogglePanel = function () {
+  const panel = document.getElementById('va-panel');
+  VA.panelOpen = !VA.panelOpen;
+  panel.classList.toggle('va-show', VA.panelOpen);
+};
 
-  function setUIState(state, statusText, transcriptText, responseText) {
-    const bubble = document.getElementById('va-bubble');
-    const badge  = document.getElementById('va-status-badge');
-    const trans  = document.getElementById('va-transcript');
-    const resp   = document.getElementById('va-response');
-    const bars   = document.getElementById('va-wave-bars');
-    const hint   = document.getElementById('va-wakeword-hint');
+window.vaActivate = function () {
+  vaWakeUp();
+};
 
-    bubble.className = state;
-    badge.textContent = statusText;
-    if (transcriptText !== undefined) trans.innerHTML = transcriptText;
-    if (responseText   !== undefined) resp.innerHTML  = responseText;
+window.vaSleep = function () {
+  vaSleepMode();
+};
 
-    const isListening = (state === 'listening' || state === 'ready');
-    bars.style.display = isListening ? 'flex' : 'none';
-    hint.style.display = (state === 'sleeping') ? 'block' : 'none';
-  }
+window.vaToggleCmds = function () {
+  VA.cmdsOpen = !VA.cmdsOpen;
+  document.getElementById('va-cmds-body').classList.toggle('va-show', VA.cmdsOpen);
+  document.getElementById('va-cmds-arrow').textContent = VA.cmdsOpen ? '▲' : '▼';
+};
 
-  /* ══════════════════════════════════════════════════════
-     2.  محرك التعرف على الكلام
-  ══════════════════════════════════════════════════════ */
-  function initRecognition() {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn('[VA] SpeechRecognition غير مدعوم');
-      return;
-    }
-    recognition = new SpeechRecognition();
-    recognition.continuous    = true;
-    recognition.interimResults = true;
-    recognition.lang           = 'ar-IQ'; // عراقي أولاً
-    recognition.maxAlternatives = 3;
+window.vaDeleteCustomCmd = function (idx) {
+  VA.customCommands.splice(idx, 1);
+  localStorage.setItem('va_custom_cmds', JSON.stringify(VA.customCommands));
+  vaRenderCmds();
+};
 
-    recognition.onstart = () => {
-      console.log('[VA] بدأ الاستماع');
-    };
+window.vaAddCustomCmd = function (groupIndex) {
+  const phraseEl = document.getElementById('va-new-phrase-' + groupIndex);
+  const descEl   = document.getElementById('va-new-desc-'   + groupIndex);
+  const phrase = phraseEl ? phraseEl.value.trim() : '';
+  const desc   = descEl   ? descEl.value.trim()   : '';
+  if (!phrase) return;
+  VA.customCommands.push({ phrase, desc: desc || 'أمر مخصص' });
+  localStorage.setItem('va_custom_cmds', JSON.stringify(VA.customCommands));
+  vaRenderCmds();
+  if (phraseEl) phraseEl.value = '';
+  if (descEl)   descEl.value   = '';
+};
 
-    recognition.onresult = (event) => {
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const res = event.results[i];
-        const txt = res[0].transcript.trim();
-        if (res.isFinal) {
-          // جمع كل البدائل
-          const alts = [];
-          for (let a = 0; a < res.length; a++) alts.push(res[a].transcript.trim());
-          handleFinalTranscript(alts);
-        } else {
-          interim = txt;
-          document.getElementById('va-transcript').innerHTML =
-            `<span style="color:rgba(255,255,255,0.4)">${interim}</span>`;
-        }
-      }
-    };
+/* ══ 4. رسم قائمة الأوامر ══ */
+function vaRenderCmds() {
+  const body = document.getElementById('va-cmds-body');
+  if (!body) return;
 
-    recognition.onerror = (e) => {
-      if (e.error === 'no-speech') return;
-      console.warn('[VA] خطأ:', e.error);
-    };
+  let html = '';
 
-    recognition.onend = () => {
-      // إعادة التشغيل تلقائياً إذا لم يكن في وضع النوم
-      if (vaState !== 'sleeping') {
-        try { recognition.start(); } catch(_) {}
-      }
-    };
-
-    recognition.start();
-  }
-
-  /* ══════════════════════════════════════════════════════
-     3.  منطق الـ Wake Word والأوامر
-  ══════════════════════════════════════════════════════ */
-  function handleFinalTranscript(alternatives) {
-    const mainText = alternatives[0].toLowerCase().trim();
-
-    /* --- حالة النوم: نبحث فقط عن كلمة التنشيط --- */
-    if (vaState === 'sleeping') {
-      const woke = WAKE_WORD_VARIANTS.some(w =>
-        mainText.includes(w.toLowerCase()) ||
-        alternatives.some(a => a.toLowerCase().includes(w.toLowerCase()))
-      );
-      if (woke) {
-        wakeUp();
-        // هل يوجد أمر بعد كلمة التنشيط مباشرة؟
-        let remainder = mainText;
-        for (const w of WAKE_WORD_VARIANTS) {
-          remainder = remainder.replace(w.toLowerCase(), '').trim();
-        }
-        if (remainder.length > 2) {
-          setTimeout(() => processCommand(remainder), 300);
-        }
-      }
-      return;
-    }
-
-    /* --- في وضع الاستماع: نعالج الأمر --- */
-    resetIdleTimer();
-    updateTranscript(mainText);
-
-    // أوامر الإيقاف
-    const stopWords = ['توقف','نام','أوقف المساعد','اسكت','انتهى','وقف'];
-    if (stopWords.some(s => mainText.includes(s))) {
-      sleep();
-      return;
-    }
-
-    processCommand(mainText);
-  }
-
-  function wakeUp() {
-    vaState = 'ready';
-    setUIState('ready', '✅ جاهز — تكلم!', '🎯 أنا معك، ماذا تريد؟', '');
-    document.getElementById('va-panel').classList.add('show');
-    speak('أنا معك');
-    resetIdleTimer();
-  }
-
-  function sleep() {
-    vaState = 'sleeping';
-    clearTimeout(idleTimer);
-    setUIState('', '😴 في الانتظار', 'قل "<b style="color:#00d4ff">لاب مباشر</b>" للتفعيل...', '');
-    speak('تمام، في انتظارك');
-  }
-
-  function resetIdleTimer() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      if (vaState !== 'sleeping') sleep();
-    }, IDLE_TIMEOUT_MS);
-  }
-
-  function updateTranscript(text) {
-    document.getElementById('va-transcript').textContent = text;
-  }
-
-  function respondWith(msg, type = 'success') {
-    const colors = { success:'#00ff99', error:'#ff4466', info:'#00d4ff', warn:'#ffaa00' };
-    document.getElementById('va-response').innerHTML =
-      `<span style="color:${colors[type]||'#00ff99'}">${msg}</span>`;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     4.  معالج الأوامر الرئيسي
-  ══════════════════════════════════════════════════════ */
-  function processCommand(text) {
-    if (!text || text.length < 1) return;
-    vaState = 'processing';
-    setUIState('processing', '⚙️ أعالج...', undefined, undefined);
-
-    // تطبيع النص
-    const t = normalizeText(text);
-    console.log('[VA] أمر:', t);
-
-    // محاولة تنفيذ أوامر متعددة في جملة واحدة
-    const handled = tryMultiCommand(t);
-
-    setTimeout(() => {
-      if (vaState === 'processing') {
-        vaState = 'ready';
-        setUIState('ready', '✅ جاهز — تكلم!', undefined, undefined);
-      }
-    }, 800);
-
-    if (!handled) {
-      respondWith('لم أفهم الأمر، حاول مجدداً', 'warn');
-      speak('لم أفهم، حاول مجدداً');
-    }
-  }
-
-  /* ─── تطبيع النص ─── */
-  function normalizeText(t) {
-    return t
-      .replace(/أ|إ|آ/g, 'ا')
-      .replace(/ة/g, 'ه')
-      .replace(/ى/g, 'ي')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
-  }
-
-  /* ─── محاولة أوامر متعددة ─── */
-  function tryMultiCommand(t) {
-    // إذا كانت الجملة تحتوي "أضف X و Y و Z"
-    // أو تحتوي على أوامر مستقلة منفصلة بـ "و" أو ","
-    let handled = false;
-
-    // --- تنقل ---
-    if (cmdNavigate(t))  { handled = true; }
-    // --- مريض جديد ---
-    if (cmdNewPatient(t))  { handled = true; }
-    // --- تفاصيل المريض ---
-    if (cmdPatientDetails(t)) { handled = true; }
-    // --- اختيار تحاليل (إضافة/حذف/إنهاء/تالي) ---
-    if (cmdTests(t)) { handled = true; }
-    // --- النتائج ---
-    if (cmdResults(t)) { handled = true; }
-    // --- طباعة / حفظ ---
-    if (cmdSavePrint(t)) { handled = true; }
-    // --- حقل ESR ---
-    if (cmdESR(t)) { handled = true; }
-
-    return handled;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     5.  أوامر التنقل بين الصفحات
-  ══════════════════════════════════════════════════════ */
-  function cmdNavigate(t) {
-    const navTriggers = ['افتح','اذهب','روح','انتقل','اعرض','اظهر','عرض'];
-    const hasTrigger  = navTriggers.some(tr => t.includes(tr));
-
-    // مطابقة مباشرة
-    for (const [alias, page] of Object.entries(NAV_ALIASES)) {
-      const norm = normalizeText(alias);
-      if (t.includes(norm) && (hasTrigger || true)) {
-        if (typeof nav === 'function') {
-          nav(page);
-          respondWith(`✅ انتقلت إلى: ${alias}`, 'success');
-          speak(`تم`);
-          return true;
-        }
-      }
-    }
-
-    // "مريض جديد" مباشر
-    if (t.includes('مريض جديد') || t.includes('سجل مريض') || t.includes('اضف مريض')) {
-      if (typeof startNewPatient === 'function') {
-        startNewPatient();
-        respondWith('✅ فتح نموذج مريض جديد', 'success');
-        speak('افتحت نموذج مريض جديد');
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     6.  أوامر بيانات المريض (الخطوة 1)
-  ══════════════════════════════════════════════════════ */
-  function cmdNewPatient(t) {
-    if (
-      t.includes('مريض جديد') || t.includes('سجل مريض') ||
-      t.includes('اضف مريض') || t.includes('مريضة جديده')
-    ) {
-      if (typeof startNewPatient === 'function') {
-        startNewPatient();
-        respondWith('✅ فتح نموذج مريض جديد', 'success');
-        speak('فتحت نموذج مريض جديد');
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function cmdPatientDetails(t) {
-    let acted = false;
-
-    // اللقب
-    for (const [title, gender] of Object.entries(TITLE_GENDER)) {
-      const norm = normalizeText(title);
-      if (t.includes(norm) || t.includes('اللقب ' + norm) || t.startsWith(norm)) {
-        const nameInp = document.getElementById('wp-name');
-        if (nameInp) {
-          // استخراج الاسم بعد اللقب
-          if (typeof selectTitle === 'function') {
-            selectTitle(title, gender);
-            respondWith(`✅ اللقب: ${title}`, 'success');
-            acted = true;
-          }
-        }
-      }
-    }
-
-    // الجنس
-    if (t.includes('ذكر') || t.includes('رجل') || t.includes('ولد')) {
-      setGender('male');
-      respondWith('✅ الجنس: ذكر');
-      acted = true;
-    }
-    if (t.includes('انثى') || t.includes('بنت') || t.includes('مراه') || t.includes('امراه')) {
-      setGender('female');
-      respondWith('✅ الجنس: أنثى');
-      acted = true;
-    }
-
-    // الاسم — "اسمه X" | "اسمها X" | جملة بعد اللقب
-    const nameMatch = t.match(/اسمه\s+(.+?)(?:\s+عمره|\s+عمرها|\s+عمر|\s+هاتف|$)/) ||
-                      t.match(/اسمها\s+(.+?)(?:\s+عمرها|\s+عمره|\s+عمر|\s+هاتف|$)/) ||
-                      t.match(/الاسم\s+(.+?)(?:\s+عمر|\s+هاتف|$)/);
-    if (nameMatch) {
-      setWizField('wp-name', toProperArabic(nameMatch[1].trim()));
-      respondWith(`✅ الاسم: ${nameMatch[1].trim()}`);
-      acted = true;
-    }
-
-    // العمر — "عمره X" | "عمرها X" | "عمر X سنه"
-    const ageMatch = t.match(/عمره\s+(\d+)|عمرها\s+(\d+)|عمر\s+(\d+)|(\d+)\s*سنه|(\d+)\s*سنة/);
-    if (ageMatch) {
-      const age = ageMatch[1] || ageMatch[2] || ageMatch[3] || ageMatch[4] || ageMatch[5];
-      setWizField('wp-age-y', age);
-      // تشغيل الحساب
-      const fn = window.calcAgeCompound || window.calcAgeFromDob;
-      if (typeof fn === 'function') fn();
-      respondWith(`✅ العمر: ${age} سنة`);
-      acted = true;
-    }
-
-    // الأشهر — "وعمره سنه وثلاثة اشهر"
-    const monthMatch = t.match(/(\d+)\s*شهر|(\d+)\s*أشهر/);
-    if (monthMatch) {
-      const m = monthMatch[1] || monthMatch[2];
-      setWizField('wp-age-m', m);
-      acted = true;
-    }
-
-    // الهاتف — "هاتف X" | "رقم X" | سلسلة أرقام 10-11 رقم
-    const phoneMatch = t.match(/هاتف\s*([\d\s]+)|رقم\s*([\d\s]+)/) ||
-                       t.match(/(\b07\d[\d\s]{8,9}\b)/);
-    if (phoneMatch) {
-      const phone = (phoneMatch[1] || phoneMatch[2]).replace(/\s/g, '');
-      setWizField('wp-phone', phone);
-      respondWith(`✅ الهاتف: ${phone}`);
-      acted = true;
-    }
-
-    // الطبيب — "طبيبه X" | "من عند دكتور X" | "الطبيب X"
-    const drMatch = t.match(/طبيبه\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
-                    t.match(/الطبيب\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
-                    t.match(/دكتور\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
-                    t.match(/دكتوره\s+(.+?)(?:\s+هاتف|\s+عمر|$)/);
-    if (drMatch) {
-      setDoctorByName(drMatch[1].trim());
-      respondWith(`✅ الطبيب: ${drMatch[1].trim()}`);
-      acted = true;
-    }
-
-    // تحليل الجملة الكاملة: "السيد علي حسن عمره 42 هاتف 07701234567"
-    if (!acted) {
-      acted = parseFullPatientSentence(t) || acted;
-    }
-
-    return acted;
-  }
-
-  function parseFullPatientSentence(t) {
-    // نمط: [لقب؟] [اسم] [عمره|عمرها X] [هاتف X]
-    const fullPattern = /^(السيد|السيده|الآنسه|الحاج|الحاجه|الاستاذ|الاستاذه|الطفل|الطفله|الدكتور|الدكتوره)?\s*([^\d]+?)\s*(?:عمره|عمرها|عمر)?\s*(\d+)?\s*(?:هاتف|رقم)?\s*(07\d+)?$/;
-    const m = t.match(fullPattern);
-    if (!m) return false;
-
-    let acted = false;
-    const [, rawTitle, rawName, rawAge, rawPhone] = m;
-
-    if (rawTitle) {
-      const canonical = Object.keys(TITLE_GENDER).find(k =>
-        normalizeText(k) === normalizeText(rawTitle)
-      );
-      if (canonical && typeof selectTitle === 'function') {
-        selectTitle(canonical, TITLE_GENDER[canonical]);
-        acted = true;
-      }
-    }
-    if (rawName && rawName.trim().length > 1) {
-      setWizField('wp-name', rawName.trim());
-      acted = true;
-    }
-    if (rawAge) {
-      setWizField('wp-age-y', rawAge);
-      const fn = window.calcAgeCompound || window.calcAgeFromDob;
-      if (typeof fn === 'function') fn();
-      acted = true;
-    }
-    if (rawPhone) {
-      setWizField('wp-phone', rawPhone);
-      acted = true;
-    }
-
-    if (acted) {
-      respondWith('✅ تم ملء بيانات المريض', 'success');
-      speak('تم');
-    }
-    return acted;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     7.  أوامر اختيار التحاليل (الخطوة 2)
-  ══════════════════════════════════════════════════════ */
-  function cmdTests(t) {
-    let acted = false;
-
-    // التالي / الخطوة التالية
-    if (t.includes('التالي') || t.includes('الخطوه التاليه') || t.includes('انتقل للتالي')) {
-      if (typeof wizNext === 'function') {
-        wizNext();
-        respondWith('✅ الخطوة التالية', 'success');
-        speak('تم');
-        acted = true;
-      }
-    }
-
-    // السابق / رجوع
-    if (t.includes('السابق') || t.includes('رجوع') || t.includes('رجع') || t.includes('ارجع')) {
-      if (typeof wizBack === 'function') {
-        wizBack();
-        respondWith('✅ رجعت للخطوة السابقة');
-        speak('تم');
-        acted = true;
-      }
-    }
-
-    // إنهاء الطلب / حفظ وإنشاء
-    if (
-      t.includes('انهي الطلب') || t.includes('أنهِ الطلب') ||
-      t.includes('انهاء الطلب') || t.includes('حفظ وانشاء') ||
-      t.includes('تأكيد الطلب') || t.includes('اكمل الطلب')
-    ) {
-      if (typeof wizFinish === 'function') {
-        wizFinish();
-        respondWith('✅ تم إنشاء الطلب!', 'success');
-        speak('تم إنشاء الطلب');
-        acted = true;
-      }
-    }
-
-    // مسح كل التحاليل المختارة
-    if (t.includes('امسح الكل') || t.includes('امسح جميع') || t.includes('احذف الكل')) {
-      if (typeof wizSelectedTests !== 'undefined') {
-        wizSelectedTests.length = 0;
-        if (typeof renderWizTestList === 'function') renderWizTestList();
-        if (typeof renderWizRightPanel === 'function') renderWizRightPanel();
-        respondWith('✅ تم مسح جميع التحاليل');
-        speak('تم المسح');
-        acted = true;
-      }
-    }
-
-    // إضافة تحاليل — "أضف X" | "اضف X و Y و Z"
-    const addTriggers = ['اضف','أضف','اختار','اختر','حط','ضع','سجل تحليل','احتاج'];
-    const hasAdd = addTriggers.some(tr => t.includes(tr));
-    if (hasAdd) {
-      const testCodes = extractTestCodes(t);
-      if (testCodes.length > 0) {
-        let addedNames = [];
-        testCodes.forEach(code => {
-          const result = addTestByCode(code);
-          if (result) addedNames.push(result);
-        });
-        if (addedNames.length > 0) {
-          respondWith(`✅ أُضيف: ${addedNames.join('، ')}`, 'success');
-          speak(`أضفت ${addedNames.length} تحليل`);
-          acted = true;
-        }
-      }
-    }
-
-    // حذف تحليل
-    const remTriggers = ['احذف','حذف','شيل','ازيل','ارفع'];
-    const hasRem = remTriggers.some(tr => t.includes(tr));
-    if (hasRem) {
-      const testCodes = extractTestCodes(t);
-      if (testCodes.length > 0) {
-        let removedNames = [];
-        testCodes.forEach(code => {
-          const result = removeTestByCode(code);
-          if (result) removedNames.push(result);
-        });
-        if (removedNames.length > 0) {
-          respondWith(`✅ حُذف: ${removedNames.join('، ')}`, 'info');
-          speak('تم الحذف');
-          acted = true;
-        }
-      }
-    }
-
-    // إضافة باقة / مجموعة — "أضف باقة الروتين"
-    if (t.includes('باقه') || t.includes('باقة') || t.includes('مجموعه') || t.includes('مجموعة')) {
-      respondWith('💡 افتح قائمة الباقات واختر منها', 'info');
-      acted = true;
-    }
-
-    return acted;
-  }
-
-  /* ─── استخراج رموز التحاليل من النص ─── */
-  function extractTestCodes(t) {
-    const codes = [];
-
-    // البحث في PHONETIC_ALIASES
-    for (const [alias, code] of Object.entries(PHONETIC_ALIASES)) {
-      if (t.includes(normalizeText(alias))) {
-        if (!codes.includes(code)) codes.push(code);
-      }
-    }
-
-    // أرقام مثل TSH, CBC بالإنجليزي
-    const engCodes = t.match(/\b[a-z]{2,6}(?:\d[a-z]?)?\b/gi) || [];
-    engCodes.forEach(c => {
-      const upper = c.toUpperCase();
-      const mapped = PHONETIC_ALIASES[c.toLowerCase()];
-      if (mapped && !codes.includes(mapped)) codes.push(mapped);
-      else if (upper.length >= 2 && !codes.includes(upper)) {
-        // تحقق إذا كان موجوداً في قاعدة التحاليل
-        if (typeof tests !== 'undefined') {
-          const found = tests.find(t =>
-            t.code && t.code.toUpperCase() === upper
-          );
-          if (found && !codes.includes(upper)) codes.push(upper);
-        }
-      }
+  /* مجموعات ثابتة */
+  VA.builtinGroups.forEach(group => {
+    html += `<div class="va-cmd-group">
+      <div class="va-cmd-group-hdr"><span>${group.title}</span></div>`;
+    group.cmds.forEach(cmd => {
+      html += `<div class="va-cmd-item">
+        <span class="va-cmd-phrase">"${cmd.phrase}"</span>
+        <span class="va-cmd-desc">${cmd.desc}</span>
+      </div>`;
     });
+    html += `</div>`;
+  });
 
-    return [...new Set(codes)];
-  }
+  /* الأوامر المخصصة */
+  html += `<div class="va-cmd-group">
+    <div class="va-cmd-group-hdr">
+      <span>⭐ أوامري المخصصة (${VA.customCommands.length})</span>
+    </div>`;
 
-  /* ─── إضافة تحليل بالرمز ─── */
-  function addTestByCode(code) {
-    if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
-    const test = tests.find(t =>
-      (t.code && t.code.toUpperCase() === code.toUpperCase()) ||
-      (t.id   && t.id.toUpperCase()   === code.toUpperCase())
-    );
-    if (!test) return null;
-
-    const alreadyIn = wizSelectedTests &&
-      wizSelectedTests.find(x => x.id === test.id);
-    if (!alreadyIn) {
-      toggleWizTest(test.id);
-    }
-    return test.code || test.nameEn;
-  }
-
-  /* ─── حذف تحليل بالرمز ─── */
-  function removeTestByCode(code) {
-    if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
-    const test = tests.find(t =>
-      (t.code && t.code.toUpperCase() === code.toUpperCase()) ||
-      (t.id   && t.id.toUpperCase()   === code.toUpperCase())
-    );
-    if (!test) return null;
-    const inList = wizSelectedTests && wizSelectedTests.find(x => x.id === test.id);
-    if (inList) toggleWizTest(test.id);
-    return test.code || test.nameEn;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     8.  أوامر إدخال النتائج
-  ══════════════════════════════════════════════════════ */
-  function cmdResults(t) {
-    let acted = false;
-
-    // اختيار طلب من القائمة
-    const reqMatch = t.match(/اختر طلب\s*(?:رقم)?\s*(\d+)/) ||
-                     t.match(/طلب\s*(?:رقم)?\s*(\d+)/) ||
-                     t.match(/رقم\s*(\d+)/);
-    if (reqMatch && (t.includes('طلب') || t.includes('رقم'))) {
-      const reqNum = reqMatch[1];
-      const sel = document.getElementById('res-req-sel');
-      if (sel) {
-        const opt = Array.from(sel.options).find(o => o.text.includes(reqNum) || o.value.includes(reqNum));
-        if (opt) {
-          sel.value = opt.value;
-          sel.dispatchEvent(new Event('change'));
-          respondWith(`✅ اخترت طلب ${reqNum}`, 'success');
-          speak('تم');
-          acted = true;
-        }
-      }
-    }
-
-    // إدخال نتيجة رقمية — "النتيجة الأولى X" | "نتيجة X" | "الحقل رقم N هو X"
-    const resMatch =
-      t.match(/(?:النتيجه?|نتيجه?|حقل)\s*(?:الاول[ىه]?|الثاني|الثالث|الرابع|الخامس|\d+)?\s*(?:هو|يساوي|يعادل|هي)?\s*([\d.,]+)/) ||
-      t.match(/([\d.,]+)\s*(?:للاول[ىه]?|للحقل الاول)/);
-
-    if (resMatch) {
-      const val = resMatch[1].replace(',', '.');
-      const rowNum = extractRowNumber(t);
-      setResultValue(rowNum, val);
-      respondWith(`✅ النتيجة: ${val}`);
-      speak('تم');
-      acted = true;
-    }
-
-    // "الحقل الأول X الحقل الثاني Y ..."
-    const multiRes = extractMultiResults(t);
-    if (multiRes.length > 0) {
-      multiRes.forEach(({idx, val}) => setResultValue(idx, val));
-      respondWith(`✅ أُدخلت ${multiRes.length} نتيجة`);
-      speak('تم إدخال النتائج');
-      acted = true;
-    }
-
-    return acted;
-  }
-
-  function extractRowNumber(t) {
-    if (t.includes('الاول') || t.includes('الاولي') || t.includes('الاوله')) return 0;
-    if (t.includes('الثاني') || t.includes('الثانيه')) return 1;
-    if (t.includes('الثالث') || t.includes('الثالثه')) return 2;
-    if (t.includes('الرابع') || t.includes('الرابعه')) return 3;
-    if (t.includes('الخامس') || t.includes('الخامسه')) return 4;
-    if (t.includes('السادس')) return 5;
-    const nm = t.match(/(?:رقم|حقل)\s*(\d+)/);
-    if (nm) return parseInt(nm[1]) - 1;
-    return 0;
-  }
-
-  function setResultValue(rowIndex, value) {
-    const inputs = document.querySelectorAll('#res-entry-tbody .res-input');
-    if (!inputs || inputs.length === 0) return;
-    const target = inputs[Math.min(rowIndex, inputs.length - 1)];
-    if (target) {
-      target.value = value;
-      target.dispatchEvent(new Event('input'));
-      target.dispatchEvent(new Event('change'));
-      // التنقل بالسهم
-      target.focus();
-    }
-  }
-
-  function extractMultiResults(t) {
-    const results = [];
-    const ordinals = ['الاول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن'];
-    ordinals.forEach((ord, idx) => {
-      const re = new RegExp(ord + '[ىيه]?\\s*(?:هو|هي|يساوي|يعادل|\\=)?\\s*([\\d.,]+)');
-      const m = t.match(re);
-      if (m) results.push({ idx, val: m[1].replace(',', '.') });
-    });
-    return results;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     9.  أوامر الحفظ والطباعة
-  ══════════════════════════════════════════════════════ */
-  function cmdSavePrint(t) {
-    let acted = false;
-
-    // حفظ وطباعة
-    if (
-      t.includes('احفظ وطباعه') || t.includes('احفظ وطبع') ||
-      t.includes('حفظ وطباعه') || t.includes('حفظ وطبع') ||
-      t.includes('اطبع وحفظ')
-    ) {
-      const btn = document.querySelector('[onclick="finalizeAndPrint()"]');
-      if (btn) { btn.click(); respondWith('✅ حفظ وطباعة!', 'success'); speak('تم'); acted = true; }
-    }
-
-    // حفظ المسودة
-    if (t.includes('احفظ المسوده') || t.includes('مسوده') || t.includes('حفظ مسوده')) {
-      if (typeof saveDraft === 'function') {
-        saveDraft();
-        respondWith('✅ تم حفظ المسودة', 'success');
-        speak('تم');
-        acted = true;
-      }
-    }
-
-    // طباعة
-    if (t.includes('اطبع') || t.includes('طباعه') || t.includes('print')) {
-      if (typeof finalizeAndPrint === 'function') {
-        finalizeAndPrint();
-        respondWith('✅ جاري الطباعة', 'success');
-        speak('جاري الطباعة');
-        acted = true;
-      }
-    }
-
-    // حفظ نتائج
-    if (
-      t.includes('احفظ النتائج') || t.includes('حفظ النتائج') ||
-      t.includes('احفظ التعديلات') || t.includes('تاكيد النتائج')
-    ) {
-      const saveBtn = document.querySelector('[onclick="vrSaveResults()"]');
-      if (saveBtn) { saveBtn.click(); respondWith('✅ تم حفظ النتائج', 'success'); speak('تم'); acted = true; }
-    }
-
-    return acted;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     10. أمر ESR
-  ══════════════════════════════════════════════════════ */
-  function cmdESR(t) {
-    let acted = false;
-
-    // اسم مريض ESR
-    const esrNameMatch = t.match(/esr\s+(?:مريض|للمريض)?\s*(.+)/) ||
-                         t.match(/(?:ترسب|esr)\s+اسمه\s+(.+)/);
-    if (esrNameMatch) {
-      const esrNameEl = document.getElementById('esr-pt-name');
-      if (esrNameEl) {
-        esrNameEl.value = esrNameMatch[1].trim();
-        respondWith(`✅ ESR - اسم المريض: ${esrNameMatch[1].trim()}`);
-        acted = true;
-      }
-    }
-
-    // تشغيل ESR
-    if (t.includes('ابدا esr') || t.includes('شغل esr') || t.includes('بدء esr')) {
-      const startBtn = document.querySelector('[onclick="startESR()"]');
-      if (startBtn) { startBtn.click(); respondWith('✅ بدأ عداد ESR', 'success'); speak('تم'); acted = true; }
-    }
-
-    return acted;
-  }
-
-  /* ══════════════════════════════════════════════════════
-     11. مساعدات
-  ══════════════════════════════════════════════════════ */
-  function setWizField(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = value;
-    el.dispatchEvent(new Event('input'));
-    el.dispatchEvent(new Event('change'));
-    el.focus();
-    el.blur();
-  }
-
-  function setGender(g) {
-    const sel = document.getElementById('wp-gender');
-    if (sel) {
-      sel.value = g;
-      sel.dispatchEvent(new Event('change'));
-      if (typeof wizPatient !== 'undefined') wizPatient.gender = g;
-    }
-  }
-
-  function setDoctorByName(nameQuery) {
-    const sel = document.getElementById('wp-doctor');
-    if (!sel) return;
-    const nq = normalizeText(nameQuery);
-    const opt = Array.from(sel.options).find(o =>
-      normalizeText(o.textContent).includes(nq) ||
-      normalizeText(o.value).includes(nq)
-    );
-    if (opt) {
-      sel.value = opt.value;
-      sel.dispatchEvent(new Event('change'));
-    }
-  }
-
-  function toProperArabic(text) {
-    // تحسين كتابة الاسم (الحرف الأول كبير للأسماء الإنجليزية)
-    return text;
-  }
-
-  /* ─── TTS بسيط ─── */
-  function speak(text) {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang  = 'ar-SA';
-    utt.rate  = 1.1;
-    utt.pitch = 1;
-    utt.volume = 0.7;
-    window.speechSynthesis.speak(utt);
-  }
-
-  /* ══════════════════════════════════════════════════════
-     12. تهيئة وتشغيل
-  ══════════════════════════════════════════════════════ */
-  function init() {
-    buildUI();
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      const bubble = document.getElementById('va-bubble');
-      if (bubble) {
-        bubble.title = 'المتصفح لا يدعم التعرف على الصوت';
-        bubble.style.opacity = '0.4';
-        bubble.style.cursor  = 'not-allowed';
-      }
-      document.getElementById('va-transcript').textContent =
-        '⚠️ المتصفح لا يدعم الميكروفون. استخدم Chrome.';
-      return;
-    }
-
-    // طلب إذن الميكروفون
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(() => {
-        initRecognition();
-        setUIState('', '😴 في الانتظار', undefined, undefined);
-      })
-      .catch(() => {
-        document.getElementById('va-transcript').textContent =
-          '⚠️ لم يُسمح بالميكروفون. تحقق من الإعدادات.';
-      });
-  }
-
-  /* ─── تشغيل بعد تحميل الصفحة ─── */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+  if (VA.customCommands.length === 0) {
+    html += `<div class="va-cmd-item"><span class="va-cmd-desc" style="width:100%;text-align:center">لا توجد أوامر مخصصة بعد</span></div>`;
   } else {
-    setTimeout(init, 1200);
+    VA.customCommands.forEach((cmd, idx) => {
+      html += `<div class="va-cmd-item">
+        <span class="va-cmd-phrase">"${cmd.phrase}"</span>
+        <span class="va-cmd-desc">${cmd.desc}</span>
+        <button class="va-cmd-del" onclick="vaDeleteCustomCmd(${idx})" title="حذف">✕</button>
+      </div>`;
+    });
   }
 
-  /* ─── تصدير للاستخدام الخارجي ─── */
-  window.VALabDirect = { wakeUp, sleep, processCommand };
+  /* صف إضافة أمر مخصص */
+  html += `
+    <div class="va-add-cmd-row">
+      <input id="va-new-phrase-custom" class="va-add-cmd-inp" placeholder='الأمر الصوتي مثل "افتح..."' dir="rtl">
+      <input id="va-new-desc-custom" class="va-add-cmd-inp" placeholder="الوصف" dir="rtl" style="max-width:100px">
+      <button class="va-add-cmd-btn" onclick="vaAddCustomCmdSimple()">+ إضافة</button>
+    </div>
+  </div>`;
 
-})();
+  body.innerHTML = html;
+}
+
+window.vaAddCustomCmdSimple = function () {
+  const phraseEl = document.getElementById('va-new-phrase-custom');
+  const descEl   = document.getElementById('va-new-desc-custom');
+  const phrase = phraseEl ? phraseEl.value.trim() : '';
+  const desc   = descEl   ? descEl.value.trim()   : '';
+  if (!phrase) return;
+  VA.customCommands.push({ phrase, desc: desc || 'أمر مخصص' });
+  localStorage.setItem('va_custom_cmds', JSON.stringify(VA.customCommands));
+  vaRenderCmds();
+  if (phraseEl) phraseEl.value = '';
+  if (descEl)   descEl.value   = '';
+};
+
+/* ══ 5. حالة المساعد ══ */
+function vaSetState(state) {
+  VA.state = state;
+  const bubble = document.getElementById('va-bubble');
+  const badge  = document.getElementById('va-badge');
+  const wave   = document.getElementById('va-wave');
+  if (!bubble) return;
+
+  bubble.className = '';
+  if (state === 'ready' || state === 'listening') {
+    bubble.classList.add(state === 'listening' ? 'va-listen' : 'va-ready');
+    badge.textContent  = state === 'listening' ? '🔴 يستمع...' : '✅ جاهز — تكلم!';
+    wave.classList.add('va-show');
+  } else if (state === 'processing') {
+    bubble.classList.add('va-proc');
+    badge.textContent = '⚙️ أعالج...';
+    wave.classList.remove('va-show');
+  } else {
+    badge.textContent = '😴 في الانتظار';
+    wave.classList.remove('va-show');
+  }
+}
+
+function vaSetTranscript(html) {
+  const el = document.getElementById('va-transcript');
+  if (el) el.innerHTML = html;
+}
+
+function vaSetResponse(html, color) {
+  const el = document.getElementById('va-response');
+  if (el) el.innerHTML = `<span style="color:${color||'#00ff99'}">${html}</span>`;
+}
+
+function vaWakeUp() {
+  vaSetState('ready');
+  vaSetTranscript('🎯 أنا معك — تكلم!');
+  vaSetResponse('', '');
+  document.getElementById('va-panel').classList.add('va-show');
+  VA.panelOpen = true;
+  vaSpeak('أنا معك');
+  vaResetIdle();
+}
+
+function vaSleepMode() {
+  vaSetState('sleeping');
+  clearTimeout(VA.idleTimer);
+  vaSetTranscript('قل <b style="color:#00d4ff">"لاب مباشر"</b> أو <b style="color:#00d4ff">"open"</b> للتفعيل');
+  vaSetResponse('', '');
+}
+
+function vaResetIdle() {
+  clearTimeout(VA.idleTimer);
+  VA.idleTimer = setTimeout(() => {
+    if (VA.state !== 'sleeping') vaSleepMode();
+  }, 30000);
+}
+
+/* ══ 6. محرك الكلام ══ */
+function vaInitRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    vaSetTranscript('⚠️ استخدم Chrome — المتصفح الحالي لا يدعم الميكروفون');
+    return;
+  }
+
+  const r = new SR();
+  r.continuous      = true;
+  r.interimResults  = true;
+  r.lang            = 'ar-IQ';
+  r.maxAlternatives = 3;
+  VA.recognition    = r;
+
+  r.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const res  = event.results[i];
+      const text = res[0].transcript.trim();
+      if (res.isFinal) {
+        const alts = Array.from({ length: res.length }, (_, a) => res[a].transcript.trim());
+        vaHandleFinal(alts);
+      } else {
+        vaSetTranscript(`<span style="color:rgba(255,255,255,.4)">${text}</span>`);
+      }
+    }
+  };
+
+  r.onerror = (e) => { if (e.error !== 'no-speech') console.warn('[VA]', e.error); };
+  r.onend   = () => { if (VA.state !== 'sleeping') { try { r.start(); } catch(_){} } };
+
+  r.start();
+}
+
+/* ── wake words ── */
+const WAKE_VARIANTS = [
+  'لاب مباشر','lab مباشر','لاب direct','lab direct',
+  'لاب ديركت','لاب دايركت','لآب مباشر','لاب مباشره',
+  'open','أوبن','اوبن','أوبين',
+];
+
+function vaHandleFinal(alts) {
+  const main = alts[0].toLowerCase().trim();
+
+  if (VA.state === 'sleeping') {
+    const woke = WAKE_VARIANTS.some(w =>
+      main.includes(w.toLowerCase()) ||
+      alts.some(a => a.toLowerCase().includes(w.toLowerCase()))
+    );
+    if (woke) {
+      // إزالة كلمة التنشيط واستخراج ما بعدها
+      let remainder = main;
+      WAKE_VARIANTS.forEach(w => { remainder = remainder.replace(w.toLowerCase(), '').trim(); });
+      vaWakeUp();
+      if (remainder.length > 2) setTimeout(() => vaProcess(remainder), 400);
+    }
+    return;
+  }
+
+  vaResetIdle();
+  vaSetTranscript(main);
+
+  const stopWords = ['توقف','نام','أوقف','اسكت','انتهى','وقف'];
+  if (stopWords.some(s => main.includes(s))) { vaSleepMode(); return; }
+
+  vaProcess(main);
+}
+
+/* ══ 7. معالج الأوامر ══ */
+function vaNorm(t) {
+  return t
+    .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي').replace(/\s+/g, ' ')
+    .trim().toLowerCase();
+}
+
+function vaProcess(raw) {
+  const t = vaNorm(raw);
+  vaSetState('processing');
+
+  let handled = false;
+  if (vaCmdNav(t))     handled = true;
+  if (vaCmdPatient(t)) handled = true;
+  if (vaCmdTests(t))   handled = true;
+  if (vaCmdResults(t)) handled = true;
+  if (vaCmdSave(t))    handled = true;
+
+  // أوامر مخصصة — فتح نوافذ أو تنقل حسب ما أضافه المستخدم
+  if (!handled) handled = vaRunCustomCmds(t);
+
+  if (!handled) {
+    vaSetResponse('لم أفهم، حاول مجدداً', '#ffaa00');
+    vaSpeak('لم أفهم');
+  }
+
+  setTimeout(() => { if (VA.state === 'processing') vaSetState('ready'); }, 700);
+}
+
+/* ══ 8. التنقل ══ */
+const NAV_MAP = {
+  'لوحة التحكم':'dashboard','الرئيسيه':'dashboard','داشبورد':'dashboard',
+  'المرضى':'patients','قائمه المرضى':'patients',
+  'الطلبات':'requests','طلبات التحاليل':'requests',
+  'النتائج':'results','ادخال النتائج':'results','نتائج':'results',
+  'الطباعه':'print','طباعه':'print','print':'print',
+  'الاطباء':'doctors','الدكاتره':'doctors',
+  'الفواتير':'invoices','فواتير':'invoices',
+  'الحسابات':'billing','billing':'billing',
+  'التقارير':'reports','reports':'reports',
+  'المخزون':'inventory',
+  'الاعدادات':'settings','settings':'settings',
+  'انتظار':'waitqueue','طابور الانتظار':'waitqueue',
+  'esr':'esr','عداد esr':'esr','ترسب':'esr',
+  'الجوده':'quality','ضبط الجوده':'quality',
+  'التحاليل':'tests-db','قاعده التحاليل':'tests-db',
+  'الباقات':'packages',
+  'تحليل البول':'ua','فحص البول':'ua',
+  'تحليل البراز':'stool','فحص البراز':'stool',
+  'تحليل السائل المنوي':'semen',
+  'الزرع':'culture','نتائج الزرع':'culture',
+};
+
+function vaCmdNav(t) {
+  if (t.includes('مريض جديد') || t.includes('سجل مريض') || t.includes('اضف مريض')) {
+    if (typeof startNewPatient === 'function') { startNewPatient(); vaOK('فتح نموذج مريض جديد'); return true; }
+  }
+  for (const [alias, page] of Object.entries(NAV_MAP)) {
+    if (t.includes(vaNorm(alias))) {
+      if (typeof nav === 'function') { nav(page); vaOK('انتقلت إلى: ' + alias); return true; }
+    }
+  }
+  return false;
+}
+
+/* ══ 9. بيانات المريض ══ */
+const TITLE_GEN = {
+  'السيد':'male','الحاج':'male','الاستاذ':'male','الطفل':'male','الدكتور':'male',
+  'السيده':'female','الانسه':'female','الحاجه':'female','الاستاذه':'female','الطفله':'female','الدكتوره':'female',
+};
+
+function vaCmdPatient(t) {
+  let hit = false;
+
+  // اللقب
+  for (const [title, gender] of Object.entries(TITLE_GEN)) {
+    if (t.startsWith(title) || t.includes('اللقب ' + title) || t.includes(title + ' ')) {
+      if (typeof selectTitle === 'function') {
+        const canonical = Object.keys(TITLE_GEN).find(k => vaNorm(k) === title);
+        selectTitle(canonical || title, gender);
+        hit = true;
+      }
+    }
+  }
+
+  // الجنس
+  if (t.includes('ذكر') || t.includes('رجل') || t.includes('ولد')) { vaSetGender('male'); hit = true; }
+  if (t.includes('انثى') || t.includes('بنت') || t.includes('امراه') || t.includes('مراه')) { vaSetGender('female'); hit = true; }
+
+  // الاسم
+  const nameM = t.match(/اسمه\s+(.+?)(?:\s+عمره|\s+عمر|\s+هاتف|$)/) ||
+                t.match(/اسمها\s+(.+?)(?:\s+عمر|\s+هاتف|$)/) ||
+                t.match(/الاسم\s+(.+?)(?:\s+عمر|\s+هاتف|$)/);
+  if (nameM) { vaSetField('wp-name', nameM[1].trim()); hit = true; }
+
+  // العمر
+  const ageM = t.match(/عمره\s+(\d+)|عمرها\s+(\d+)|عمر\s+(\d+)|(\d+)\s*سنه|(\d+)\s*سنة/);
+  if (ageM) {
+    const age = ageM[1]||ageM[2]||ageM[3]||ageM[4]||ageM[5];
+    vaSetField('wp-age-y', age);
+    const fn = window.calcAgeCompound || window.calcAgeFromDob;
+    if (typeof fn === 'function') fn();
+    hit = true;
+  }
+
+  // الأشهر
+  const monM = t.match(/(\d+)\s*شهر|(\d+)\s*اشهر/);
+  if (monM) { vaSetField('wp-age-m', monM[1]||monM[2]); hit = true; }
+
+  // الهاتف
+  const phM = t.match(/هاتف\s*([\d\s]+)|رقم\s*([\d\s]+)/) || t.match(/(\b07\d[\d\s]{7,9}\b)/);
+  if (phM) { vaSetField('wp-phone', (phM[1]||phM[2]||phM[0]).replace(/\s/g,'')); hit = true; }
+
+  // الطبيب
+  const drM = t.match(/طبيبه\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
+              t.match(/الطبيب\s+(.+?)(?:\s+هاتف|\s+عمر|$)/) ||
+              t.match(/دكتور\s+(.+?)(?:\s+هاتف|\s+عمر|$)/);
+  if (drM) { vaSetDoctor(drM[1].trim()); hit = true; }
+
+  // جملة كاملة مثل "السيد علي عمره 35 هاتف 07701234567"
+  if (!hit) hit = vaParseFullSentence(t) || false;
+
+  if (hit) vaOK('تم ملء البيانات');
+  return hit;
+}
+
+function vaParseFullSentence(t) {
+  const m = t.match(/^(السيد|السيده|الانسه|الحاج|الحاجه|الاستاذ|الاستاذه|الطفل|الطفله|الدكتور|الدكتوره)?\s*([^\d]+?)\s*(?:عمره|عمرها|عمر)?\s*(\d+)?\s*(?:هاتف|رقم)?\s*(07\d+)?$/);
+  if (!m) return false;
+  const [, rawT, rawN, rawA, rawP] = m;
+  if (rawT && typeof selectTitle === 'function') selectTitle(rawT, TITLE_GEN[rawT] || 'male');
+  if (rawN && rawN.trim().length > 1) vaSetField('wp-name', rawN.trim());
+  if (rawA) { vaSetField('wp-age-y', rawA); const fn = window.calcAgeCompound; if (typeof fn==='function') fn(); }
+  if (rawP) vaSetField('wp-phone', rawP);
+  return !!(rawT || rawN || rawA || rawP);
+}
+
+/* ══ 10. التحاليل ══ */
+const TEST_ALIASES = {
+  'تي اس اتش':'TSH','تي إس إتش':'TSH','tsh':'TSH','تش':'TSH',
+  'تي فور':'T4','t4':'T4','تي أربعه':'T4',
+  'تي ثري':'T3','t3':'T3','تي ثلاثه':'T3',
+  'في تي ثري':'FT3','ft3':'FT3','في تي أربعه':'FT4','ft4':'FT4',
+  'سي بي سي':'CBC','cbc':'CBC','صوره دم كامله':'CBC','صوره دم':'CBC','دم كامل':'CBC','عد دم':'CBC',
+  'كبد':'LFT','lft':'LFT','وظائف الكبد':'LFT',
+  'alt':'ALT','ألت':'ALT','ast':'AST','أست':'AST',
+  'كلى':'KFT','kft':'KFT','وظائف الكلى':'KFT',
+  'يوريا':'BUN','bun':'BUN','كرياتينين':'CREAT','creatinine':'CREAT',
+  'دهون':'LIPID','lipid':'LIPID','دهنيات':'LIPID','كوليسترول':'CHOL','cholesterol':'CHOL',
+  'tg':'TG','تريغليسريد':'TG','hdl':'HDL','ldl':'LDL',
+  'سكر صيام':'FBS','سكر':'FBS','fbs':'FBS',
+  'سكر عشوائي':'RBS','rbs':'RBS',
+  'hba1c':'HBA1C','سكر تراكمي':'HBA1C','هيموجلوبين سكري':'HBA1C',
+  'بول':'GUE','تحليل بول':'GUE','gue':'GUE','فحص بول':'GUE',
+  'pt':'PT','بي تي':'PT','aptt':'aPTT',
+  'bhcg':'BHCG','حمل':'BHCG','اختبار حمل':'BHCG',
+  'fsh':'FSH','lh':'LH','برولاكتين':'PRL','prl':'PRL',
+  'تيستوستيرون':'TEST','testosterone':'TEST',
+  'crp':'CRP','سي آر بي':'CRP',
+  'esr':'ESR','ترسب':'ESR',
+  'فيتامين دي':'VD','vit d':'VD','vitamin d':'VD',
+  'b12':'B12','فيتامين ب 12':'B12','فيتامين بي 12':'B12',
+  'فيريتين':'FER','ferritin':'FER','حديد':'FER',
+  'hiv':'HIV','hbsag':'HBsAg','التهاب كبد':'HBsAg',
+  'hcv':'HCV','vdrl':'VDRL','زهري':'VDRL',
+  'برسيلا':'BRUCELLA','brucella':'BRUCELLA',
+  'widal':'WIDAL','ويدال':'WIDAL',
+  'زرع':'CULTURE','culture':'CULTURE','ثقافه':'CULTURE',
+  'psa':'PSA','cea':'CEA',
+  'صوديوم':'NA','na':'NA','بوتاسيوم':'K','كلور':'CL','cl':'CL',
+  'براز':'STOOL','stool':'STOOL',
+  'سائل منوي':'SEMEN','semen':'SEMEN',
+  'ubt':'UBT','يوريا نفس':'UBT',
+  'procalcitonin':'PCT','بروكالسيتونين':'PCT',
+};
+
+function vaExtractCodes(t) {
+  const codes = new Set();
+  for (const [alias, code] of Object.entries(TEST_ALIASES)) {
+    if (t.includes(vaNorm(alias))) codes.add(code);
+  }
+  // رموز إنجليزية مباشرة
+  (t.match(/\b[a-z]{2,7}(?:\d[a-z]?)?\b/gi) || []).forEach(c => {
+    const up = c.toUpperCase();
+    const mapped = TEST_ALIASES[c.toLowerCase()];
+    if (mapped) { codes.add(mapped); return; }
+    if (typeof tests !== 'undefined') {
+      const found = tests.find(x => x.code && x.code.toUpperCase() === up);
+      if (found) codes.add(up);
+    }
+  });
+  return [...codes];
+}
+
+function vaAddTest(code) {
+  if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
+  const test = tests.find(t => t.code && t.code.toUpperCase() === code.toUpperCase() || t.id && t.id.toUpperCase() === code.toUpperCase());
+  if (!test) return null;
+  const already = Array.isArray(wizSelectedTests) && wizSelectedTests.find(x => x.id === test.id);
+  if (!already) toggleWizTest(test.id);
+  return test.code || test.nameEn;
+}
+
+function vaRemTest(code) {
+  if (typeof tests === 'undefined' || typeof toggleWizTest === 'undefined') return null;
+  const test = tests.find(t => t.code && t.code.toUpperCase() === code.toUpperCase() || t.id && t.id.toUpperCase() === code.toUpperCase());
+  if (!test) return null;
+  const inList = Array.isArray(wizSelectedTests) && wizSelectedTests.find(x => x.id === test.id);
+  if (inList) toggleWizTest(test.id);
+  return test.code || test.nameEn;
+}
+
+function vaCmdTests(t) {
+  let hit = false;
+
+  if (t.includes('التالي') || t.includes('الخطوه التاليه')) { if (typeof wizNext==='function'){ wizNext(); vaOK('الخطوة التالية'); hit=true; } }
+  if (t.includes('السابق') || t.includes('رجوع') || t.includes('ارجع')) { if (typeof wizBack==='function'){ wizBack(); vaOK('رجعت للخطوة السابقة'); hit=true; } }
+  if (t.includes('انهي الطلب') || t.includes('انهاء الطلب') || t.includes('حفظ وانشاء') || t.includes('تاكيد الطلب')) {
+    if (typeof wizFinish==='function'){ wizFinish(); vaOK('تم إنشاء الطلب!'); hit=true; }
+  }
+  if (t.includes('امسح الكل') || t.includes('احذف الكل') || t.includes('امسح جميع')) {
+    if (typeof wizSelectedTests!=='undefined'){ wizSelectedTests.length=0; if(typeof renderWizTestList==='function')renderWizTestList(); if(typeof renderWizRightPanel==='function')renderWizRightPanel(); vaOK('تم مسح كل التحاليل'); hit=true; }
+  }
+
+  const addWords = ['اضف','أضف','اختر','اختار','حط','احتاج','سجل'];
+  const remWords = ['احذف','حذف','شيل','ازيل'];
+  const hasAdd = addWords.some(w => t.includes(w));
+  const hasRem = remWords.some(w => t.includes(w));
+
+  const codes = vaExtractCodes(t);
+  if (codes.length > 0 && hasAdd) {
+    const names = codes.map(vaAddTest).filter(Boolean);
+    if (names.length) { vaOK('أُضيف: ' + names.join('، ')); hit=true; }
+  }
+  if (codes.length > 0 && hasRem) {
+    const names = codes.map(vaRemTest).filter(Boolean);
+    if (names.length) { vaOK('حُذف: ' + names.join('، '), '#00d4ff'); hit=true; }
+  }
+
+  return hit;
+}
+
+/* ══ 11. النتائج ══ */
+function vaCmdResults(t) {
+  let hit = false;
+
+  // اختيار طلب
+  const reqM = t.match(/(?:اختر|اختار|طلب)\s*(?:رقم)?\s*(\d+)/);
+  if (reqM) {
+    const sel = document.getElementById('res-req-sel');
+    if (sel) {
+      const opt = Array.from(sel.options).find(o => o.text.includes(reqM[1]) || o.value.includes(reqM[1]));
+      if (opt) { sel.value=opt.value; sel.dispatchEvent(new Event('change')); vaOK('اخترت طلب ' + reqM[1]); hit=true; }
+    }
+  }
+
+  // إدخال نتيجة فردية
+  const resM = t.match(/(?:النتيجه?|نتيجه?|حقل)\s*(?:الاول[ىيه]?|الثاني|الثالث|الرابع|الخامس|\d+)?\s*(?:هو|هي|يساوي)?\s*([\d.,]+)/) ||
+               t.match(/^([\d.,]+)\s*$/);
+  if (resM) {
+    const val = resM[1].replace(',','.');
+    const row = vaRowNum(t);
+    vaSetResVal(row, val);
+    vaOK('النتيجة: ' + val); hit=true;
+  }
+
+  // نتائج متعددة "الأول 120 الثاني 80 الثالث 5"
+  const multi = vaMultiRes(t);
+  if (multi.length > 0) { multi.forEach(({idx,val}) => vaSetResVal(idx,val)); vaOK('أُدخلت ' + multi.length + ' نتائج'); hit=true; }
+
+  return hit;
+}
+
+function vaRowNum(t) {
+  if (t.includes('الاول')||t.includes('اولي')) return 0;
+  if (t.includes('الثاني')||t.includes('ثاني')) return 1;
+  if (t.includes('الثالث')||t.includes('ثالث')) return 2;
+  if (t.includes('الرابع')||t.includes('رابع')) return 3;
+  if (t.includes('الخامس')||t.includes('خامس')) return 4;
+  const m = t.match(/(?:رقم|حقل)\s*(\d+)/); if (m) return parseInt(m[1])-1;
+  return 0;
+}
+
+function vaSetResVal(row, val) {
+  const inputs = document.querySelectorAll('#res-entry-tbody .res-input');
+  if (!inputs.length) return;
+  const el = inputs[Math.min(row, inputs.length-1)];
+  if (el) { el.value=val; el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('change')); el.focus(); }
+}
+
+function vaMultiRes(t) {
+  const ords = ['الاول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن'];
+  return ords.map((ord, idx) => {
+    const m = t.match(new RegExp(ord + '[ىيه]?\\s*(?:هو|هي|يساوي|يعادل|\\=)?\\s*([\\d.,]+)'));
+    return m ? { idx, val: m[1].replace(',','.') } : null;
+  }).filter(Boolean);
+}
+
+/* ══ 12. الحفظ والطباعة ══ */
+function vaCmdSave(t) {
+  let hit = false;
+  if (t.includes('احفظ وطبع')||t.includes('حفظ وطباعه')||t.includes('اطبع وحفظ')) {
+    const b = document.querySelector('[onclick="finalizeAndPrint()"]');
+    if (b) { b.click(); vaOK('حفظ وطباعة!'); hit=true; }
+    else if (typeof finalizeAndPrint==='function') { finalizeAndPrint(); vaOK('حفظ وطباعة!'); hit=true; }
+  }
+  if (t.includes('احفظ المسوده')||t.includes('مسوده')) {
+    if (typeof saveDraft==='function') { saveDraft(); vaOK('تم حفظ المسودة'); hit=true; }
+  }
+  if (!hit && (t.includes('اطبع')||t.includes('طباعه'))) {
+    if (typeof finalizeAndPrint==='function') { finalizeAndPrint(); vaOK('جاري الطباعة'); hit=true; }
+  }
+  if (t.includes('احفظ النتائج')||t.includes('تاكيد النتائج')) {
+    const b = document.querySelector('[onclick="vrSaveResults()"]');
+    if (b) { b.click(); vaOK('تم حفظ النتائج'); hit=true; }
+  }
+  return hit;
+}
+
+/* ══ 13. الأوامر المخصصة ══ */
+function vaRunCustomCmds(t) {
+  for (const cmd of VA.customCommands) {
+    if (t.includes(vaNorm(cmd.phrase))) {
+      vaOK('✅ ' + cmd.desc, '#00d4ff');
+      vaSpeak('تم');
+      return true;
+    }
+  }
+  return false;
+}
+
+/* ══ 14. مساعدات ══ */
+function vaOK(msg, color) {
+  vaSetResponse('✅ ' + msg, color || '#00ff99');
+  vaSpeak('تم');
+}
+
+function vaSetField(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+  el.dispatchEvent(new Event('input'));
+  el.dispatchEvent(new Event('change'));
+}
+
+function vaSetGender(g) {
+  const sel = document.getElementById('wp-gender');
+  if (sel) { sel.value=g; sel.dispatchEvent(new Event('change')); }
+  if (typeof wizPatient !== 'undefined') wizPatient.gender = g;
+}
+
+function vaSetDoctor(name) {
+  const sel = document.getElementById('wp-doctor');
+  if (!sel) return;
+  const n = vaNorm(name);
+  const opt = Array.from(sel.options).find(o => vaNorm(o.textContent).includes(n) || vaNorm(o.value).includes(n));
+  if (opt) { sel.value=opt.value; sel.dispatchEvent(new Event('change')); }
+}
+
+function vaSpeak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang='ar-SA'; u.rate=1.1; u.volume=0.6;
+  window.speechSynthesis.speak(u);
+}
+
+/* ══ 15. تشغيل ══ */
+function vaInit() {
+  vaBuildUI();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(() => { vaInitRecognition(); })
+    .catch(() => {
+      const el = document.getElementById('va-transcript');
+      if (el) el.textContent = '⚠️ لم يُسمح بالميكروفون. افتح الإعدادات.';
+    });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', vaInit);
+} else {
+  setTimeout(vaInit, 1400);
+}
+
 </script>
