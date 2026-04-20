@@ -26988,14 +26988,19 @@ const VA = (function(){
       if(typeof wizPatient!=='undefined')wizPatient.gender='male';
       out.push({cls:'ok',msg:'الجنس: ذكر'});
     }
-    // الاسم
-    const nameMatch=raw.match(/(?:اسمه|اسمها|الاسم|اسم المريض|المريض)\s+([^\d،,]+?)(?:\s+عمره|\s+عمرها|\s+العمر|\s+رقم|\s+الطبيب|$)/i);
+    // الاسم — يُعيَّن مرة واحدة فقط
+    const nameMatch=raw.match(/(?:اسمه|اسمها|الاسم|اسم المريض|المريض|اسم)\s+([^\d،,]+?)(?:\s+عمره|\s+عمرها|\s+العمر|\s+رقم|\s+الطبيب|$)/i);
     if(nameMatch){
-      const name=nameMatch[1].trim();
-      const el=document.getElementById('wp-name');
-      if(el){el.value=name;el.dispatchEvent(new Event('input',{bubbles:true}));}
-      if(typeof wizPatient!=='undefined')wizPatient.name=name;
-      out.push({cls:'ok',msg:'الاسم: '+name});
+      const name=nameMatch[1].trim().replace(/\s+/g,' ');
+      if(name.length > 1){
+        const el=document.getElementById('wp-name');
+        if(el && el.value !== name){
+          el.value = name;
+          el.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+        if(typeof wizPatient!=='undefined') wizPatient.name=name;
+        out.push({cls:'ok',msg:'الاسم: '+name});
+      }
     }
     // العمر
     const ageMatch=t.match(/(?:عمره|عمرها|العمر|عمر)\s+(.+?)(?:\s+سنة|\s+سنوات|$)/i)||t.match(/(\d+)\s+سن/i);
@@ -27017,13 +27022,25 @@ const VA = (function(){
       out.push({cls:'ok',msg:'الهاتف: '+phone});
     }
     // الطبيب
-    const docMatch=raw.match(/(?:الطبيب|دكتور|دكتورة|د\.)\s+([^\d،,]+?)(?:\s+رقم|\s+عمر|$)/i);
+    const docMatch=raw.match(/(?:الطبيب|طبيب المحول|المحول|دكتور|دكتورة|الدكتور|الدكتورة|د\.)\s+([^\d،,]+?)(?:\s+رقم|\s+عمر|\s+اسم|$)/i);
     if(docMatch&&typeof doctors!=='undefined'){
-      const dName=docMatch[1].trim().toLowerCase();
-      const found=doctors.find(d=>d.name.toLowerCase().includes(dName)||dName.includes(d.name.toLowerCase().split(' ')[0])||_sim(d.name.toLowerCase(),dName)>0.6);
+      const dName=docMatch[1].trim().toLowerCase().replace(/\s+/g,' ');
+      // أولوية: 1) تطابق تام، 2) احتواء، 3) تشابه عالٍ فقط
+      const found=
+        doctors.find(d=>d.name.toLowerCase()===dName) ||
+        doctors.find(d=>d.name.toLowerCase().includes(dName)||dName.includes(d.name.toLowerCase())) ||
+        doctors.find(d=>{
+          // تطابق الاسم الأول على الأقل
+          const firstName=d.name.toLowerCase().split(' ')[0];
+          return firstName.length>2 && dName.includes(firstName);
+        }) ||
+        doctors.find(d=>_sim(d.name.toLowerCase(),dName)>0.80);
       if(found){
         const el=document.getElementById('wp-doctor');
-        if(el){el.value=found.id;el.dispatchEvent(new Event('change',{bubbles:true}));}
+        if(el && el.value!==found.id){
+          el.value=found.id;
+          el.dispatchEvent(new Event('change',{bubbles:true}));
+        }
         if(typeof wizPatient!=='undefined'){wizPatient.doctorId=found.id;wizPatient.doctorName=found.name;}
         out.push({cls:'ok',msg:'الطبيب: '+found.name});
       }else{out.push({cls:'err',msg:'لم أجد الطبيب: '+docMatch[1]});}
@@ -27359,17 +27376,23 @@ const VA = (function(){
     const out=[];
 
     // ① بحث عن مريض في قسم الطلبات
-    // صيغ: "ابحث عن أحمد" / "دور على محمد" / "فتش عن سالم" / "اشوف طلبات علي"
-    const searchMatch=raw.match(/(?:ابحث عن|بحث عن|دور على|دور عن|دوّر على|فتش عن|فتّش عن|اشوف|شوف طلبات|اجيب|هاي|هات طلبات?|جيب طلبات?|جيب طلب|گلي عن|كلي عن|لكيت|لچ عن|لگ عن|بحث عن|فتش)\s+(.+)/i);
+    const searchMatch=raw.match(/(?:ابحث\s+عن|بحث\s+عن|دور\s+على|دور\s+عن|دوّر\s+على|فتش\s+عن|فتّش\s+عن|اشوف\s+طلبات?|جيب\s+طلبات?|هات\s+طلبات?|گلي\s+عن|كلي\s+عن|لچ\s+عن|لگ\s+عن)\s+(.+)/i)
+      || raw.match(/^(?:فتش|دور|ابحث|بحث)\s+(.+)/i);
     if(searchMatch){
-      const name=searchMatch[1].replace(/(?:\s+في الطلبات|\s+الطلبات)$/,'').trim();
+      // استخرج الاسم فقط — بدون الكلمة المحفزة
+      const name = searchMatch[searchMatch.length-1]
+        .replace(/(?:\s+في\s+الطلبات|\s+الطلبات)$/,'').trim();
+      if(name.length < 2){ out.push({cls:'err',msg:'أعد قول الاسم'}); return out; }
       const inp=document.getElementById('req-srch-inp');
       if(inp){
-        inp.value=name;
-        inp.dispatchEvent(new Event('input',{bubbles:true}));
-        if(typeof searchReq==='function')searchReq(name);
+        // اكتب الاسم مرة واحدة فقط
+        if(inp.value !== name){
+          inp.value = name;
+          inp.dispatchEvent(new Event('input',{bubbles:true}));
+          if(typeof searchReq==='function') searchReq(name);
+        }
         out.push({cls:'ok',msg:'بحث عن: '+name+' ✅'});
-      }else{out.push({cls:'err',msg:'لم أجد حقل البحث'});}
+      }else{ out.push({cls:'err',msg:'لم أجد حقل البحث'}); }
       return out;
     }
 
@@ -27821,9 +27844,9 @@ const VA = (function(){
     _rec.interimResults = true;  // ← لكشف متى يتكلم المستخدم
     _rec.maxAlternatives = 5;
 
-    let _finalBuf = '';          // تجميع النص النهائي
+    let _finalBuf = '';          // تجميع النص النهائي فقط
     let _commitTimer = null;     // مؤقت تنفيذ الأمر بعد توقف الكلام
-    let _lastInterim = '';       // آخر نص مؤقت لعرضه
+    let _executing = false;      // منع التنفيذ المزدوج
 
     _rec.onresult = e => {
       let interimText = '';
@@ -27837,25 +27860,29 @@ const VA = (function(){
         }
       }
 
-      // إضافة النص النهائي للمخزن المؤقت
+      // أضف فقط النص النهائي الجديد للمخزن
       if(newFinal.trim()){
         _finalBuf += newFinal;
-        _showHeard('🎤 ' + _finalBuf.trim());
-      } else if(interimText){
-        _showHeard('🎤 ' + _finalBuf.trim() + ' <span style="opacity:0.5">' + interimText + '</span>');
       }
 
-      // بعد 800ms من توقف الكلام → نفّذ الأمر
+      // عرض ما يُسمع الآن
+      const display = (_finalBuf + interimText).trim();
+      if(display) _showHeard('🎤 ' + _finalBuf.trim() +
+        (interimText ? ' <span style="opacity:0.5">' + interimText + '</span>' : ''));
+
+      // أعد ضبط المؤقت — سينفّذ بعد 900ms من آخر كلمة
       clearTimeout(_commitTimer);
+      if(!display) return;
       _commitTimer = setTimeout(()=>{
-        const tx = (_finalBuf + ' ' + interimText).trim();
-        _finalBuf = '';
-        _lastInterim = '';
-        if(!tx) return;
+        if(_executing) return;
+        // استخدم النص النهائي فقط — النص المؤقت قد يكون غير دقيق
+        const tx = _finalBuf.trim() || interimText.trim();
+        _finalBuf = '';      // ← صفّر فوراً قبل أي شيء
+        interimText = '';
+        if(!tx || _executing) return;
+        _executing = true;
 
-        // تحويل الحروف الإنجليزية المنطوقة بالعربية
         const converted = _arabicLettersToEn(tx.toLowerCase().trim());
-
         _showHeard('<b>🎤 سمعت:</b> ' + tx);
 
         let processed = false;
@@ -27878,7 +27905,9 @@ const VA = (function(){
         if(!processed){ _process(tx); }
         _setHint(_ctx());
         _resetIdleTimer();
-      }, 800);
+        // أعد تعيين العلامة بعد فترة قصيرة
+        setTimeout(()=>{ _executing = false; }, 600);
+      }, 900);
     };
 
     _rec.onerror = e => {
