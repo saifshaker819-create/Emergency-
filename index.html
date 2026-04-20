@@ -26816,6 +26816,94 @@ const VA = (function(){
     return m/Math.max(a.length,b.length);
   }
 
+  // ══════════════════════════════════════════════════════
+  // قاموس نطق الحروف الإنجليزية بالعربية
+  // مثال: "ار" = R, "سي" = C, "تي اس اتش" = TSH
+  // ══════════════════════════════════════════════════════
+  const LETTER_MAP = {
+    // A
+    'ايه':'A','إيه':'A','آيه':'A','اي':'A',
+    // B
+    'بي':'B','بيه':'B',
+    // C
+    'سي':'C','سيه':'C',
+    // D
+    'دي':'D','ديه':'D',
+    // E
+    'إي':'E','إيه':'E',
+    // F
+    'اف':'F','إف':'F','ايف':'F',
+    // G
+    'جي':'G','جيه':'G',
+    // H
+    'اتش':'H','إتش':'H','هيتش':'H','هاتش':'H','ايتش':'H','ايج':'H',
+    // I
+    'آي':'I',
+    // J
+    'جاي':'J',
+    // K
+    'كيه':'K','كاي':'K',
+    // L
+    'ال':'L','ايل':'L','ايلي':'L',
+    // M
+    'ام':'M','إم':'M','ايم':'M',
+    // N
+    'ان':'N','إن':'N','اين':'N',
+    // O
+    'او':'O','أوه':'O',
+    // P
+    'بيه':'P','پي':'P',
+    // Q
+    'كيو':'Q',
+    // R
+    'ار':'R','آر':'R','إر':'R',
+    // S
+    'اس':'S','إس':'S','ايس':'S',
+    // T
+    'تي':'T','تيه':'T',
+    // U
+    'يو':'U','يوه':'U',
+    // V
+    'في':'V','فيه':'V','في':'V',
+    // W
+    'دبليو':'W','دبليوه':'W',
+    // X
+    'اكس':'X','إكس':'X','ايكس':'X',
+    // Y
+    'واي':'Y','وايه':'Y',
+    // Z
+    'زد':'Z','زيه':'Z','زي':'Z',
+  };
+
+  // تحويل النص الذي يحتوي على حروف إنجليزية منطوقة بالعربية إلى الحروف نفسها
+  // مثال: "سي بي سي" → "CBC"، "تي اس اتش" → "TSH"، "ار بي سي" → "RBC"
+  function _arabicLettersToEn(txt){
+    // نقسم النص على فراغات ونحاول تحويل كل كلمة أو مجموعة كلمات إلى حرف إنجليزي
+    const words = txt.trim().split(/\s+/);
+    const result = [];
+    let i = 0;
+    while(i < words.length){
+      // جرب مطابقة كلمتين أو ثلاث كلمات أولاً (للكلمات المركبة مثل "دبليو بي سي")
+      let matched = false;
+      for(let len = 3; len >= 1; len--){
+        if(i + len > words.length) continue;
+        const chunk = words.slice(i, i+len).join(' ');
+        if(LETTER_MAP[chunk]){
+          result.push(LETTER_MAP[chunk]);
+          i += len;
+          matched = true;
+          break;
+        }
+      }
+      if(!matched){ result.push(words[i]); i++; }
+    }
+    // إذا كانت النتيجة كلها حروف إنجليزية، ادمجها بدون فراغات
+    const allLetters = result.every(r => /^[A-Z]$/.test(r));
+    if(allLetters && result.length > 1) return result.join('');
+    // وإلا أعد النص الأصلي مع استبدال الحروف المحوّلة
+    return result.join(' ');
+  }
+
   function _findTestCode(word){
     const w=word.toLowerCase().trim();
     // ⓪ القاموس المخصص — أعلى أولوية دائماً
@@ -26827,6 +26915,21 @@ const VA = (function(){
     }
     // ① مطابقة مباشرة من القاموس
     if(TEST_MAP[w])return TEST_MAP[w];
+    // ①-ب تحويل نطق الحروف الإنجليزية بالعربية ثم البحث مجدداً
+    // مثال: "ار بي سي" → "RBC"، "سي بي سي" → "CBC"، "تي اس اتش" → "TSH"
+    const converted = _arabicLettersToEn(word.toLowerCase().trim());
+    if(converted !== w){
+      const convUpper = converted.toUpperCase().trim();
+      // مطابقة مباشرة للكود المحوَّل
+      if(typeof tests!=='undefined'){
+        const exact=tests.find(t=>t.code.toUpperCase()===convUpper);
+        if(exact)return exact.code;
+      }
+      const dictKey=Object.keys(TEST_MAP).find(k=>k.toUpperCase()===convUpper);
+      if(dictKey)return TEST_MAP[dictKey];
+      // مطابقة جزئية
+      for(const[k,v]of Object.entries(TEST_MAP)){if(convUpper===k.toUpperCase()||convUpper.includes(k.toUpperCase()))return v;}
+    }
     // ② مطابقة الأكواد القصيرة (3 أحرف أو أقل) بشكل دقيق فقط — لمنع الخلط بين RBC/CRP/CBC
     const upper=w.toUpperCase();
     if(w.length<=4){
@@ -27509,12 +27612,15 @@ const VA = (function(){
   // دالة مساعدة لتجربة النص وإرجاع النتيجة دون تنفيذ
   function _tryProcess(txt){
     const ctx=_ctx();
-    const t=txt.toLowerCase().trim();
-    if(ctx==='patient')         return _handlePatient(t,txt);
-    else if(ctx==='tests')      return _handleTests(t,txt);
-    else if(ctx==='results')    return _handleResults(t,txt);
-    else if(ctx==='viewresults') return _handleViewResults(t,txt);
-    else if(ctx==='requests')   return _handleRequests(t,txt);
+    // تحويل نطق الحروف الإنجليزية بالعربية (مثلاً "سي بي سي" → "CBC")
+    const converted = _arabicLettersToEn(txt.toLowerCase().trim());
+    const t = converted.toLowerCase().trim();
+    const raw = converted;
+    if(ctx==='patient')         return _handlePatient(t,raw);
+    else if(ctx==='tests')      return _handleTests(t,raw);
+    else if(ctx==='results')    return _handleResults(t,raw);
+    else if(ctx==='viewresults') return _handleViewResults(t,raw);
+    else if(ctx==='requests')   return _handleRequests(t,raw);
     else if(ctx==='ua')         return _handleUA(t);
     else if(ctx==='stool')      return _handleStool(t);
     else                        return _handleGeneral(t);
@@ -27526,7 +27632,9 @@ const VA = (function(){
   function _process(txt){
     const ctx=_ctx();
     _setCtxLabel(ctx);
-    const t=txt.toLowerCase().trim();
+    // تحويل نطق الحروف الإنجليزية بالعربية قبل المعالجة
+    const converted = _arabicLettersToEn(txt.toLowerCase().trim());
+    const t=converted.toLowerCase().trim();
     let results=[];
 
     // أمر إغلاق عالمي
@@ -27537,11 +27645,11 @@ const VA = (function(){
     // في السياق العام، إذا كان الأمر يخص النتائج يُحوَّل لـ _handleResults مباشرة
     const isResultsCmd = /تأكيد النتائج|تأكيد الناتج|تاكيد النتائج|تاكيد الناتج|confirm results|حفظ وطباعة|حفظ وطبع|احفظ وطبع|save.*print|print.*save|تحميل pdf|واتساب.*نتائج|نتائج.*واتساب/.test(t);
 
-    if(ctx==='patient')         results=_handlePatient(t,txt);
-    else if(ctx==='tests')      results=_handleTests(t,txt);
-    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,txt);
-    else if(ctx==='viewresults') results=_handleViewResults(t,txt);
-    else if(ctx==='requests')   results=_handleRequests(t,txt);
+    if(ctx==='patient')         results=_handlePatient(t,converted);
+    else if(ctx==='tests')      results=_handleTests(t,converted);
+    else if(ctx==='results'||isResultsCmd) results=_handleResults(t,converted);
+    else if(ctx==='viewresults') results=_handleViewResults(t,converted);
+    else if(ctx==='requests')   results=_handleRequests(t,converted);
     else if(ctx==='ua')         results=_handleUA(t);
     else if(ctx==='stool')      results=_handleStool(t);
     else                        results=_handleGeneral(t);
@@ -27657,7 +27765,7 @@ const VA = (function(){
       const tx=allTexts[0]||'';
       _showHeard(tx+(allTexts.length>1?' <small style="opacity:0.5">('+allTexts.slice(1,3).join(' / ')+')</small>':''));
 
-      // ② تنفيذ الامر وإعادة ضبط مؤقت الخمول
+      // تنفيذ الأمر
       let processed=false;
       for(const alt of allTexts){
         const r=_tryProcess(alt);
@@ -27670,26 +27778,31 @@ const VA = (function(){
       }
       if(!processed){ _process(tx); }
       _setHint(_ctx());
-      // ② بعد أي أمر (حتى لو فشل) جدد مؤقت الخمول
+      // جدد مؤقت الخمول بعد كل كلام مسموع (حتى لو لم يُنفَّذ أمر)
       _resetIdleTimer();
     };
 
     _rec.onerror=e=>{
       _stopWave();
-      document.getElementById('va-fab').classList.remove('va-on');
+      const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
       if(e.error==='not-allowed'){_on=false;clearTimeout(_idleTimer);_showReply([{cls:'err',msg:'اسمح للمتصفح بالوصول للميكروفون'}]);return;}
-      if(e.error==='aborted'){_on=false;return;}
-      // ③ أعد الاستماع تلقائياً — يضمن استمرار الاستماع بين الأوامر
-      if(_on)_restartTimer=setTimeout(()=>{if(_on)_startListening();},300);
+      if(e.error==='aborted'){
+        // aborted يعني أننا أوقفناه بشكل مقصود، لا تعد الاستماع
+        if(!_on) return;
+      }
+      // أعد الاستماع تلقائياً بعد أي خطأ آخر
+      if(_on) _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 400);
     };
 
     _rec.onend=()=>{
       _stopWave();
-      document.getElementById('va-fab').classList.remove('va-on');
+      const fab=document.getElementById('va-fab');if(fab)fab.classList.remove('va-on');
       if(_on){
-        // ③ إعادة تشغيل فورية للاستماع المستمر
-        document.getElementById('va-heard').innerHTML='<span style="color:rgba(255,255,255,0.35)">\u{1F3A4} يستمع... تكلم</span>';
-        _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 250);
+        // إعادة تشغيل فورية للاستماع المستمر — هذا هو قلب الاستماع الدائم
+        const heard=document.getElementById('va-heard');
+        if(heard) heard.innerHTML='<span style="color:rgba(255,255,255,0.35)">\u{1F3A4} يستمع... تكلم</span>';
+        clearTimeout(_restartTimer);
+        _restartTimer=setTimeout(()=>{ if(_on) _startListening(); }, 200);
       }
     };
 
