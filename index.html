@@ -27042,6 +27042,40 @@ const VA = (function(){
     return out;
   }
 
+  // ══════════════════════════════════════════════════════
+  // تقطيع ذكي لتحاليل متعددة منطوقة بدون فواصل
+  // مثال: "سي بي سي دهون ثلاثية سكر صائم" → ['سي بي سي','دهون ثلاثية','سكر صائم']
+  // ══════════════════════════════════════════════════════
+  function _splitMultipleTests(raw){
+    // الكلمات الفاصلة الشائعة في النطق
+    const separators = /\s+(?:و|مع|ثم|بعدين|كذلك|أيضا|ايضا|كمان)\s+/g;
+    const bySep = raw.split(separators).map(p=>p.trim()).filter(Boolean);
+    if(bySep.length > 1) return bySep;
+
+    // محاولة تقطيع بناءً على جميع المفاتيح المعروفة في TEST_MAP
+    // نرتّب المفاتيح تنازلياً حسب الطول لنطابق الأطول أولاً
+    const keys = Object.keys(TEST_MAP).sort((a,b)=>b.length-a.length);
+    const text = raw.toLowerCase().trim();
+    const found = [];
+    let remaining = text;
+    let maxIter = 20;
+    while(remaining.length > 1 && maxIter-- > 0){
+      let bestMatch = null, bestKey = null, bestIdx = Infinity;
+      for(const k of keys){
+        const idx = remaining.indexOf(k);
+        if(idx !== -1 && idx < bestIdx){
+          bestIdx = idx;
+          bestKey = k;
+          bestMatch = k;
+        }
+      }
+      if(!bestMatch) break;
+      found.push(bestMatch);
+      remaining = remaining.slice(bestIdx + bestMatch.length).trim();
+    }
+    return found.length > 1 ? found : [raw];
+  }
+
   /* ── واجهة اختيار التحاليل (الخطوة 2) ── */
   function _handleTests(t, raw){
     const out=[];
@@ -27059,7 +27093,6 @@ const VA = (function(){
     if(/(?:^|\s)(انشاء|إنشاء|تأكيد|اكمل|تم|انتهيت|next|confirm|done|حفظ وإنشاء|حفظ وانشاء)(?:\s|$)/.test(t)){
       if(typeof wizFinish==='function'){setTimeout(()=>wizFinish(),250);out.push({cls:'ok',msg:'حفظ وإنشاء الطلب ✅'});}
       else if(typeof wizNext==='function'){setTimeout(()=>wizNext(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
-      // كبديل: ابحث عن زر الإنشاء بالنص
       else{
         const finBtn=document.querySelector('#wiz-ftr button.btn-p');
         if(finBtn){setTimeout(()=>finBtn.click(),250);out.push({cls:'ok',msg:'إنشاء الطلب ✅'});}
@@ -27089,11 +27122,15 @@ const VA = (function(){
       }
       return out;
     }
-    // إضافة تحاليل
-    const parts=raw.split(/[،,وومع\+&]/g).map(p=>p.trim()).filter(Boolean);
-    const allParts=parts.length>1?parts:[raw];
+    // ── إضافة تحاليل متعددة ──
+    // أولاً: قسّم بالفاصلات والواو والفصل الصريح
+    let parts = raw.split(/[،,\+&]+|(?:\s+و\s+)|(?:\s+مع\s+)/g).map(p=>p.trim()).filter(Boolean);
+    // إذا لم ينقسم (قيل بدون فواصل)، حاول كشف التحاليل المتعددة من النص المتسلسل
+    if(parts.length === 1){
+      parts = _splitMultipleTests(raw);
+    }
     let added=0;
-    for(const part of allParts){
+    for(const part of parts){
       const code=_findTestCode(part.trim().toLowerCase());
       if(code&&typeof tests!=='undefined'){
         const t2=tests.find(x=>x.code===code);
@@ -27244,7 +27281,7 @@ const VA = (function(){
       return out;
     }
 
-    // ⑨ إدخال نتيجة تحليل — "اسم_التحليل + رقم أو نوعي"
+    // ⑨ إدخال نتيجة تحليل — "اسم_التحليل + قيمة" — يدعم أكثر من تحليل دفعة واحدة
     const qualMap={
       'سلبي':'Negative','سالب':'Negative','negative':'Negative','neg':'Negative',
       'سلب':'Negative','نيكاتيف':'Negative','ما موجود':'Negative','مو موجود':'Negative',
@@ -27259,11 +27296,13 @@ const VA = (function(){
       'طبيعي':'Normal','نورمال':'Normal','normal':'Normal','عادي':'Normal','زين':'Normal',
       'غير طبيعي':'Abnormal','abnormal':'Abnormal','مو طبيعي':'Abnormal','مو زين':'Abnormal',
     };
-    const lines=raw.split(/[،\n]+/);
-    for(const line of lines){
-      const l=line.trim();if(!l)continue;
+
+    // دالة لمعالجة سطر واحد (تحليل + قيمة)
+    function _processResultLine(l){
+      const lc=l.toLowerCase().trim();
+      if(!l)return null;
       let qualResult=null;
-      for(const[k,v]of Object.entries(qualMap)){if(l.toLowerCase().includes(k)){qualResult=v;break;}}
+      for(const[k,v]of Object.entries(qualMap)){if(lc.includes(k)){qualResult=v;break;}}
       let numResult=null;
       const numPart=l.match(/(\d+(?:[.,]\d+)?)\s*$/);
       if(numPart)numResult=numPart[1].replace(',','.');
@@ -27271,14 +27310,46 @@ const VA = (function(){
         const arabicPart=l.replace(/^.*?(?=\s+(?:واحد|اثنين|ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مئة|مائة|مية|الف|ألف))/i,'');
         numResult=_parseNum(arabicPart);
       }
-      const val=qualResult||numResult;if(!val)continue;
+      const val=qualResult||numResult;if(!val)return null;
       let testPart=l;
-      if(numResult)testPart=l.replace(numPart[0],'').trim();
+      if(numResult&&numPart)testPart=l.replace(numPart[0],'').trim();
       if(qualResult){for(const k of Object.keys(qualMap))testPart=testPart.replace(new RegExp(k,'gi'),'').trim();}
       testPart=testPart.replace(/^(?:قيمة|نتيجة|ال|value|result)\s*/i,'').trim();
       const code=_findTestCode(testPart);
-      if(code){const done=_setResult(code,val);if(done)out.push({cls:'ok',msg:code+': '+val});else out.push({cls:'err',msg:'لم أجد حقل: '+code});}
-      else{out.push({cls:'err',msg:'لم أعرف التحليل: '+testPart});}
+      if(code){
+        const done=_setResult(code,val);
+        return done?{cls:'ok',msg:code+': '+val}:{cls:'err',msg:'لم أجد حقل: '+code};
+      }
+      return{cls:'err',msg:'لم أعرف التحليل: '+testPart};
+    }
+
+    // تقطيع ذكي للنص: بالفاصلة أو "و" أو بالكشف التلقائي عن حدود التحليل+القيمة
+    function _splitResultLines(raw){
+      // أولاً: قسّم بالفاصلة أو سطر جديد
+      const bySep = raw.split(/[،,\n]+/).map(p=>p.trim()).filter(Boolean);
+      if(bySep.length > 1) return bySep;
+      // ثانياً: قسّم بـ "و" الفاصلة بين تحليل وقيمة وتحليل آخر
+      // نمط: [اسم_تحليل] [قيمة] و [اسم_تحليل] [قيمة]
+      // مثال: "سكر عشرة وكرياتينين خمسة" → ['سكر عشرة', 'كرياتينين خمسة']
+      const byWaw = raw.split(/\s+و\s+|\s+مع\s+/).map(p=>p.trim()).filter(Boolean);
+      if(byWaw.length > 1) return byWaw;
+      // ثالثاً: تقطيع تلقائي بناءً على الأرقام — كل رقم يكون نهاية وحدة
+      // نمط: اسم [رقم] اسم [رقم] ...
+      const autoSplit = [];
+      const numPattern = /(\S.*?)(\s+\d+(?:[.,]\d+)?)(?=\s|$)/g;
+      let m; let lastIdx=0;
+      while((m=numPattern.exec(raw))!==null){
+        autoSplit.push((m[1]+m[2]).trim());
+        lastIdx=m.index+m[0].length;
+      }
+      if(autoSplit.length > 1) return autoSplit;
+      return [raw];
+    }
+
+    const lines = _splitResultLines(raw);
+    for(const line of lines){
+      const res=_processResultLine(line.trim());
+      if(res)out.push(res);
     }
     return out;
   }
@@ -27765,20 +27836,27 @@ const VA = (function(){
       const tx=allTexts[0]||'';
       _showHeard(tx+(allTexts.length>1?' <small style="opacity:0.5">('+allTexts.slice(1,3).join(' / ')+')</small>':''));
 
-      // تنفيذ الأمر
+      // تنفيذ الأمر — نُبقي _on=true حتى لا يُوقف onend الاستماع
       let processed=false;
       for(const alt of allTexts){
         const r=_tryProcess(alt);
         if(r&&r.length&&r[0].cls!=='err'&&r[0].cls!=='inf'){
           _showReply(r);
-          _speak(r.map(x=>x.msg).join('، '));
+          // تشغيل الصوت بدون تعطيل الاستماع (لا نستخدم cancel لأنه يُوقف الـ recognition)
+          if(!_isSilent()&&window.speechSynthesis){
+            const u=new SpeechSynthesisUtterance(r.map(x=>x.msg).join('، ').replace(/<[^>]+>/g,'').substring(0,80));
+            u.lang='ar-SA';u.rate=1.2;u.pitch=1;
+            const arV=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('ar'));
+            if(arV)u.voice=arV;
+            window.speechSynthesis.speak(u);
+          }
           processed=true;
           break;
         }
       }
       if(!processed){ _process(tx); }
       _setHint(_ctx());
-      // جدد مؤقت الخمول بعد كل كلام مسموع (حتى لو لم يُنفَّذ أمر)
+      // جدد مؤقت الخمول بعد كل كلام مسموع
       _resetIdleTimer();
     };
 
