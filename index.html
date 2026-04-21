@@ -1942,6 +1942,111 @@ body.light-mode .fr-accent{color:#059669 !important;}
   direction:rtl; white-space:nowrap;
 }
 body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
+
+/* ══════════════════════════════════════════════
+   Welcome Neon Banner — بانر الترحيب النيون
+══════════════════════════════════════════════ */
+.welcome-neon-banner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(4,8,20,0.95) 0%, rgba(0,20,40,0.95) 50%, rgba(4,8,20,0.95) 100%);
+  border: 1px solid rgba(0,212,255,0.25);
+  box-shadow: 0 0 30px rgba(0,212,255,0.07), inset 0 1px 0 rgba(0,212,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70px;
+}
+body.light-mode .welcome-neon-banner {
+  background: linear-gradient(135deg, rgba(230,242,255,0.98) 0%, rgba(215,235,255,0.98) 50%, rgba(230,242,255,0.98) 100%);
+  border-color: rgba(0,110,200,0.3);
+  box-shadow: 0 0 30px rgba(0,110,200,0.09), inset 0 1px 0 rgba(0,110,200,0.18);
+}
+.wnb-bg-layer {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+body.light-mode .wnb-bg-layer {
+  background: radial-gradient(ellipse at 50% 50%, rgba(0,110,200,0.08) 0%, transparent 70%);
+}
+.wnb-line {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.5), rgba(139,63,255,0.5), rgba(0,212,255,0.5), transparent);
+  animation: wnb-line-scan 3s linear infinite;
+}
+body.light-mode .wnb-line {
+  background: linear-gradient(90deg, transparent, rgba(0,100,200,0.45), rgba(90,40,180,0.35), rgba(0,100,200,0.45), transparent);
+}
+.wnb-line-top  { top: 0; }
+.wnb-line-bottom { bottom: 0; animation-delay: 1.5s; }
+@keyframes wnb-line-scan {
+  0%   { opacity:.3; transform:scaleX(.3); }
+  50%  { opacity:1;  transform:scaleX(1);  }
+  100% { opacity:.3; transform:scaleX(.3); }
+}
+.wnb-particles { position:absolute; inset:0; pointer-events:none; }
+.wnb-particle {
+  position:absolute; border-radius:50%;
+  animation: wnb-float linear infinite; opacity:0;
+}
+@keyframes wnb-float {
+  0%   { opacity:0; transform:translateY(0) scale(0); }
+  20%  { opacity:1; }
+  80%  { opacity:.5; }
+  100% { opacity:0; transform:translateY(-40px) scale(1.5); }
+}
+.wnb-content {
+  position:relative; z-index:2;
+  display:flex; align-items:center; gap:14px;
+}
+.wnb-icon {
+  font-size:22px;
+  filter: drop-shadow(0 0 8px rgba(0,212,255,0.6));
+  animation: wnb-icon-pulse 2s ease-in-out infinite alternate;
+}
+body.light-mode .wnb-icon {
+  filter: drop-shadow(0 0 8px rgba(0,100,200,0.5));
+}
+@keyframes wnb-icon-pulse {
+  0%   { transform:scale(1);    filter:drop-shadow(0 0 6px rgba(0,212,255,0.4)); }
+  100% { transform:scale(1.08); filter:drop-shadow(0 0 14px rgba(0,212,255,0.85)); }
+}
+.wnb-icon-alt { animation-delay: 1s; }
+.wnb-text-wrap { position:relative; }
+.wnb-text {
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  font-size: clamp(15px,2.3vw,21px);
+  font-weight:800;
+  letter-spacing:.5px;
+  line-height:1.3;
+  color:rgba(255,255,255,0.18);
+  direction:rtl;
+  user-select:none;
+}
+body.light-mode .wnb-text { color:rgba(0,50,120,0.2); }
+.wnb-text .wnb-char { display:inline; transition:color .05s,text-shadow .05s; }
+.wnb-text .wnb-char.neon-active {
+  color:#ffffff;
+  text-shadow: 0 0 6px #00d4ff, 0 0 14px #00d4ff, 0 0 28px #00d4ff, 0 0 50px rgba(0,212,255,.7);
+}
+body.light-mode .wnb-text .wnb-char.neon-active {
+  color:#003c8c;
+  text-shadow: 0 0 6px rgba(0,110,220,.9), 0 0 14px rgba(0,110,220,.7), 0 0 28px rgba(0,110,220,.4);
+}
+.wnb-text .wnb-char.neon-trail {
+  color:rgba(255,255,255,.65);
+  text-shadow: 0 0 4px rgba(0,212,255,.5), 0 0 10px rgba(0,212,255,.3);
+}
+body.light-mode .wnb-text .wnb-char.neon-trail {
+  color:rgba(0,50,120,.55);
+  text-shadow: 0 0 5px rgba(0,110,220,.3);
+}
 </style>
 </head>
 <body>
@@ -2066,233 +2171,21 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-dashboard">
 
-      <!-- ══════════════ بانر الترحيب النيون ══════════════ -->
-      <div class="welcome-neon-banner" id="welcome-neon-banner">
+      <!-- ══════════════ بانر الترحيب النيون — لوحة التحكم ══════════════ -->
+      <div class="welcome-neon-banner" id="wnb-dash-banner">
         <div class="wnb-bg-layer"></div>
-        <div class="wnb-particles" id="wnb-particles"></div>
+        <div class="wnb-particles" id="wnb-particles-dash"></div>
         <div class="wnb-content">
           <div class="wnb-icon">🧪</div>
           <div class="wnb-text-wrap">
-            <p class="wnb-text" id="wnb-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
+            <p class="wnb-text" id="wnb-dash-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
           </div>
-          <div class="wnb-icon">⚕️</div>
+          <div class="wnb-icon wnb-icon-alt">⚕️</div>
         </div>
         <div class="wnb-line wnb-line-top"></div>
         <div class="wnb-line wnb-line-bottom"></div>
       </div>
-
-      <style>
-      /* ══ Welcome Neon Banner ══ */
-      .welcome-neon-banner {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-        border-radius: 14px;
-        margin-bottom: 18px;
-        padding: 18px 24px;
-        background: linear-gradient(135deg, rgba(4,8,20,0.95) 0%, rgba(0,20,40,0.95) 50%, rgba(4,8,20,0.95) 100%);
-        border: 1px solid rgba(0,212,255,0.25);
-        box-shadow: 0 0 30px rgba(0,212,255,0.08), inset 0 1px 0 rgba(0,212,255,0.12);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 70px;
-      }
-      body.light-mode .welcome-neon-banner {
-        background: linear-gradient(135deg, rgba(235,245,255,0.97) 0%, rgba(220,238,255,0.97) 50%, rgba(235,245,255,0.97) 100%);
-        border-color: rgba(0,120,200,0.3);
-        box-shadow: 0 0 30px rgba(0,120,200,0.1), inset 0 1px 0 rgba(0,120,200,0.2);
-      }
-      .wnb-bg-layer {
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.06) 0%, transparent 70%);
-        pointer-events: none;
-      }
-      body.light-mode .wnb-bg-layer {
-        background: radial-gradient(ellipse at 50% 50%, rgba(0,120,200,0.08) 0%, transparent 70%);
-      }
-      .wnb-line {
-        position: absolute;
-        left: 0; right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(0,212,255,0.5), rgba(139,63,255,0.5), rgba(0,212,255,0.5), transparent);
-        animation: wnb-line-scan 3s linear infinite;
-      }
-      body.light-mode .wnb-line {
-        background: linear-gradient(90deg, transparent, rgba(0,100,200,0.5), rgba(100,50,200,0.5), rgba(0,100,200,0.5), transparent);
-      }
-      .wnb-line-top { top: 0; }
-      .wnb-line-bottom { bottom: 0; animation-delay: 1.5s; }
-      @keyframes wnb-line-scan {
-        0%   { opacity: 0.3; transform: scaleX(0.3); }
-        50%  { opacity: 1;   transform: scaleX(1); }
-        100% { opacity: 0.3; transform: scaleX(0.3); }
-      }
-      .wnb-particles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-      }
-      .wnb-particle {
-        position: absolute;
-        width: 3px; height: 3px;
-        border-radius: 50%;
-        background: var(--primary);
-        animation: wnb-float linear infinite;
-        opacity: 0;
-      }
-      @keyframes wnb-float {
-        0%   { opacity: 0; transform: translateY(0) scale(0); }
-        20%  { opacity: 1; }
-        80%  { opacity: 0.5; }
-        100% { opacity: 0; transform: translateY(-40px) scale(1.5); }
-      }
-      .wnb-content {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        z-index: 2;
-      }
-      .wnb-icon {
-        font-size: 22px;
-        filter: drop-shadow(0 0 8px rgba(0,212,255,0.6));
-        animation: wnb-icon-pulse 2s ease-in-out infinite alternate;
-      }
-      body.light-mode .wnb-icon {
-        filter: drop-shadow(0 0 8px rgba(0,120,200,0.5));
-      }
-      @keyframes wnb-icon-pulse {
-        0%   { transform: scale(1);    filter: drop-shadow(0 0 6px rgba(0,212,255,0.4)); }
-        100% { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(0,212,255,0.8)); }
-      }
-      .wnb-text-wrap {
-        position: relative;
-      }
-      .wnb-text {
-        margin: 0;
-        font-family: 'Cairo', sans-serif;
-        font-size: clamp(16px, 2.5vw, 22px);
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        line-height: 1.3;
-        color: rgba(255,255,255,0.25);
-        text-shadow: none;
-        direction: rtl;
-        user-select: none;
-      }
-      body.light-mode .wnb-text {
-        color: rgba(0,60,120,0.2);
-      }
-      /* كل حرف يُلف بـ span عبر JS */
-      .wnb-text .wnb-char {
-        display: inline;
-        transition: color 0.05s, text-shadow 0.05s;
-      }
-      /* الحرف المضيء حالياً */
-      .wnb-text .wnb-char.neon-active {
-        color: #ffffff;
-        text-shadow:
-          0 0 6px #00d4ff,
-          0 0 14px #00d4ff,
-          0 0 28px #00d4ff,
-          0 0 50px rgba(0,212,255,0.7);
-      }
-      body.light-mode .wnb-text .wnb-char.neon-active {
-        color: #003c8c;
-        text-shadow:
-          0 0 6px rgba(0,120,220,0.9),
-          0 0 14px rgba(0,120,220,0.7),
-          0 0 28px rgba(0,120,220,0.5);
-      }
-      /* الحرف المضيء لفترة قصيرة بعده (trailing glow) */
-      .wnb-text .wnb-char.neon-trail {
-        color: rgba(255,255,255,0.7);
-        text-shadow:
-          0 0 4px rgba(0,212,255,0.5),
-          0 0 10px rgba(0,212,255,0.3);
-      }
-      body.light-mode .wnb-text .wnb-char.neon-trail {
-        color: rgba(0,60,120,0.6);
-        text-shadow: 0 0 6px rgba(0,120,220,0.3);
-      }
-      </style>
-
-      <script>
-      (function initWelcomeNeon() {
-        /* ── توليد الجزيئات ── */
-        const particlesCont = document.getElementById('wnb-particles');
-        if (particlesCont) {
-          for (let i = 0; i < 14; i++) {
-            const p = document.createElement('div');
-            p.className = 'wnb-particle';
-            p.style.cssText = `
-              left: ${Math.random() * 100}%;
-              bottom: ${Math.random() * 30}%;
-              width: ${2 + Math.random() * 3}px;
-              height: ${2 + Math.random() * 3}px;
-              animation-duration: ${2.5 + Math.random() * 3}s;
-              animation-delay: ${Math.random() * 4}s;
-              background: ${Math.random() > 0.5 ? '#00d4ff' : '#8b3fff'};
-            `;
-            particlesCont.appendChild(p);
-          }
-        }
-
-        /* ── تحويل النص إلى spans ── */
-        const textEl = document.getElementById('wnb-text-el');
-        if (!textEl) return;
-        const fullText = textEl.textContent;
-        textEl.textContent = '';
-
-        const chars = [];
-        for (let i = 0; i < fullText.length; i++) {
-          const span = document.createElement('span');
-          span.className = 'wnb-char';
-          span.textContent = fullText[i];
-          textEl.appendChild(span);
-          chars.push(span);
-        }
-
-        /* ── تأثير النيون المتنقل ── */
-        let currentIndex = 0;
-        const SPEED_PER_CHAR = 85;   // ms لكل حرف
-        const TRAIL_LENGTH   = 3;    // عدد الحروف المضيئة خلف المؤشر
-        const PAUSE_END      = 600;  // توقف في النهاية قبل إعادة البدء
-
-        function clearAll() {
-          chars.forEach(c => c.classList.remove('neon-active', 'neon-trail'));
-        }
-
-        function step() {
-          clearAll();
-
-          if (currentIndex < chars.length) {
-            chars[currentIndex].classList.add('neon-active');
-
-            for (let t = 1; t <= TRAIL_LENGTH; t++) {
-              const ti = currentIndex - t;
-              if (ti >= 0) chars[ti].classList.add('neon-trail');
-            }
-
-            currentIndex++;
-            setTimeout(step, SPEED_PER_CHAR);
-          } else {
-            /* إعادة ضبط بعد توقف */
-            setTimeout(() => {
-              clearAll();
-              currentIndex = 0;
-              setTimeout(step, 300);
-            }, PAUSE_END);
-          }
-        }
-
-        /* ابدأ بعد تحميل الصفحة */
-        setTimeout(step, 800);
-      })();
-      </script>
-      <!-- ══════════════════════════════════════════ -->
+      <!-- ══════════════════════════════════════════════ -->
 
       <div class="stats" id="dash-stats">
         <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:var(--primary);font-size:22px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
@@ -2361,6 +2254,23 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
           <button class="btn btn-p" onclick="startNewPatient()">➕ طلب جديد</button>
         </div>
       </div>
+
+      <!-- ══════════════ بانر الترحيب النيون — الطلبات ══════════════ -->
+      <div class="welcome-neon-banner wnb-requests" id="wnb-requests-banner">
+        <div class="wnb-bg-layer"></div>
+        <div class="wnb-particles wnb-p2" id="wnb-particles-req"></div>
+        <div class="wnb-content">
+          <div class="wnb-icon wnb-icon-alt">📋</div>
+          <div class="wnb-text-wrap">
+            <p class="wnb-text" id="wnb-req-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
+          </div>
+          <div class="wnb-icon wnb-icon-alt">🧬</div>
+        </div>
+        <div class="wnb-line wnb-line-top"></div>
+        <div class="wnb-line wnb-line-bottom"></div>
+      </div>
+      <!-- ══════════════════════════════════════════ -->
+
       <div class="gc">
         <div style="overflow-x:auto">
           <table class="tbl"><thead><tr><th>رقم الطلب</th><th>المريض</th><th>التحاليل</th><th>الطبيب</th><th>الأولوية</th><th>الحالة</th><th>الطباعة</th><th>إجراءات</th></tr></thead><tbody id="requests-body"></tbody></table>
@@ -5325,7 +5235,39 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
       </div>
     </div>
 
-    <!-- ⑥ رسالة ترحيب + ⑦ نسخ احتياطي إجباري -->
+    <!-- ✨ تخصيص نص البانر النيون -->
+    <div class="admin-card" style="border-color:rgba(0,212,255,0.45);background:linear-gradient(135deg,rgba(0,18,36,0.7),rgba(0,8,20,0.7))">
+      <h3 style="color:var(--primary);display:flex;align-items:center;gap:8px">
+        ✨ تخصيص نص بانر الترحيب النيون
+      </h3>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:14px;line-height:1.8">
+        هذه الجملة تظهر بتأثير النيون المتحرك في <strong style="color:var(--primary)">لوحة التحكم</strong> وفي <strong style="color:var(--accent)">قسم الطلبات</strong>.
+      </p>
+      <div class="fg" style="margin-bottom:12px">
+        <label class="fl" style="font-size:12px;color:var(--text2);margin-bottom:6px">✏️ نص البانر</label>
+        <input type="text" id="admin-neon-text-inp" class="fc" dir="rtl" lang="ar"
+          placeholder="اكتب الجملة التي تريدها..."
+          oninput="document.getElementById('admin-neon-preview').textContent=this.value||'...'"
+          style="padding-right:12px;padding-left:12px;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;border-color:rgba(0,212,255,0.5)">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="fl" style="font-size:11px;color:var(--text2);margin-bottom:6px">👁️ معاينة:</label>
+        <div style="background:rgba(0,0,0,0.5);border:1px solid rgba(0,212,255,0.25);border-radius:10px;padding:14px 16px;text-align:center">
+          <span id="admin-neon-preview" style="font-family:'Cairo',sans-serif;font-size:15px;font-weight:800;color:#fff;text-shadow:0 0 10px #00d4ff,0 0 22px #00d4ff,0 0 40px rgba(0,212,255,0.5);direction:rtl">أهلاً وسهلاً بكم في نظام MedLab Pro</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-p btn-sm" onclick="saveNeonBannerText()" style="background:linear-gradient(135deg,rgba(0,212,255,0.28),rgba(0,212,255,0.1));border-color:rgba(0,212,255,0.6)">
+          💾 حفظ وتطبيق
+        </button>
+        <button class="btn btn-s btn-sm" onclick="resetNeonBannerText()" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15)">
+          ↩ إعادة الافتراضي
+        </button>
+      </div>
+      <div id="admin-neon-save-msg" style="display:none;font-size:12px;color:var(--success);margin-top:10px;font-weight:700">✅ تم الحفظ وتطبيق النص على البانر فوراً!</div>
+    </div>
+
+    <!-- ⑦ نسخ احتياطي إجباري -->
     <div class="admin-card" style="border-color:rgba(255,214,10,0.25)">
       <h3>📢 الرسائل والنسخ الاحتياطية</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -26410,4 +26352,157 @@ async function _pmSendFile() {
     if (btn) btn.classList.remove('loading');
   }
 }
+
+/* ══════════════════════════════════════════════════════
+   NEON BANNER SYSTEM — بانر الترحيب النيون
+══════════════════════════════════════════════════════ */
+const NEON_BANNER_KEY     = 'medlab_neon_banner_text';
+const NEON_BANNER_DEFAULT = 'أهلاً وسهلاً بكم في نظام MedLab Pro';
+const NEON_SPEED          = 85;   // ms per character
+const NEON_TRAIL          = 3;    // trailing glow length
+const NEON_PAUSE          = 650;  // pause at end before restart
+
+/* ── بناء جزيئات عائمة ── */
+function _wnbMakeParticles(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'wnb-particle';
+    p.style.cssText = [
+      `left:${Math.random()*100}%`,
+      `bottom:${Math.random()*30}%`,
+      `width:${2+Math.random()*3}px`,
+      `height:${2+Math.random()*3}px`,
+      `animation-duration:${2.5+Math.random()*3}s`,
+      `animation-delay:${Math.random()*4}s`,
+      `background:${Math.random()>.5?'#00d4ff':'#8b3fff'}`
+    ].join(';');
+    c.appendChild(p);
+  }
+}
+
+/* ── تحويل النص إلى spans + تشغيل النيون ── */
+function _wnbAnimate(textElId) {
+  const el = document.getElementById(textElId);
+  if (!el) return;
+
+  const text = el.textContent || el.innerText;
+  el.textContent = '';
+  const chars = [];
+  for (const ch of text) {
+    const s = document.createElement('span');
+    s.className = 'wnb-char';
+    s.textContent = ch;
+    el.appendChild(s);
+    chars.push(s);
+  }
+
+  let idx = 0;
+  function clearAll() { chars.forEach(c => c.classList.remove('neon-active','neon-trail')); }
+  function step() {
+    clearAll();
+    if (idx < chars.length) {
+      chars[idx].classList.add('neon-active');
+      for (let t = 1; t <= NEON_TRAIL; t++) {
+        if (idx - t >= 0) chars[idx - t].classList.add('neon-trail');
+      }
+      idx++;
+      setTimeout(step, NEON_SPEED);
+    } else {
+      setTimeout(() => { clearAll(); idx = 0; setTimeout(step, 300); }, NEON_PAUSE);
+    }
+  }
+  setTimeout(step, 800);
+  return chars; // keep ref for live updates
+}
+
+/* ── تحديث نص البانر حياً (بدون إعادة تهيئة كاملة) ── */
+function _wnbRebuild(textElId, newText) {
+  const el = document.getElementById(textElId);
+  if (!el) return;
+  el.textContent = newText;
+  _wnbAnimate(textElId);
+}
+
+/* ── تهيئة كلا البانرَين ── */
+function initNeonBanners() {
+  const saved = localStorage.getItem(NEON_BANNER_KEY) || NEON_BANNER_DEFAULT;
+
+  /* لوحة التحكم */
+  const dashEl = document.getElementById('wnb-dash-text-el');
+  if (dashEl) { dashEl.textContent = saved; }
+  _wnbMakeParticles('wnb-particles-dash');
+  _wnbAnimate('wnb-dash-text-el');
+
+  /* الطلبات */
+  const reqEl = document.getElementById('wnb-req-text-el');
+  if (reqEl) { reqEl.textContent = saved; }
+  _wnbMakeParticles('wnb-particles-req');
+  _wnbAnimate('wnb-req-text-el');
+
+  /* حقل الأدمن */
+  const inp = document.getElementById('admin-neon-text-inp');
+  const prev = document.getElementById('admin-neon-preview');
+  if (inp)  inp.value = saved;
+  if (prev) prev.textContent = saved;
+}
+
+/* ── حفظ النص الجديد من لوحة الأدمن ── */
+function saveNeonBannerText() {
+  const inp = document.getElementById('admin-neon-text-inp');
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val) { showNotif('تنبيه','الحقل فارغ — اكتب جملة أولاً','warning'); return; }
+
+  localStorage.setItem(NEON_BANNER_KEY, val);
+
+  /* تطبيق فوري على البانرَين */
+  _wnbRebuild('wnb-dash-text-el', val);
+  _wnbRebuild('wnb-req-text-el',  val);
+
+  /* رسالة النجاح */
+  const msg = document.getElementById('admin-neon-save-msg');
+  if (msg) { msg.style.display='block'; setTimeout(()=>msg.style.display='none', 3000); }
+  showNotif('✅ تم','تم تطبيق النص الجديد على بانر الترحيب','success');
+}
+
+/* ── إعادة النص الافتراضي ── */
+function resetNeonBannerText() {
+  localStorage.removeItem(NEON_BANNER_KEY);
+  const inp  = document.getElementById('admin-neon-text-inp');
+  const prev = document.getElementById('admin-neon-preview');
+  if (inp)  inp.value = NEON_BANNER_DEFAULT;
+  if (prev) prev.textContent = NEON_BANNER_DEFAULT;
+  _wnbRebuild('wnb-dash-text-el', NEON_BANNER_DEFAULT);
+  _wnbRebuild('wnb-req-text-el',  NEON_BANNER_DEFAULT);
+  showNotif('↩ تمت الإعادة','تم استعادة النص الافتراضي','success');
+}
+
+/* ── تشغيل عند فتح لوحة الأدمن (تحديث الحقل بالقيمة المحفوظة) ── */
+function _wnbSyncAdminField() {
+  const saved = localStorage.getItem(NEON_BANNER_KEY) || NEON_BANNER_DEFAULT;
+  const inp   = document.getElementById('admin-neon-text-inp');
+  const prev  = document.getElementById('admin-neon-preview');
+  if (inp)  inp.value = saved;
+  if (prev) prev.textContent = saved;
+}
+
+/* ── تشغيل عند تحميل الصفحة ── */
+document.addEventListener('DOMContentLoaded', () => {
+  initNeonBanners();
+
+  /* مزامنة حقل الأدمن عند فتح اللوحة */
+  const adminPanel = document.getElementById('admin-panel');
+  if (adminPanel) {
+    const observer = new MutationObserver(muts => {
+      muts.forEach(m => {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          if (adminPanel.classList.contains('show')) _wnbSyncAdminField();
+        }
+      });
+    });
+    observer.observe(adminPanel, { attributes: true });
+  }
+});
 </script>
