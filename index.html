@@ -2065,6 +2065,235 @@ body.light-mode .phc-tooltip { background:#fff; border-color:#c8d4e0; }
 
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-dashboard">
+
+      <!-- ══════════════ بانر الترحيب النيون ══════════════ -->
+      <div class="welcome-neon-banner" id="welcome-neon-banner">
+        <div class="wnb-bg-layer"></div>
+        <div class="wnb-particles" id="wnb-particles"></div>
+        <div class="wnb-content">
+          <div class="wnb-icon">🧪</div>
+          <div class="wnb-text-wrap">
+            <p class="wnb-text" id="wnb-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
+          </div>
+          <div class="wnb-icon">⚕️</div>
+        </div>
+        <div class="wnb-line wnb-line-top"></div>
+        <div class="wnb-line wnb-line-bottom"></div>
+      </div>
+
+      <style>
+      /* ══ Welcome Neon Banner ══ */
+      .welcome-neon-banner {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 14px;
+        margin-bottom: 18px;
+        padding: 18px 24px;
+        background: linear-gradient(135deg, rgba(4,8,20,0.95) 0%, rgba(0,20,40,0.95) 50%, rgba(4,8,20,0.95) 100%);
+        border: 1px solid rgba(0,212,255,0.25);
+        box-shadow: 0 0 30px rgba(0,212,255,0.08), inset 0 1px 0 rgba(0,212,255,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70px;
+      }
+      body.light-mode .welcome-neon-banner {
+        background: linear-gradient(135deg, rgba(235,245,255,0.97) 0%, rgba(220,238,255,0.97) 50%, rgba(235,245,255,0.97) 100%);
+        border-color: rgba(0,120,200,0.3);
+        box-shadow: 0 0 30px rgba(0,120,200,0.1), inset 0 1px 0 rgba(0,120,200,0.2);
+      }
+      .wnb-bg-layer {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 50% 50%, rgba(0,212,255,0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      body.light-mode .wnb-bg-layer {
+        background: radial-gradient(ellipse at 50% 50%, rgba(0,120,200,0.08) 0%, transparent 70%);
+      }
+      .wnb-line {
+        position: absolute;
+        left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(0,212,255,0.5), rgba(139,63,255,0.5), rgba(0,212,255,0.5), transparent);
+        animation: wnb-line-scan 3s linear infinite;
+      }
+      body.light-mode .wnb-line {
+        background: linear-gradient(90deg, transparent, rgba(0,100,200,0.5), rgba(100,50,200,0.5), rgba(0,100,200,0.5), transparent);
+      }
+      .wnb-line-top { top: 0; }
+      .wnb-line-bottom { bottom: 0; animation-delay: 1.5s; }
+      @keyframes wnb-line-scan {
+        0%   { opacity: 0.3; transform: scaleX(0.3); }
+        50%  { opacity: 1;   transform: scaleX(1); }
+        100% { opacity: 0.3; transform: scaleX(0.3); }
+      }
+      .wnb-particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .wnb-particle {
+        position: absolute;
+        width: 3px; height: 3px;
+        border-radius: 50%;
+        background: var(--primary);
+        animation: wnb-float linear infinite;
+        opacity: 0;
+      }
+      @keyframes wnb-float {
+        0%   { opacity: 0; transform: translateY(0) scale(0); }
+        20%  { opacity: 1; }
+        80%  { opacity: 0.5; }
+        100% { opacity: 0; transform: translateY(-40px) scale(1.5); }
+      }
+      .wnb-content {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        z-index: 2;
+      }
+      .wnb-icon {
+        font-size: 22px;
+        filter: drop-shadow(0 0 8px rgba(0,212,255,0.6));
+        animation: wnb-icon-pulse 2s ease-in-out infinite alternate;
+      }
+      body.light-mode .wnb-icon {
+        filter: drop-shadow(0 0 8px rgba(0,120,200,0.5));
+      }
+      @keyframes wnb-icon-pulse {
+        0%   { transform: scale(1);    filter: drop-shadow(0 0 6px rgba(0,212,255,0.4)); }
+        100% { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(0,212,255,0.8)); }
+      }
+      .wnb-text-wrap {
+        position: relative;
+      }
+      .wnb-text {
+        margin: 0;
+        font-family: 'Cairo', sans-serif;
+        font-size: clamp(16px, 2.5vw, 22px);
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 1.3;
+        color: rgba(255,255,255,0.25);
+        text-shadow: none;
+        direction: rtl;
+        user-select: none;
+      }
+      body.light-mode .wnb-text {
+        color: rgba(0,60,120,0.2);
+      }
+      /* كل حرف يُلف بـ span عبر JS */
+      .wnb-text .wnb-char {
+        display: inline;
+        transition: color 0.05s, text-shadow 0.05s;
+      }
+      /* الحرف المضيء حالياً */
+      .wnb-text .wnb-char.neon-active {
+        color: #ffffff;
+        text-shadow:
+          0 0 6px #00d4ff,
+          0 0 14px #00d4ff,
+          0 0 28px #00d4ff,
+          0 0 50px rgba(0,212,255,0.7);
+      }
+      body.light-mode .wnb-text .wnb-char.neon-active {
+        color: #003c8c;
+        text-shadow:
+          0 0 6px rgba(0,120,220,0.9),
+          0 0 14px rgba(0,120,220,0.7),
+          0 0 28px rgba(0,120,220,0.5);
+      }
+      /* الحرف المضيء لفترة قصيرة بعده (trailing glow) */
+      .wnb-text .wnb-char.neon-trail {
+        color: rgba(255,255,255,0.7);
+        text-shadow:
+          0 0 4px rgba(0,212,255,0.5),
+          0 0 10px rgba(0,212,255,0.3);
+      }
+      body.light-mode .wnb-text .wnb-char.neon-trail {
+        color: rgba(0,60,120,0.6);
+        text-shadow: 0 0 6px rgba(0,120,220,0.3);
+      }
+      </style>
+
+      <script>
+      (function initWelcomeNeon() {
+        /* ── توليد الجزيئات ── */
+        const particlesCont = document.getElementById('wnb-particles');
+        if (particlesCont) {
+          for (let i = 0; i < 14; i++) {
+            const p = document.createElement('div');
+            p.className = 'wnb-particle';
+            p.style.cssText = `
+              left: ${Math.random() * 100}%;
+              bottom: ${Math.random() * 30}%;
+              width: ${2 + Math.random() * 3}px;
+              height: ${2 + Math.random() * 3}px;
+              animation-duration: ${2.5 + Math.random() * 3}s;
+              animation-delay: ${Math.random() * 4}s;
+              background: ${Math.random() > 0.5 ? '#00d4ff' : '#8b3fff'};
+            `;
+            particlesCont.appendChild(p);
+          }
+        }
+
+        /* ── تحويل النص إلى spans ── */
+        const textEl = document.getElementById('wnb-text-el');
+        if (!textEl) return;
+        const fullText = textEl.textContent;
+        textEl.textContent = '';
+
+        const chars = [];
+        for (let i = 0; i < fullText.length; i++) {
+          const span = document.createElement('span');
+          span.className = 'wnb-char';
+          span.textContent = fullText[i];
+          textEl.appendChild(span);
+          chars.push(span);
+        }
+
+        /* ── تأثير النيون المتنقل ── */
+        let currentIndex = 0;
+        const SPEED_PER_CHAR = 85;   // ms لكل حرف
+        const TRAIL_LENGTH   = 3;    // عدد الحروف المضيئة خلف المؤشر
+        const PAUSE_END      = 600;  // توقف في النهاية قبل إعادة البدء
+
+        function clearAll() {
+          chars.forEach(c => c.classList.remove('neon-active', 'neon-trail'));
+        }
+
+        function step() {
+          clearAll();
+
+          if (currentIndex < chars.length) {
+            chars[currentIndex].classList.add('neon-active');
+
+            for (let t = 1; t <= TRAIL_LENGTH; t++) {
+              const ti = currentIndex - t;
+              if (ti >= 0) chars[ti].classList.add('neon-trail');
+            }
+
+            currentIndex++;
+            setTimeout(step, SPEED_PER_CHAR);
+          } else {
+            /* إعادة ضبط بعد توقف */
+            setTimeout(() => {
+              clearAll();
+              currentIndex = 0;
+              setTimeout(step, 300);
+            }, PAUSE_END);
+          }
+        }
+
+        /* ابدأ بعد تحميل الصفحة */
+        setTimeout(step, 800);
+      })();
+      </script>
+      <!-- ══════════════════════════════════════════ -->
+
       <div class="stats" id="dash-stats">
         <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:var(--primary);font-size:22px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
         <div class="scard" style="--cc:rgba(0,245,147,0.18)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">التحاليل المنجزة اليوم</div><div class="scard-val" id="ds-done" style="color:var(--success);font-size:22px;font-weight:900">0</div><div class="scard-sub">اليوم</div><div class="scard-ic">🧪</div></div>
@@ -25915,7 +26144,7 @@ function _pmBuildHTML(data) {
   const ini = ptName.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
 
   // ─ JSON البيانات لتضمينها ─
-  const _st = '</' + 'script>'; const dataJson = JSON.stringify(data).replace(new RegExp(_st, 'gi'), '<\\/' + 'script>');
+  const dataJson = JSON.stringify(data).replace(/<\/script>/gi, '<\\/script>');
 
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -26047,9 +26276,9 @@ table tr:hover td{background:rgba(255,255,255,.015)}
 
 <div class="toast" id="TT"></div>
 
-<${'script'} src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></${'script'}>
-<${'script'} src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></${'script'}>
-<${'script'}>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
+<script>
 const _D=${dataJson};
 function toast(m,ms=2500){const t=document.getElementById('TT');t.textContent=m;t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),ms)}
 function tog(i){const c=document.getElementById('vc'+i);if(c)c.classList.toggle('op')}
@@ -26115,1125 +26344,7 @@ async function dlPDF(i){
   const fd=_D.requests.findIndex(r=>r.status==='done');
   if(fd>=0) setTimeout(()=>tog(fd),300);
 })();
-</${'script'}>
-</body></html>`;
-}
-
-</script>
-<script>
-/**
- * ═══════════════════════════════════════════════════════════════════
- *   MedLab Pro — المساعد الصوتي الذكي
- *   Smart Voice Assistant v3.0
- *   يدعم اللهجات العربية ويفهم أسماء التحاليل بالعربي والإنجليزي
- * ═══════════════════════════════════════════════════════════════════
- *
- * طريقة التثبيت:
- * أضف هذا السطر قبل إغلاق </body> في ملف index.html:
- * <script src="voice-assistant.js"><\/script>
- *
- * أو الصق كامل محتوى هذا الملف داخل وسم <script> في نهاية الـ HTML
- */
-
-(function () {
-  'use strict';
-
-  // ──────────────────────────────────────────────────────────────
-  // 1. قاموس التحاليل: ربط النطق العربي بالكود الإنجليزي
-  //    كل تحليل له أكثر من 3 أسماء / طرق نطق
-  // ──────────────────────────────────────────────────────────────
-  const TEST_DICT = [
-    // ── CBC & Hematology ──────────────────────────────────────────
-    { codes: ['CBC', 'HCT', 'WBC', 'HGB', 'RBC', 'PLT', 'MCV', 'MCH', 'MCHC', 'RDW', 'NEUT', 'LYMPH', 'MONO', 'EOS', 'BASO'],
-      keys: ['cbc', 'سي بي سي', 'سيبيسي', 'صورة دم', 'دم كامل', 'تحليل دم', 'هيموغلوبين كامل', 'complete blood count', 'صوره دم', 'دم'] },
-    { codes: ['HGB'], keys: ['hgb', 'اتش جي بي', 'هيموغلوبين', 'هيموجلوبين', 'hemoglobin', 'hb', 'اتش بي'] },
-    { codes: ['HCT'], keys: ['hct', 'اتش سي تي', 'hematocrit', 'هيماتوكريت', 'حزمه الدم'] },
-    { codes: ['WBC'], keys: ['wbc', 'دبليو بي سي', 'كريات بيضاء', 'كرات بيضاء', 'white blood cells', 'ليكوسيت'] },
-    { codes: ['RBC'], keys: ['rbc', 'ار بي سي', 'كريات حمراء', 'كرات حمراء', 'red blood cells', 'خلايا حمراء'] },
-    { codes: ['PLT'], keys: ['plt', 'بي ال تي', 'صفائح دموية', 'صفيحات', 'platelets', 'تروم بوسيت'] },
-    { codes: ['ESR'], keys: ['esr', 'اي اس ار', 'ترسيب', 'سرعة ترسب', 'erythrocyte sedimentation', 'تريسيب الدم', 'sedimentation rate'] },
-    { codes: ['FERR'], keys: ['ferr', 'فير', 'فيريتين', 'ferritin', 'فيرتين', 'فير تين'] },
-    { codes: ['PT'], keys: ['pt', 'بي تي', 'زمن بروثرومبين', 'prothrombin time', 'تجلط', 'بروثرومبين تايم'] },
-    { codes: ['APTT'], keys: ['aptt', 'اي بي تي تي', 'بي تي تي', 'ptt', 'تجلط جزئي', 'partial thromboplastin', 'ابيتيتي'] },
-    { codes: ['INR'], keys: ['inr', 'اي ان ار', 'inr', 'نسبة التخثر', 'مخفف الدم', 'تجلط الدم'] },
-    { codes: ['DIMER'], keys: ['dimer', 'دي دايمر', 'd-dimer', 'دي ديمر', 'اي ام بولي', 'جلطة', 'dimer دايمر'] },
-    { codes: ['BLOOD-GRP'], keys: ['blood-grp', 'blood group', 'فصيلة دم', 'فصيله دم', 'زمرة الدم', 'blood type', 'زمره دم'] },
-    { codes: ['G6PD'], keys: ['g6pd', 'جي سكس', 'g6pd', 'جي ستة', 'جي ٦', 'إنزيم g6pd', 'نقص الإنزيم', 'جلوكوز فوسفات'] },
-    { codes: ['SICKLE'], keys: ['sickle', 'هلالي', 'مجل', 'sickling', 'فحص مجل'] },
-    { codes: ['RETIC'], keys: ['retic', 'ريتيك', 'خلايا شبكية', 'reticulocyte', 'reticulocytes', 'reticulos'] },
-
-    // ── Biochemistry / Chemistry ──────────────────────────────────
-    { codes: ['FBS'], keys: ['fbs', 'اف بي اس', 'fbs', 'سكر صيام', 'سكر الصيام', 'fasting blood sugar', 'fasting glucose', 'جلوكوز صيام', 'glu fasting'] },
-    { codes: ['RBS'], keys: ['rbs', 'ار بي اس', 'سكر عشوائي', 'سكر عشوائي', 'random blood sugar', 'random glucose', 'سكر'] },
-    { codes: ['PPBS'], keys: ['ppbs', 'بي بي بي اس', 'سكر ما بعد الأكل', 'سكر بعد الأكل', 'postprandial', 'سكر بعد ساعتين', 'ppbg'] },
-    { codes: ['HBA1C'], keys: ['hba1c', 'اتش بي اي وان سي', 'hba1c', 'سكر تراكمي', 'هيموغلوبين غليكوزيلاتد', 'a1c', 'هيموجلوبين سكري', 'تراكمي', 'سكر اجمالي'] },
-    { codes: ['CHOL'], keys: ['chol', 'شول', 'كوليسترول', 'كلوسترول', 'total cholesterol', 'دهون', 'دهون الدم'] },
-    { codes: ['TG'], keys: ['tg', 'تي جي', 'triglycerides', 'ثلاثيات الجليسريد', 'دهون ثلاثية', 'تريغليسيريد', 'تراي جليسريد', 'triglyceride'] },
-    { codes: ['HDL'], keys: ['hdl', 'اتش دي ال', 'hdl', 'كوليسترول نافع', 'كلوسترول جيد', 'high density lipoprotein', 'كلسترول نافع'] },
-    { codes: ['LDL'], keys: ['ldl', 'ال دي ال', 'ldl', 'كوليسترول ضار', 'كلوسترول سيء', 'low density lipoprotein', 'كلسترول ضار'] },
-    { codes: ['UREA'], keys: ['urea', 'يوريا', 'urea', 'بولينا', 'blood urea nitrogen', 'بول نيتروجين', 'bun'] },
-    { codes: ['CREAT'], keys: ['creat', 'كرياتينين', 'creatinine', 'كريا', 'كرياتينين الدم', 'قصور كلوي'] },
-    { codes: ['UA'], keys: ['ua', 'يو اي', 'حمض بوليك', 'uric acid', 'نقرس', 'يوريك اسيد', 'بول السكر'] },
-    { codes: ['ALT'], keys: ['alt', 'ال تي', 'alt', 'sgpt', 'كبد', 'انزيم كبد', 'enzymes', 'transaminase', 'الكبد'] },
-    { codes: ['AST'], keys: ['ast', 'اي اس تي', 'ast', 'sgot', 'إنزيم كبد', 'إنزيمات الكبد', 'aspartate'] },
-    { codes: ['ALP'], keys: ['alp', 'اي ال بي', 'alkaline phosphatase', 'ألكالين فوسفاتيز', 'phosphatase', 'قلوية'] },
-    { codes: ['TP'], keys: ['tp', 'تي بي', 'total protein', 'بروتين كلي', 'protein total', 'بروتين'] },
-    { codes: ['ALB'], keys: ['alb', 'ألبيومين', 'albumin', 'البومين', 'البومن'] },
-    { codes: ['TBIL'], keys: ['tbil', 'تي بيل', 'bilirubin total', 'بيليروبين كلي', 'صفراء', 'يرقان', 'bilirubin'] },
-    { codes: ['DBIL'], keys: ['dbil', 'دي بيل', 'direct bilirubin', 'بيليروبين مباشر'] },
-    { codes: ['IBIL'], keys: ['ibil', 'اي بيل', 'indirect bilirubin', 'بيليروبين غير مباشر'] },
-    { codes: ['GGT'], keys: ['ggt', 'جي جي تي', 'gamma gt', 'gamma glutamyl', 'جاما جي تي'] },
-    { codes: ['AMYL'], keys: ['amyl', 'أمايليز', 'amylase', 'بنكرياس', 'ببكرياس'] },
-    { codes: ['LIPASE'], keys: ['lipase', 'لايبيز', 'lipase', 'إنزيم البنكرياس', 'ليبيز'] },
-    { codes: ['Ca'], keys: ['ca', 'كالسيوم', 'calcium', 'كلسيوم', 'كالشيوم'] },
-    { codes: ['Na'], keys: ['na', 'صوديوم', 'sodium', 'ملح', 'الملح'] },
-    { codes: ['K'], keys: ['k', 'بوتاسيوم', 'potassium', 'كاليوم', 'پوتاسيوم'] },
-    { codes: ['FERR'], keys: ['ferr', 'فريتين', 'ferritin', 'مستودع الحديد'] },
-    { codes: ['SERUM-FE'], keys: ['serum-fe', 'حديد', 'serum iron', 'iron', 'فيتامين الحديد', 'ايرون'] },
-    { codes: ['TIBC'], keys: ['tibc', 'تي اي بي سي', 'tibc', 'طاقة ربط الحديد', 'iron binding capacity'] },
-    { codes: ['VIT-D'], keys: ['vit-d', 'فيتامين د', 'vitamin d', 'vitamin d3', 'فيتامين دي', 'فيتامين دي 3', 'كالسيفيرول', 'فيتامين الشمس'] },
-    { codes: ['VIT-B12'], keys: ['vit-b12', 'فيتامين ب12', 'vitamin b12', 'b12', 'بي 12', 'كوبالامين', 'فيتامين بي اثنى عشر'] },
-    { codes: ['CRP'], keys: ['crp', 'سي ار بي', 'c-reactive protein', 'crp', 'بروتين سي التفاعلي', 'التهاب', 'سيرب'] },
-
-    // ── Thyroid ──────────────────────────────────────────────────
-    { codes: ['TSH'], keys: ['tsh', 'تي اس اتش', 'thyroid stimulating hormone', 'هرمون الغدة الدرقية', 'درقية', 'تي اس اج', 'الغدة الدرقية', 'درق'] },
-    { codes: ['FT4'], keys: ['ft4', 'اف تي 4', 'free t4', 'فري تي4', 'ثيروكسين', 'thyroxine', 'تي 4 حر'] },
-    { codes: ['FT3'], keys: ['ft3', 'اف تي 3', 'free t3', 'فري تي3', 'triiodothyronine', 'تي 3 حر'] },
-    { codes: ['TT4'], keys: ['tt4', 'تي تي 4', 'total t4', 'تي4 كلي', 'thyroxine total'] },
-    { codes: ['TT3'], keys: ['tt3', 'تي تي 3', 'total t3', 'تي3 كلي'] },
-
-    // ── Hormones ─────────────────────────────────────────────────
-    { codes: ['LH'], keys: ['lh', 'ال اتش', 'luteinizing hormone', 'هرمون ال اتش', 'هرمون ملوتن', 'خصوبة'] },
-    { codes: ['FSH'], keys: ['fsh', 'اف اس اتش', 'follicle stimulating hormone', 'هرمون حوصلة', 'خصوبة fsh'] },
-    { codes: ['PROL'], keys: ['prol', 'بروولاكتين', 'prolactin', 'برولاكتين', 'هرمون الحليب', 'بي ار ال'] },
-    { codes: ['TESTO'], keys: ['testo', 'تستستيرون', 'testosterone', 'هرمون ذكوري', 'تيسترون'] },
-    { codes: ['ESTRO'], keys: ['estro', 'استروجين', 'estrogen', 'estradiol', 'هرمون انثوي', 'استراديول'] },
-    { codes: ['PROG'], keys: ['prog', 'بروجستيرون', 'progesterone', 'هرمون الحمل', 'برجسترون'] },
-    { codes: ['PREG-URI'], keys: ['preg-uri', 'حمل', 'pregnancy test', 'حمل بول', 'pregnancy urine', 'hcg urine', 'hcg بول'] },
-    { codes: ['PREG-SER'], keys: ['preg-ser', 'hcg', 'اتش سي جي', 'pregnancy serum', 'حمل دم', 'hcg serum', 'حمل دم', 'إتش سي جي'] },
-    { codes: ['CORTIS'], keys: ['cortis', 'كورتيزول', 'cortisol', 'هرمون الإجهاد', 'cortisol test'] },
-    { codes: ['INS'], keys: ['ins', 'أنسولين', 'insulin', 'انسولين', 'السكري إنسولين'] },
-
-    // ── Immunology / Serology ────────────────────────────────────
-    { codes: ['HIV'], keys: ['hiv', 'اتش اي في', 'hiv', 'إيدز', 'aids', 'المناعة المكتسبة'] },
-    { codes: ['HBsAg'], keys: ['hbsag', 'اتش بي اس', 'hepatitis b surface antigen', 'التهاب كبد ب', 'هيباتيتس بي', 'كبد ب', 'hbs', 'hbsag'] },
-    { codes: ['ANTI-HCV'], keys: ['anti-hcv', 'اتش سي في', 'hepatitis c', 'كبد سي', 'التهاب كبد سي', 'hcv', 'اتش سي'] },
-    { codes: ['TYPHOID-G'], keys: ['typhoid-g', 'تيفويد', 'typhoid', 'تيفوئيد', 'widal test', 'حمى التيفود', 'فيدال', 'ويدال', 'ابر تيفود'] },
-    { codes: ['TYPHOID-M'], keys: ['typhoid-m', 'تيفويد ام', 'typhoid igm', 'تيفويد اي جي ام'] },
-    { codes: ['CRP'], keys: ['crp', 'التهاب', 'c reactive protein', 'الجسم المضاد', 'بروتين التفاعل'] },
-    { codes: ['TROP-I'], keys: ['trop-i', 'تروبونين', 'troponin', 'قلب', 'نوبة قلبية', 'troponin i', 'تروبونين اي', 'troponin i'] },
-    { codes: ['AFP'], keys: ['afp', 'اي اف بي', 'alpha fetoprotein', 'ورم الكبد', 'afp tumor', 'alpha fetoprotein'] },
-    { codes: ['CEA'], keys: ['cea', 'سي اي اي', 'carcinoembryonic antigen', 'ورم كاشف', 'cea marker', 'سرطان كاشف'] },
-    { codes: ['PSA'], keys: ['psa', 'بي اس اي', 'prostate specific antigen', 'بروستاتة', 'psa بروستاتة', 'بروستات'] },
-    { codes: ['CA125'], keys: ['ca125', 'سي اي 125', 'ca 125', 'tumor marker ovarian', 'مبيض', 'ca-125'] },
-    { codes: ['CA153'], keys: ['ca153', 'سي اي 153', 'ca 15-3', 'breast cancer marker', 'ثدي', 'ca15.3'] },
-    { codes: ['Stoole'], keys: ['stoole', 'stool', 'برازي', 'براز', 'stools', 'stool analysis', 'فحص براز'] },
-
-    // ── Urine ────────────────────────────────────────────────────
-    { codes: ['Urine'], keys: ['urine', 'بول', 'ua', 'urine analysis', 'تحليل بول', 'urin', 'فحص بول', 'ادرار'] },
-
-    // ── Malaria / Parasites ──────────────────────────────────────
-    { codes: ['MALARIA-RDT'], keys: ['malaria-rdt', 'ملاريا', 'malaria', 'ملاريا سريعة', 'rdt malaria', 'مالاريا'] },
-    { codes: ['MALARIA-QBC'], keys: ['malaria-qbc', 'ملاريا qbc', 'malaria film', 'فيلم ملاريا'] },
-
-    // ── Blood Gases ──────────────────────────────────────────────
-    { codes: ['pH'], keys: ['ph', 'بي اتش', 'ph', 'حموضة الدم'] },
-    { codes: ['pO2'], keys: ['po2', 'بي او 2', 'oxygen partial pressure', 'أكسجين', 'اكسجين'] },
-    { codes: ['pCO2'], keys: ['pco2', 'بي سي او 2', 'carbon dioxide', 'ثاني اكسيد الكربون'] },
-    { codes: ['SaO2'], keys: ['sao2', 'اس اي او 2', 'oxygen saturation', 'تشبع الاكسجين', 'سو2'] },
-
-    // ── Miscellaneous ────────────────────────────────────────────
-    { codes: ['MICRO-ALB'], keys: ['micro-alb', 'ميكرو البومين', 'microalbumin', 'ميكرو ألبومين', 'albumin urine'] },
-    { codes: ['BLEED-T'], keys: ['bleed-t', 'زمن نزف', 'bleeding time', 'نزيف', 'bleeding'] },
-    { codes: ['CLOT-T'], keys: ['clot-t', 'زمن تجلط', 'clotting time', 'تجلط', 'clotting'] },
-    { codes: ['HB-ELEC'], keys: ['hb-elec', 'كهربائية الهيموغلوبين', 'hemoglobin electrophoresis', 'hb electrophoresis', 'انيميا', 'هيموغلوبين الكهربية'] },
-  ];
-
-  // ──────────────────────────────────────────────────────────────
-  // 2. قاموس أوامر الواجهة (الواجهات الثلاث)
-  // ──────────────────────────────────────────────────────────────
-  const COMMANDS = {
-    // ────── فتح / إغلاق / تنقل ─────────────────────────────────
-    openWizard: ['طلب جديد', 'طلب تحليل', 'اضافة طلب', 'إضافة طلب', 'مريض جديد', 'انشاء طلب', 'إنشاء طلب', 'فتح الطلب', 'new request', 'add request', 'اضف مريض', 'مريض جديد', 'سجل مريض'],
-    closeModal: ['اغلق', 'أغلق', 'إغلاق', 'إلغاء', 'الغاء', 'close', 'cancel', 'رجع', 'ارجع', 'خروج', 'خرج', 'لا'],
-    nextStep: ['التالي', 'تالي', 'next', 'تقدم', 'الخطوة التالية', 'اختيار التحاليل', 'next step'],
-    prevStep: ['السابق', 'سابق', 'back', 'previous', 'الخطوة السابقة', 'رجوع'],
-    saveRequest: ['حفظ', 'حفظ الطلب', 'إنشاء الطلب', 'انشاء الطلب', 'save', 'حفظ وانشاء', 'أنشئ الطلب', 'حفظ المريض'],
-
-    // ────── واجهة بيانات المريض ────────────────────────────────
-    setTitleSayyed: ['السيد', 'سيد', 'mr'],
-    setTitleSayyeda: ['السيدة', 'سيدة', 'mrs'],
-    setTitleAnissa: ['الآنسة', 'آنسة', 'انسة', 'miss'],
-    setTitleHaj: ['الحاج', 'حاج'],
-    setTitleHaja: ['الحاجة', 'حاجة'],
-    setTitleOstaz: ['الأستاذ', 'الاستاذ', 'أستاذ', 'استاذ'],
-    setTitleOstaza: ['الأستاذة', 'الاستاذة', 'أستاذة', 'استاذة'],
-    setTitleTifl: ['الطفل', 'طفل'],
-    setTitleTifla: ['الطفلة', 'طفلة'],
-    setTitleDoctor: ['الدكتور', 'دكتور', 'dr'],
-    setTitleDoctora: ['الدكتورة', 'دكتورة'],
-    setGenderMale: ['ذكر', 'رجل', 'male', 'بنين', 'ولد'],
-    setGenderFemale: ['أنثى', 'انثى', 'امرأة', 'بنت', 'female', 'woman'],
-    clearName: ['امسح الاسم', 'حذف الاسم', 'الاسم مسح', 'مسح', 'clear name'],
-    clearAll: ['مسح الكل', 'ابدأ من جديد', 'ابدا من جديد', 'reset', 'إعادة تعيين'],
-
-    // ────── واجهة اختيار التحاليل ──────────────────────────────
-    clearTests: ['مسح التحاليل', 'حذف التحاليل', 'ازل كل التحاليل', 'أزل كل التحاليل', 'clear all tests', 'مسح الكل'],
-    setPriorityRoutine: ['روتيني', 'عادي', 'اعتيادي', 'routine', 'طبيعي'],
-    setPriorityUrgent: ['عاجل', 'مستعجل', 'urgent', 'سريع', 'سرعة'],
-    setPriorityCritical: ['حرج', 'طارئ', 'اطوارئ', 'critical', 'خطر'],
-    setSampleVenous: ['وريد', 'وريدي', 'دم وريد', 'venous blood', 'دم'],
-    setSampleArterial: ['شرياني', 'شريان', 'دم شريان', 'arterial blood'],
-    setSampleUrine: ['بول', 'urine', 'بولي'],
-    setSampleStool: ['براز', 'stool', 'برازي'],
-
-    // ────── واجهة إدخال النتائج ────────────────────────────────
-    confirmResults: ['تأكيد النتائج', 'تاكيد النتائج', 'احفظ النتائج', 'confirm results', 'حفظ النتائج', 'انهاء', 'إنهاء', 'تأكيد وطباعة'],
-    saveDraft: ['حفظ مسودة', 'حفظ مؤقت', 'save draft', 'مسودة', 'save temp'],
-    printResults: ['طباعة', 'اطبع', 'print', 'اطبع النتائج', 'طباعة النتائج'],
-    editPatient: ['تعديل بيانات المريض', 'تعديل المريض', 'edit patient', 'تغيير المريض'],
-
-    // ────── أوامر التنقل بين الصفحات ──────────────────────────
-    navDashboard: ['لوحة التحكم', 'الرئيسية', 'dashboard', 'الصفحة الرئيسية'],
-    navRequests: ['الطلبات', 'طلبات', 'requests', 'قسم الطلبات'],
-    navResults: ['النتائج', 'إدخال النتائج', 'results', 'ادخال نتائج', 'نتائج'],
-    navPrint: ['الطباعة', 'طباعة', 'print page', 'صفحة الطباعة'],
-    navPatients: ['المرضى', 'مرضى', 'patients', 'قسم المرضى'],
-    navInvoices: ['الفواتير', 'فواتير', 'invoices', 'مالية'],
-
-    // ────── أوامر متنوعة ────────────────────────────────────────
-    help: ['مساعدة', 'مساعده', 'help', 'ماذا تقدر تفعل', 'ما هي الأوامر', 'اوامر'],
-    stopListening: ['توقف', 'أوقف', 'stop', 'إيقاف الاستماع', 'اسكت', 'صامت'],
-  };
-
-  // ──────────────────────────────────────────────────────────────
-  // 3. دالة تطابق النص مع المفاتيح (مرنة)
-  // ──────────────────────────────────────────────────────────────
-  function normalize(text) {
-    return (text || '')
-      .toLowerCase()
-      .replace(/[أإآا]/g, 'ا')
-      .replace(/[ة]/g, 'ه')
-      .replace(/[يى]/g, 'ي')
-      .replace(/[ؤو]/g, 'و')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  function matchCommand(transcript, cmdKeys) {
-    const norm = normalize(transcript);
-    return cmdKeys.some(k => norm.includes(normalize(k)));
-  }
-
-  function findTestByVoice(transcript) {
-    const norm = normalize(transcript);
-    let best = null;
-    let bestScore = 0;
-    TEST_DICT.forEach(entry => {
-      entry.keys.forEach(key => {
-        const nk = normalize(key);
-        if (norm.includes(nk) && nk.length > bestScore) {
-          bestScore = nk.length;
-          best = entry;
-        }
-      });
-    });
-    return best;
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 4. كشف الواجهة النشطة
-  // ──────────────────────────────────────────────────────────────
-  function getCurrentInterface() {
-    const wizard = document.getElementById('m-wizard');
-    const wizardOpen = wizard && (wizard.classList.contains('open') || wizard.style.display === 'flex' || wizard.style.display === 'block');
-
-    if (wizardOpen) {
-      const title = document.querySelector('#m-wizard .mtitle, #m-wizard .modal-title');
-      const titleText = title ? title.textContent : '';
-      if (titleText.includes('1') || titleText.includes('بيانات المريض')) return 'wizard-step1';
-      if (titleText.includes('2') || titleText.includes('اختيار التحاليل')) return 'wizard-step2';
-      return 'wizard-step1';
-    }
-
-    // صفحة إدخال النتائج
-    const secResults = document.getElementById('sec-results');
-    if (secResults && secResults.classList.contains('active')) return 'results';
-
-    // صفحة الطباعة
-    const secPrint = document.getElementById('sec-print');
-    if (secPrint && secPrint.classList.contains('active')) return 'print';
-
-    return 'main';
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 5. منطق تنفيذ الأوامر
-  // ──────────────────────────────────────────────────────────────
-  function executeCommand(transcript) {
-    const norm = normalize(transcript);
-    const iface = getCurrentInterface();
-
-    // ── مساعدة ──────────────────────────────────────────────────
-    if (matchCommand(norm, COMMANDS.help)) {
-      speakFeedback('يمكنك قول: طلب جديد، اختر تحليل واذكر اسمه، التالي، السابق، حفظ، تأكيد النتائج، لوحة التحكم، الطلبات، أو أي اسم تحليل');
-      showVoiceToast('💡 جرب: "طلب جديد" أو "اختر TSH" أو "التالي"');
-      return true;
-    }
-
-    // ── إيقاف المساعد ────────────────────────────────────────────
-    if (matchCommand(norm, COMMANDS.stopListening)) {
-      stopVoiceAssistant();
-      return true;
-    }
-
-    // ── التنقل بين الصفحات ──────────────────────────────────────
-    if (matchCommand(norm, COMMANDS.navDashboard)) { doNav('dashboard'); return true; }
-    if (matchCommand(norm, COMMANDS.navRequests)) { doNav('requests'); return true; }
-    if (matchCommand(norm, COMMANDS.navResults)) { doNav('results'); return true; }
-    if (matchCommand(norm, COMMANDS.navPrint)) { doNav('print'); return true; }
-    if (matchCommand(norm, COMMANDS.navPatients)) { doNav('patients'); return true; }
-    if (matchCommand(norm, COMMANDS.navInvoices)) { doNav('invoices'); return true; }
-
-    // ── فتح طلب جديد ────────────────────────────────────────────
-    if (matchCommand(norm, COMMANDS.openWizard)) {
-      const openBtn = document.querySelector('[onclick*="openWizard"], [onclick*="wizOpen"], [onclick*="newRequest"]');
-      if (openBtn) {
-        openBtn.click();
-      } else if (typeof openWizard === 'function') {
-        openWizard();
-      } else if (typeof wizOpen === 'function') {
-        wizOpen();
-      } else {
-        // محاولة إيجاد الزر من النص
-        const btns = document.querySelectorAll('button');
-        for (let b of btns) {
-          if (b.textContent.includes('طلب جديد') || b.textContent.includes('مريض جديد')) {
-            b.click(); break;
-          }
-        }
-      }
-      speakFeedback('تم فتح نموذج طلب جديد');
-      return true;
-    }
-
-    // ── إغلاق النافذة / إلغاء ────────────────────────────────────
-    if (matchCommand(norm, COMMANDS.closeModal)) {
-      const closeBtn = document.querySelector('.mclose, .modal-cls');
-      if (closeBtn) closeBtn.click();
-      else if (typeof closeModal === 'function') closeModal('m-wizard');
-      speakFeedback('تم الإغلاق');
-      return true;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // ── واجهة بيانات المريض (الخطوة 1) ──────────────────────────
-    // ─────────────────────────────────────────────────────────────
-    if (iface === 'wizard-step1') {
-      // اختيار اللقب
-      const titleMap = {
-        'السيد': 'السيد', 'سيد': 'السيد',
-        'السيدة': 'السيدة', 'سيدة': 'السيدة',
-        'الآنسة': 'الآنسة', 'انسة': 'الآنسة', 'آنسة': 'الآنسة',
-        'الحاج': 'الحاج', 'حاج': 'الحاج',
-        'الحاجة': 'الحاجة', 'حاجة': 'الحاجة',
-        'الأستاذ': 'الأستاذ', 'استاذ': 'الأستاذ', 'أستاذ': 'الأستاذ',
-        'الأستاذة': 'الأستاذة', 'استاذة': 'الأستاذة',
-        'الطفل': 'الطفل', 'طفل': 'الطفل',
-        'الطفلة': 'الطفلة', 'طفلة': 'الطفلة',
-        'الدكتور': 'الدكتور', 'دكتور': 'الدكتور',
-        'الدكتورة': 'الدكتورة', 'دكتورة': 'الدكتورة',
-      };
-      for (const [key, titleVal] of Object.entries(titleMap)) {
-        if (norm.includes(normalize(key))) {
-          const btn = document.getElementById('title-btn-' + titleVal);
-          if (btn) {
-            btn.click();
-            speakFeedback('تم اختيار اللقب: ' + titleVal);
-            return true;
-          }
-          // محاولة عبر الدالة المباشرة
-          if (typeof selectTitle === 'function') {
-            const gMap = {
-              'السيد': 'male', 'السيدة': 'female', 'الآنسة': 'female',
-              'الحاج': 'male', 'الحاجة': 'female', 'الأستاذ': 'male',
-              'الأستاذة': 'female', 'الطفل': 'male', 'الطفلة': 'female',
-              'الدكتور': 'male', 'الدكتورة': 'female'
-            };
-            selectTitle(titleVal, gMap[titleVal] || 'male');
-            speakFeedback('تم اختيار اللقب: ' + titleVal);
-            return true;
-          }
-        }
-      }
-
-      // إدخال الاسم: "اسم المريض [الاسم]" أو "اسمه [الاسم]"
-      const namePatterns = [
-        /(?:اسم المريض|اسم الشخص|اسمه|اسمها|المريض اسمه|اكتب اسم)\s+(.+)/,
-        /(?:name is|patient name)\s+(.+)/i,
-        /^(.{3,30})$/ // إذا النص قصير ومباشر — ربما هو الاسم
-      ];
-      for (let i = 0; i < namePatterns.length - 1; i++) {
-        const m = transcript.match(namePatterns[i]);
-        if (m) {
-          const name = m[1].trim();
-          const nameInput = document.getElementById('wp-name');
-          if (nameInput) {
-            nameInput.value = name;
-            nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-            speakFeedback('تم إدخال الاسم: ' + name);
-            return true;
-          }
-        }
-      }
-
-      // إدخال العمر: "العمر 30" أو "عمره 30 سنة"
-      const ageMatch = transcript.match(/(?:العمر|عمره|عمرها|عمر المريض|عمره|age is?|age)\s*[:\-]?\s*(\d+)\s*(سنة|شهر|يوم|year|month|day)?/i);
-      if (ageMatch) {
-        const ageVal = ageMatch[1];
-        const ageUnit = normalize(ageMatch[2] || 'سنة');
-        if (ageUnit.includes('سن') || ageUnit.includes('year')) {
-          const yInp = document.getElementById('wp-age-y');
-          if (yInp) {
-            yInp.value = ageVal;
-            yInp.dispatchEvent(new Event('input', { bubbles: true }));
-            if (typeof calcAgeCompound === 'function') calcAgeCompound();
-          }
-        } else if (ageUnit.includes('شهر') || ageUnit.includes('month')) {
-          const mInp = document.getElementById('wp-age-m');
-          if (mInp) { mInp.value = ageVal; mInp.dispatchEvent(new Event('input', { bubbles: true })); if (typeof calcAgeCompound === 'function') calcAgeCompound(); }
-        } else if (ageUnit.includes('يوم') || ageUnit.includes('day')) {
-          const dInp = document.getElementById('wp-age-d');
-          if (dInp) { dInp.value = ageVal; dInp.dispatchEvent(new Event('input', { bubbles: true })); if (typeof calcAgeCompound === 'function') calcAgeCompound(); }
-        }
-        speakFeedback('تم إدخال العمر: ' + ageVal + ' ' + (ageMatch[2] || 'سنة'));
-        return true;
-      }
-
-      // رقم الهاتف
-      const phoneMatch = transcript.match(/(?:رقم الهاتف|الهاتف|phone|mobile|موبايل|جوال)\s*[:\-]?\s*(07[\d\s]{8,10}|\d{10,11})/i);
-      if (phoneMatch) {
-        const phoneInp = document.getElementById('wp-phone');
-        if (phoneInp) {
-          phoneInp.value = phoneMatch[1].replace(/\s/g, '');
-          speakFeedback('تم إدخال رقم الهاتف');
-          return true;
-        }
-      }
-
-      // الذهاب للخطوة التالية
-      if (matchCommand(norm, COMMANDS.nextStep)) {
-        if (typeof wizNext === 'function') { wizNext(); speakFeedback('انتقل إلى اختيار التحاليل'); }
-        else {
-          const nxtBtn = document.querySelector('[onclick*="wizNext"]');
-          if (nxtBtn) { nxtBtn.click(); speakFeedback('انتقل إلى اختيار التحاليل'); }
-        }
-        return true;
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // ── واجهة اختيار التحاليل (الخطوة 2) ────────────────────────
-    // ─────────────────────────────────────────────────────────────
-    if (iface === 'wizard-step2') {
-
-      // مسح كل التحاليل
-      if (matchCommand(norm, COMMANDS.clearTests)) {
-        if (typeof wizSelectedTests !== 'undefined') {
-          wizSelectedTests.length = 0;
-          if (typeof renderWizRightPanel === 'function') renderWizRightPanel();
-          if (typeof renderWizTestList === 'function') renderWizTestList();
-          speakFeedback('تم مسح جميع التحاليل');
-          return true;
-        }
-      }
-
-      // الأولوية
-      if (matchCommand(norm, COMMANDS.setPriorityUrgent)) {
-        const pSel = document.getElementById('wiz-priority');
-        if (pSel) { pSel.value = 'Urgent'; speakFeedback('تم تعيين الأولوية: عاجل'); return true; }
-      }
-      if (matchCommand(norm, COMMANDS.setPriorityCritical)) {
-        const pSel = document.getElementById('wiz-priority');
-        if (pSel) { pSel.value = 'Critical'; speakFeedback('تم تعيين الأولوية: حرج'); return true; }
-      }
-      if (matchCommand(norm, COMMANDS.setPriorityRoutine)) {
-        const pSel = document.getElementById('wiz-priority');
-        if (pSel) { pSel.value = 'Routine'; speakFeedback('تم تعيين الأولوية: روتيني'); return true; }
-      }
-
-      // نوع العينة
-      if (matchCommand(norm, COMMANDS.setSampleVenous)) {
-        const s = document.getElementById('wiz-sample');
-        if (s) { s.value = 'Venous Blood'; speakFeedback('تم تعيين العينة: دم وريدي'); return true; }
-      }
-      if (matchCommand(norm, COMMANDS.setSampleArterial)) {
-        const s = document.getElementById('wiz-sample');
-        if (s) { s.value = 'Arterial Blood'; speakFeedback('تم تعيين العينة: دم شرياني'); return true; }
-      }
-      if (matchCommand(norm, COMMANDS.setSampleUrine)) {
-        const s = document.getElementById('wiz-sample');
-        if (s) { s.value = 'Urine'; speakFeedback('تم تعيين العينة: بول'); return true; }
-      }
-      if (matchCommand(norm, COMMANDS.setSampleStool)) {
-        const s = document.getElementById('wiz-sample');
-        if (s) { s.value = 'Stool'; speakFeedback('تم تعيين العينة: براز'); return true; }
-      }
-
-      // ── اختيار تحليل بالصوت ──────────────────────────────────
-      // محاولة استخراج "اختر [اسم التحليل]" أو "أضف [اسم التحليل]" أو الاسم مباشرة
-      const addPrefixes = ['اختر', 'اضف', 'أضف', 'ادخل', 'أدخل', 'انتقي', 'حدد', 'ختار', 'تحليل', 'add', 'select', 'choose'];
-      let searchTerm = norm;
-      for (const pfx of addPrefixes) {
-        const pfxNorm = normalize(pfx);
-        if (norm.startsWith(pfxNorm + ' ')) {
-          searchTerm = norm.slice(pfxNorm.length + 1).trim();
-          break;
-        }
-      }
-
-      const matched = findTestByVoice(searchTerm);
-      if (matched) {
-        // ابحث عن التحليل الفعلي في قائمة tests الخاصة بالتطبيق
-        if (typeof tests !== 'undefined' && typeof toggleWizTest === 'function') {
-          const codeToFind = matched.codes[0];
-          const testObj = tests.find(t => matched.codes.includes(t.code));
-          if (testObj) {
-            // تحقق إذا كان مختاراً أم لا
-            const already = typeof wizSelectedTests !== 'undefined' && wizSelectedTests.find(x => x.id === testObj.id);
-            if (already) {
-              speakFeedback('تحليل ' + (testObj.nameEn || codeToFind) + ' مضاف بالفعل');
-            } else {
-              toggleWizTest(testObj.id);
-              speakFeedback('تم إضافة تحليل ' + (testObj.nameEn || codeToFind));
-            }
-            return true;
-          }
-        }
-
-        // fallback: اكتب في خانة البحث
-        const srchInput = document.getElementById('wiz-test-srch');
-        if (srchInput) {
-          srchInput.value = matched.codes[0];
-          srchInput.dispatchEvent(new Event('input', { bubbles: true }));
-          if (typeof filterWizTests === 'function') filterWizTests();
-          speakFeedback('بحثت عن: ' + matched.codes[0]);
-          return true;
-        }
-      }
-
-      // حذف تحليل محدد
-      const removePfx = ['احذف', 'ازل', 'أزل', 'شيل', 'remove', 'delete'];
-      for (const pfx of removePfx) {
-        if (norm.includes(normalize(pfx))) {
-          const afterPfx = norm.slice(norm.indexOf(normalize(pfx)) + normalize(pfx).length).trim();
-          const remMatch = findTestByVoice(afterPfx);
-          if (remMatch && typeof tests !== 'undefined' && typeof toggleWizTest === 'function') {
-            const testObj = tests.find(t => remMatch.codes.includes(t.code));
-            if (testObj) {
-              const inList = typeof wizSelectedTests !== 'undefined' && wizSelectedTests.find(x => x.id === testObj.id);
-              if (inList) { toggleWizTest(testObj.id); speakFeedback('تم إزالة تحليل ' + testObj.nameEn); }
-              else { speakFeedback('التحليل غير موجود في القائمة'); }
-              return true;
-            }
-          }
-        }
-      }
-
-      // حفظ الطلب (زر "حفظ وإنشاء الطلب")
-      if (matchCommand(norm, COMMANDS.saveRequest)) {
-        if (typeof wizFinish === 'function') { wizFinish(); speakFeedback('تم حفظ الطلب'); }
-        else {
-          const saveBtn = document.querySelector('[onclick*="wizFinish"]');
-          if (saveBtn) { saveBtn.click(); speakFeedback('تم حفظ الطلب'); }
-        }
-        return true;
-      }
-
-      // العودة للخطوة السابقة
-      if (matchCommand(norm, COMMANDS.prevStep)) {
-        if (typeof wizBack === 'function') { wizBack(); speakFeedback('العودة لبيانات المريض'); }
-        return true;
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // ── واجهة إدخال النتائج ───────────────────────────────────────
-    // ─────────────────────────────────────────────────────────────
-    if (iface === 'results') {
-
-      // تأكيد النتائج وطباعة
-      if (matchCommand(norm, ['تأكيد وطباعة', 'تاكيد وطباعة', 'confirm and print', 'حفظ وطباعة'])) {
-        if (typeof finalizeAndPrint === 'function') { finalizeAndPrint(); speakFeedback('تم تأكيد النتائج وإرسالها للطباعة'); }
-        return true;
-      }
-
-      // تأكيد النتائج فقط
-      if (matchCommand(norm, COMMANDS.confirmResults)) {
-        if (typeof finalizeResult === 'function') { finalizeResult(); speakFeedback('تم تأكيد النتائج'); }
-        return true;
-      }
-
-      // حفظ مسودة
-      if (matchCommand(norm, COMMANDS.saveDraft)) {
-        if (typeof saveDraft === 'function') { saveDraft(); speakFeedback('تم الحفظ كمسودة'); }
-        return true;
-      }
-
-      // تعديل بيانات المريض
-      if (matchCommand(norm, COMMANDS.editPatient)) {
-        if (typeof editPatientFromResults === 'function') { editPatientFromResults(); speakFeedback('فتح تعديل بيانات المريض'); }
-        return true;
-      }
-
-      // إدخال قيمة لتحليل: "اكتب [اسم التحليل] [قيمة]"
-      // أمثلة: "تي اس اتش 2.5" أو "اكتب hgb 14"
-      const valuePatterns = [
-        /(?:اكتب|ادخل|أدخل|ضع|سجل|write|enter|value|القيمة)?\s*(.+?)\s+(\d+[\.,]?\d*)/i,
-        /(.+?)\s+(\d+[\.,]?\d*)\s*(?:ناقص|زائد|plus|minus)?/i,
-      ];
-
-      for (const pattern of valuePatterns) {
-        const vm = transcript.match(pattern);
-        if (vm) {
-          const testPart = vm[1].trim();
-          const value = vm[2].replace(',', '.').trim();
-          const testMatch = findTestByVoice(testPart);
-          if (testMatch && typeof tests !== 'undefined') {
-            const testObj = tests.find(t => testMatch.codes.includes(t.code));
-            if (testObj) {
-              const inp = document.getElementById('rv-' + testObj.id);
-              if (inp) {
-                inp.value = value;
-                inp.dispatchEvent(new Event('input', { bubbles: true }));
-                if (typeof checkResult === 'function') checkResult(testObj.id, value);
-                speakFeedback('تم إدخال قيمة ' + (testObj.nameEn || testMatch.codes[0]) + ': ' + value);
-                return true;
-              }
-            }
-          }
-        }
-      }
-
-      // إدخال نتيجة نوعية "TSH ايجابي" أو "HIV سلبي"
-      const qualPatterns = [
-        { pattern: /(.+?)\s+(?:ايجابي|إيجابي|موجب|positive|بوزيتف)/, val: 'Positive' },
-        { pattern: /(.+?)\s+(?:سلبي|غائب|نفي|negative|نيقاتيف|absent)/, val: 'Negative' },
-        { pattern: /(.+?)\s+(?:تفاعلي|reactive)/, val: 'Reactive' },
-        { pattern: /(.+?)\s+(?:غير تفاعلي|non.reactive)/, val: 'Non-Reactive' },
-      ];
-      for (const qp of qualPatterns) {
-        const qm = transcript.match(qp.pattern);
-        if (qm) {
-          const testMatch = findTestByVoice(qm[1].trim());
-          if (testMatch && typeof tests !== 'undefined') {
-            const testObj = tests.find(t => testMatch.codes.includes(t.code));
-            if (testObj) {
-              const sel = document.getElementById('rv-' + testObj.id);
-              if (sel && sel.tagName === 'SELECT') {
-                sel.value = qp.val;
-                sel.dispatchEvent(new Event('change', { bubbles: true }));
-                speakFeedback('تم تعيين ' + testObj.nameEn + ': ' + qp.val);
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // ── مطابقة اسم تحليل مباشرة — في أي واجهة ───────────────────
-    // ─────────────────────────────────────────────────────────────
-    const directTest = findTestByVoice(norm);
-    if (directTest && (iface === 'wizard-step2' || iface === 'results')) {
-      if (iface === 'wizard-step2' && typeof tests !== 'undefined' && typeof toggleWizTest === 'function') {
-        const testObj = tests.find(t => directTest.codes.includes(t.code));
-        if (testObj) {
-          const already = typeof wizSelectedTests !== 'undefined' && wizSelectedTests.find(x => x.id === testObj.id);
-          if (already) { speakFeedback(testObj.nameEn + ' مضاف بالفعل'); }
-          else { toggleWizTest(testObj.id); speakFeedback('أضفت: ' + testObj.nameEn); }
-          return true;
-        }
-      }
-
-      // في صفحة النتائج: ركّز على حقل الإدخال الخاص بالتحليل
-      if (iface === 'results' && typeof tests !== 'undefined') {
-        const testObj = tests.find(t => directTest.codes.includes(t.code));
-        if (testObj) {
-          const inp = document.getElementById('rv-' + testObj.id);
-          if (inp) {
-            inp.focus();
-            inp.select && inp.select();
-            showVoiceToast('📝 ' + testObj.nameEn + ' — أدخل القيمة');
-            speakFeedback('أدخل قيمة ' + testObj.nameEn);
-            return true;
-          }
-        }
-      }
-    }
-
-    // لم يتعرف على الأمر
-    return false;
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 6. دوال مساعدة
-  // ──────────────────────────────────────────────────────────────
-  function doNav(page) {
-    if (typeof nav === 'function') {
-      nav(page);
-      speakFeedback('انتقلت إلى ' + page);
-    }
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 7. التغذية الراجعة الصوتية (Text-to-Speech)
-  // ──────────────────────────────────────────────────────────────
-  let ttsEnabled = true;
-  function speakFeedback(text) {
-    if (!ttsEnabled) return;
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ar-SA';
-    u.rate = 1.1;
-    u.pitch = 1.0;
-    // اختر صوتاً عربياً إن وُجد
-    const voices = window.speechSynthesis.getVoices();
-    const arVoice = voices.find(v => v.lang.startsWith('ar'));
-    if (arVoice) u.voice = arVoice;
-    window.speechSynthesis.speak(u);
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 8. نظام الإشعارات المرئية
-  // ──────────────────────────────────────────────────────────────
-  let toastTimeout = null;
-  function showVoiceToast(message, type = 'info') {
-    let toast = document.getElementById('va-toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'va-toast';
-      document.body.appendChild(toast);
-    }
-    const colors = {
-      info: '#00d4ff',
-      success: '#00e87a',
-      error: '#ff2244',
-      listening: '#8b3fff'
-    };
-    toast.style.cssText = `
-      position:fixed;bottom:80px;right:20px;z-index:9999999;
-      background:rgba(4,8,20,0.97);border:2px solid ${colors[type]};
-      color:#fff;padding:12px 20px;border-radius:14px;font-family:'Cairo',sans-serif;
-      font-size:14px;font-weight:700;min-width:220px;max-width:380px;
-      box-shadow:0 0 30px ${colors[type]}44;
-      animation:va-slide-in 0.3s ease;pointer-events:none;
-      direction:rtl;text-align:right;line-height:1.7;
-    `;
-    toast.textContent = message;
-    toast.style.display = 'block';
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => { if (toast) toast.style.display = 'none'; }, 3500);
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 9. واجهة المساعد الصوتي (زر + حالة)
-  // ──────────────────────────────────────────────────────────────
-  function buildVoiceUI() {
-    // أضف CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes va-slide-in {
-        from { opacity:0; transform:translateX(30px); }
-        to   { opacity:1; transform:translateX(0); }
-      }
-      @keyframes va-pulse {
-        0%,100% { box-shadow:0 0 0 0 rgba(139,63,255,0.6); }
-        50%      { box-shadow:0 0 0 12px rgba(139,63,255,0); }
-      }
-      @keyframes va-wave {
-        0%,100% { transform:scaleY(0.4); }
-        50%      { transform:scaleY(1.2); }
-      }
-      #va-btn {
-        position:fixed;bottom:20px;right:20px;z-index:9999998;
-        width:60px;height:60px;border-radius:50%;
-        background:linear-gradient(135deg,#8b3fff,#00d4ff);
-        border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
-        font-size:26px;color:#fff;
-        box-shadow:0 4px 24px rgba(139,63,255,0.5);
-        transition:all 0.3s ease;
-        font-family:'Cairo',sans-serif;
-      }
-      #va-btn:hover { transform:scale(1.1); box-shadow:0 6px 32px rgba(139,63,255,0.7); }
-      #va-btn.listening { animation:va-pulse 1.5s infinite; background:linear-gradient(135deg,#ff2244,#ff8800); }
-      #va-status-panel {
-        position:fixed;bottom:90px;right:20px;z-index:9999997;
-        background:rgba(4,8,20,0.97);border:1.5px solid rgba(139,63,255,0.5);
-        border-radius:18px;padding:14px 16px;min-width:280px;max-width:380px;
-        font-family:'Cairo',sans-serif;direction:rtl;
-        box-shadow:0 8px 40px rgba(0,0,0,0.7);
-        display:none;
-        animation:va-slide-in 0.3s ease;
-      }
-      #va-status-panel.open { display:block; }
-      .va-panel-hdr {
-        display:flex;align-items:center;justify-content:space-between;
-        margin-bottom:12px;
-      }
-      .va-panel-title { font-size:15px;font-weight:900;color:#8b3fff; }
-      .va-panel-close {
-        width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);
-        background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);
-        cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;
-        transition:all 0.2s;
-      }
-      .va-panel-close:hover { background:rgba(255,34,68,0.2);color:#ff2244; }
-      .va-transcript {
-        background:rgba(139,63,255,0.1);border:1px solid rgba(139,63,255,0.3);
-        border-radius:10px;padding:10px 12px;font-size:13px;color:#fff;
-        min-height:40px;margin-bottom:10px;line-height:1.7;
-        direction:rtl;text-align:right;
-      }
-      .va-transcript .interim { color:rgba(255,255,255,0.4); }
-      .va-waves {
-        display:flex;align-items:center;gap:4px;height:24px;justify-content:center;
-        margin-bottom:8px;
-      }
-      .va-wave-bar {
-        width:4px;background:linear-gradient(180deg,#8b3fff,#00d4ff);
-        border-radius:3px;animation:va-wave 0.8s ease-in-out infinite;
-        transform-origin:bottom;
-      }
-      .va-wave-bar:nth-child(2) { animation-delay:0.15s; }
-      .va-wave-bar:nth-child(3) { animation-delay:0.3s; }
-      .va-wave-bar:nth-child(4) { animation-delay:0.45s; }
-      .va-wave-bar:nth-child(5) { animation-delay:0.6s; }
-      .va-controls {
-        display:flex;gap:8px;
-      }
-      .va-ctrl-btn {
-        flex:1;padding:7px;border-radius:9px;border:1px solid rgba(255,255,255,0.12);
-        background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);
-        font-size:11px;font-family:'Cairo',sans-serif;font-weight:700;cursor:pointer;
-        transition:all 0.2s;text-align:center;
-      }
-      .va-ctrl-btn:hover { background:rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.3);color:#00d4ff; }
-      .va-ctrl-btn.active { background:rgba(0,232,122,0.12);border-color:rgba(0,232,122,0.3);color:#00e87a; }
-      .va-status-dot {
-        display:inline-block;width:8px;height:8px;border-radius:50%;
-        background:#ff2244;margin-left:6px;
-        transition:background 0.3s;
-      }
-      .va-status-dot.on { background:#00e87a;animation:va-pulse 2s infinite; }
-      #va-shortcut-hint {
-        font-size:10px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // زر المساعد الصوتي
-    const btn = document.createElement('button');
-    btn.id = 'va-btn';
-    btn.title = 'المساعد الصوتي (Space)';
-    btn.innerHTML = '🎤';
-    btn.addEventListener('click', toggleVoiceAssistant);
-    document.body.appendChild(btn);
-
-    // لوحة الحالة
-    const panel = document.createElement('div');
-    panel.id = 'va-status-panel';
-    panel.innerHTML = `
-      <div class="va-panel-hdr">
-        <span class="va-panel-title">🎤 المساعد الصوتي <span class="va-status-dot" id="va-dot"></span></span>
-        <button class="va-panel-close" onclick="document.getElementById('va-status-panel').classList.remove('open')">✕</button>
-      </div>
-      <div class="va-waves" id="va-waves">
-        <div class="va-wave-bar"></div>
-        <div class="va-wave-bar"></div>
-        <div class="va-wave-bar"></div>
-        <div class="va-wave-bar"></div>
-        <div class="va-wave-bar"></div>
-      </div>
-      <div class="va-transcript" id="va-transcript-box">
-        <span style="color:rgba(255,255,255,0.35)">انتظر... تحدث بعد الضغط</span>
-      </div>
-      <div class="va-controls">
-        <button class="va-ctrl-btn" id="va-tts-btn" onclick="toggleTTS()">🔊 الصوت</button>
-        <button class="va-ctrl-btn" id="va-lang-btn" onclick="switchLang()">🌐 العربية</button>
-        <button class="va-ctrl-btn" onclick="showVoiceHelp()">❓ مساعدة</button>
-      </div>
-      <div id="va-shortcut-hint">Space = تشغيل/إيقاف | Ctrl+M = فتح المساعد</div>
-    `;
-    document.body.appendChild(panel);
-
-    // اختصارات لوحة المفاتيح
-    document.addEventListener('keydown', function (e) {
-      // Space لتشغيل/إيقاف (فقط عندما لا يكون المستخدم في حقل إدخال)
-      if (e.code === 'Space' && e.target === document.body) {
-        e.preventDefault();
-        toggleVoiceAssistant();
-      }
-      // Ctrl+M لفتح لوحة المساعد
-      if (e.ctrlKey && e.key === 'm') {
-        e.preventDefault();
-        const p = document.getElementById('va-status-panel');
-        if (p) p.classList.toggle('open');
-      }
-    });
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 10. Web Speech API — الاستماع المستمر
-  // ──────────────────────────────────────────────────────────────
-  let recognition = null;
-  let isListening = false;
-  let currentLang = 'ar-IQ'; // اللهجة العراقية افتراضياً
-  let autoRestart = true;
-  let silenceTimer = null;
-  let lastTranscript = '';
-
-  function initSpeechRecognition() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      showVoiceToast('⚠️ المتصفح لا يدعم التعرف على الصوت — استخدم Chrome', 'error');
-      return false;
-    }
-    recognition = new SR();
-    recognition.lang = currentLang;
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 3;
-
-    recognition.onstart = function () {
-      isListening = true;
-      updateVoiceUI(true);
-    };
-
-    recognition.onresult = function (event) {
-      let interim = '';
-      let final_transcript = '';
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const alt = event.results[i];
-        if (alt.isFinal) {
-          // جمع كل البدائل
-          let best = alt[0].transcript;
-          for (let j = 1; j < alt.length; j++) {
-            if (alt[j].confidence > alt[0].confidence) best = alt[j].transcript;
-          }
-          final_transcript += best + ' ';
-        } else {
-          interim += alt[0].transcript;
-        }
-      }
-
-      // تحديث النص في اللوحة
-      const box = document.getElementById('va-transcript-box');
-      if (box) {
-        box.innerHTML = (final_transcript || interim)
-          ? `<span>${final_transcript}</span><span class="interim">${interim}</span>`
-          : '<span style="color:rgba(255,255,255,0.35)">جاري الاستماع...</span>';
-      }
-
-      if (final_transcript.trim()) {
-        lastTranscript = final_transcript.trim();
-        processTranscript(final_transcript.trim());
-      }
-
-      // إعادة ضبط مؤقت الصمت
-      clearTimeout(silenceTimer);
-      silenceTimer = setTimeout(() => {
-        // لا نوقف — الاستماع مستمر
-      }, 3000);
-    };
-
-    recognition.onerror = function (event) {
-      const ignoredErrors = ['aborted', 'no-speech'];
-      if (!ignoredErrors.includes(event.error)) {
-        showVoiceToast('⚠️ خطأ: ' + event.error, 'error');
-      }
-      if (event.error === 'not-allowed') {
-        showVoiceToast('❌ لم يُسمح بالوصول للميكروفون', 'error');
-        isListening = false;
-        updateVoiceUI(false);
-        autoRestart = false;
-      }
-    };
-
-    recognition.onend = function () {
-      if (autoRestart && isListening) {
-        try { recognition.start(); } catch (e) {}
-      } else {
-        isListening = false;
-        updateVoiceUI(false);
-      }
-    };
-
-    return true;
-  }
-
-  function processTranscript(text) {
-    showVoiceToast('🎤 سمعت: ' + text, 'listening');
-    const handled = executeCommand(text);
-    if (!handled) {
-      // لم يتعرف على الأمر
-      const iface = getCurrentInterface();
-      let hint = '';
-      if (iface === 'wizard-step1') hint = 'قل: "اللقب السيد" أو "العمر 30" أو "التالي"';
-      else if (iface === 'wizard-step2') hint = 'قل: "اختر TSH" أو "أضف سي بي سي" أو "حفظ الطلب"';
-      else if (iface === 'results') hint = 'قل: "اكتب TSH 2.5" أو "تأكيد النتائج"';
-      else hint = 'قل: "طلب جديد" أو اسم صفحة';
-      showVoiceToast('🤔 لم أفهم: "' + text + '"\n💡 ' + hint, 'error');
-    }
-  }
-
-  function startVoiceAssistant() {
-    if (!recognition) {
-      if (!initSpeechRecognition()) return;
-    }
-    autoRestart = true;
-    try {
-      recognition.lang = currentLang;
-      recognition.start();
-      speakFeedback('المساعد الصوتي جاهز');
-      showVoiceToast('✅ جاري الاستماع...', 'success');
-    } catch (e) {
-      // ربما يعمل بالفعل
-    }
-  }
-
-  function stopVoiceAssistant() {
-    autoRestart = false;
-    isListening = false;
-    if (recognition) { try { recognition.stop(); } catch (e) {} }
-    updateVoiceUI(false);
-    showVoiceToast('⏹ توقف الاستماع');
-    speakFeedback('تم إيقاف المساعد الصوتي');
-  }
-
-  function toggleVoiceAssistant() {
-    if (isListening) stopVoiceAssistant();
-    else startVoiceAssistant();
-  }
-
-  function updateVoiceUI(listening) {
-    const btn = document.getElementById('va-btn');
-    const dot = document.getElementById('va-dot');
-    const waves = document.getElementById('va-waves');
-    if (btn) {
-      btn.innerHTML = listening ? '🔴' : '🎤';
-      btn.title = listening ? 'إيقاف الاستماع (Space)' : 'تشغيل الاستماع (Space)';
-      if (listening) btn.classList.add('listening');
-      else btn.classList.remove('listening');
-    }
-    if (dot) {
-      if (listening) dot.classList.add('on');
-      else dot.classList.remove('on');
-    }
-    if (waves) {
-      waves.style.display = listening ? 'flex' : 'none';
-    }
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 11. دوال التحكم في الإعدادات
-  // ──────────────────────────────────────────────────────────────
-  function toggleTTS() {
-    ttsEnabled = !ttsEnabled;
-    const btn = document.getElementById('va-tts-btn');
-    if (btn) {
-      btn.textContent = ttsEnabled ? '🔊 الصوت' : '🔇 صامت';
-      if (ttsEnabled) btn.classList.add('active');
-      else btn.classList.remove('active');
-    }
-    showVoiceToast(ttsEnabled ? '🔊 الصوت مفعّل' : '🔇 الصوت معطّل');
-  }
-
-  const langs = [
-    { code: 'ar-IQ', label: '🇮🇶 عراقي' },
-    { code: 'ar-SA', label: '🇸🇦 سعودي' },
-    { code: 'ar-EG', label: '🇪🇬 مصري' },
-    { code: 'ar-MA', label: '🇲🇦 مغربي' },
-    { code: 'ar', label: '🌍 عربي عام' },
-  ];
-  let langIdx = 0;
-
-  function switchLang() {
-    langIdx = (langIdx + 1) % langs.length;
-    currentLang = langs[langIdx].code;
-    if (recognition) recognition.lang = currentLang;
-    const btn = document.getElementById('va-lang-btn');
-    if (btn) btn.textContent = langs[langIdx].label;
-    showVoiceToast('🌐 اللهجة: ' + langs[langIdx].label);
-    if (isListening) {
-      stopVoiceAssistant();
-      setTimeout(startVoiceAssistant, 300);
-    }
-  }
-
-  function showVoiceHelp() {
-    const helpText = `🎤 أوامر المساعد الصوتي:\n\n` +
-      `📋 عام:\n` +
-      `• "طلب جديد" — فتح نموذج الطلب\n` +
-      `• "لوحة التحكم" — انتقال للرئيسية\n` +
-      `• "الطلبات" / "النتائج" / "الطباعة"\n\n` +
-      `👤 بيانات المريض:\n` +
-      `• "السيد" / "السيدة" / "دكتور" — اختيار اللقب\n` +
-      `• "العمر 35" — إدخال العمر\n` +
-      `• "التالي" — الانتقال لاختيار التحاليل\n\n` +
-      `🧪 اختيار التحاليل:\n` +
-      `• "اختر TSH" / "أضف سي بي سي"\n` +
-      `• "تي اس اتش" / "اي اس ار" / "دهون ثلاثية"\n` +
-      `• "عاجل" / "روتيني" — الأولوية\n` +
-      `• "حفظ الطلب" — حفظ وإنشاء\n\n` +
-      `📊 إدخال النتائج:\n` +
-      `• "اكتب TSH 2.5"\n` +
-      `• "HbA1c 7.2"\n` +
-      `• "HIV سلبي"\n` +
-      `• "تأكيد النتائج" / "حفظ وطباعة"\n\n` +
-      `• "توقف" — إيقاف الاستماع\n` +
-      `• Ctrl+M — فتح/إغلاق اللوحة`;
-
-    alert(helpText);
-  }
-
-  // كشف الأصوات عند تحميل الصفحة
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = function () {};
-    window.speechSynthesis.getVoices();
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 12. تهيئة المساعد
-  // ──────────────────────────────────────────────────────────────
-  function init() {
-    buildVoiceUI();
-
-    // تعريض الدوال العامة
-    window.toggleVoiceAssistant = toggleVoiceAssistant;
-    window.startVoiceAssistant = startVoiceAssistant;
-    window.stopVoiceAssistant = stopVoiceAssistant;
-    window.toggleTTS = toggleTTS;
-    window.switchLang = switchLang;
-    window.showVoiceHelp = showVoiceHelp;
-    window.showVoiceToast = showVoiceToast;
-
-    console.log('[MedLab Voice] ✅ المساعد الصوتي جاهز — اضغط Space أو زر 🎤');
-    showVoiceToast('🎤 المساعد الصوتي متاح — اضغط زر الميكروفون أو Space للبدء', 'info');
-  }
-
-  // تأخير بسيط للتأكد من تحميل التطبيق الأساسي
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    setTimeout(init, 1200);
-  }
-
-})();
-</script>
+<\/script>
 </body>
 </html>`;
 }
