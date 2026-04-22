@@ -1841,6 +1841,363 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .notif{will-change:transform,opacity;}
 input,select,textarea{accent-color:var(--primary);}
 
+/* ══════════════════════════════════════════════════════
+   ✨ تفاعلات الأزرار المتقدمة — Ripple & Animations
+══════════════════════════════════════════════════════ */
+
+/* --- Ripple Effect --- */
+.btn{position:relative;overflow:hidden;transform:translateZ(0);}
+.btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at var(--rx,50%) var(--ry,50%), rgba(255,255,255,0.35) 0%, transparent 65%);
+  opacity:0;
+  transform:scale(0.3);
+  transition:opacity 0.5s ease, transform 0.5s ease;
+  pointer-events:none;
+  border-radius:inherit;
+}
+.btn.ripple-go::after{opacity:1;transform:scale(2.8);transition:opacity 0.05s,transform 0.45s ease-out;}
+.btn.ripple-fade::after{opacity:0;transform:scale(2.8);transition:opacity 0.4s ease,transform 0s;}
+
+/* --- Pulse glow للأزرار الرئيسية --- */
+.btn-p{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#000;
+  box-shadow:0 3px 12px rgba(0,212,255,0.28);
+  transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+.btn-p:hover{
+  box-shadow:0 6px 28px rgba(0,212,255,0.55),0 0 0 3px rgba(0,212,255,0.15) !important;
+  transform:translateY(-2px) scale(1.03) !important;
+  filter:brightness(1.08);
+}
+.btn-p:active{transform:translateY(0) scale(0.97) !important;box-shadow:0 2px 8px rgba(0,212,255,0.3) !important;}
+
+/* --- زر success --- */
+.btn-ok{
+  background:linear-gradient(135deg,var(--success),#00c470);
+  color:#000;
+  transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+.btn-ok:hover{box-shadow:0 6px 24px rgba(0,245,147,0.45),0 0 0 3px rgba(0,245,147,0.12) !important;transform:translateY(-2px) scale(1.03) !important;filter:brightness(1.08);}
+.btn-ok:active{transform:translateY(0) scale(0.97) !important;}
+
+/* --- زر ثانوي --- */
+.btn-s{
+  background:var(--bg-glass);
+  color:var(--text);
+  border:1px solid var(--border);
+  transition:all 0.16s ease !important;
+}
+.btn-s:hover{
+  background:rgba(0,212,255,0.1) !important;
+  border-color:var(--primary) !important;
+  color:var(--primary) !important;
+  transform:translateY(-1px) !important;
+  box-shadow:0 4px 14px rgba(0,212,255,0.18) !important;
+}
+.btn-s:active{transform:translateY(0) scale(0.97) !important;}
+
+/* --- زر خطر --- */
+.btn-d:hover{box-shadow:0 6px 24px rgba(255,34,68,0.45) !important;transform:translateY(-2px) scale(1.03) !important;}
+.btn-d:active{transform:translateY(0) scale(0.97) !important;}
+
+/* --- زر تحذير --- */
+.btn-w:hover{box-shadow:0 6px 24px rgba(255,204,0,0.4) !important;transform:translateY(-2px) scale(1.03) !important;}
+.btn-w:active{transform:translateY(0) scale(0.97) !important;}
+
+/* --- أزرار الحجم الكبير --- */
+.btn-lg{padding:11px 28px;font-size:13px;font-weight:800;letter-spacing:0.3px;}
+
+/* ══════════════════════════════════════════════════════
+   🚀 تسريع الـ Wizard — Step 1 (بيانات المريض)
+══════════════════════════════════════════════════════ */
+
+/* تسريع render الـ modal body */
+#wiz-body{
+  contain:layout style paint;
+  transform:translateZ(0);
+  will-change:contents;
+}
+#wiz-body .fg{margin-bottom:14px;}
+
+/* أزرار اللقب - تفاعلية ومحسّنة */
+#wiz-body .btn-sm{
+  transition:all 0.14s cubic-bezier(0.34,1.56,0.64,1) !important;
+  will-change:transform;
+}
+#wiz-body .btn-sm:hover{transform:translateY(-2px) scale(1.06) !important;}
+#wiz-body .btn-sm:active{transform:scale(0.94) !important;}
+#wiz-body .btn-sm.btn-p{
+  animation:titleBtnPop 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes titleBtnPop{
+  0%{transform:scale(0.85);}
+  60%{transform:scale(1.12);}
+  100%{transform:scale(1.08);}
+}
+
+/* تحسين حقول الإدخال */
+.fc{
+  transition:all 0.16s ease !important;
+  transform:translateZ(0);
+}
+.fc:focus{
+  border-color:var(--primary) !important;
+  background:rgba(0,212,255,0.05) !important;
+  box-shadow:0 0 0 3px rgba(0,212,255,0.12),0 0 16px rgba(0,212,255,0.08) !important;
+  transform:translateZ(0);
+}
+select.fc:focus{outline:none;}
+
+/* ══════════════════════════════════════════════════════
+   🚀 تسريع الـ Wizard — Step 2 (اختيار التحاليل)
+══════════════════════════════════════════════════════ */
+
+/* تسريع قائمة التحاليل */
+.test-list{
+  contain:layout style;
+  transform:translateZ(0);
+}
+.test-item{
+  transition:all 0.12s ease !important;
+  transform:translateZ(0);
+  will-change:transform,background,border-color;
+}
+.test-item:hover{
+  border-color:var(--primary) !important;
+  background:rgba(0,212,255,0.09) !important;
+  transform:translateX(-3px) !important;
+  box-shadow:2px 0 0 0 var(--primary) inset;
+}
+.test-item.selected{
+  border-color:var(--primary) !important;
+  background:rgba(0,212,255,0.16) !important;
+  box-shadow:3px 0 0 0 var(--primary) inset;
+}
+.test-item:active{transform:scale(0.98) !important;}
+
+/* checkbox أسرع */
+.test-item input[type=checkbox]{
+  cursor:pointer;
+  accent-color:var(--primary);
+  width:16px;height:16px;
+  transition:transform 0.1s ease;
+}
+.test-item input[type=checkbox]:checked{
+  transform:scale(1.15);
+}
+
+/* تسريع الـ wiz-panel */
+.wiz-panel{
+  contain:layout style;
+  transform:translateZ(0);
+}
+.wiz-panel-body{
+  transform:translateZ(0);
+  scroll-behavior:smooth;
+  overscroll-behavior:contain;
+}
+
+/* تحسين عناصر المختارة */
+.wiz-sel-item{
+  transition:all 0.15s ease !important;
+  transform:translateZ(0);
+  animation:selItemIn 0.2s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes selItemIn{
+  from{opacity:0;transform:translateX(20px) scale(0.9);}
+  to{opacity:1;transform:translateX(0) scale(1);}
+}
+.wiz-sel-rm{
+  transition:all 0.14s ease !important;
+}
+.wiz-sel-rm:hover{
+  background:var(--danger) !important;
+  color:#fff !important;
+  transform:scale(1.2) rotate(90deg) !important;
+}
+
+/* أزرار الأكثر طلباً */
+#mrt-buttons-area .btn{
+  transition:all 0.14s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+#mrt-buttons-area .btn:hover{transform:translateY(-2px) scale(1.05) !important;}
+#mrt-buttons-area .btn:active{transform:scale(0.94) !important;}
+
+/* ══════════════════════════════════════════════════════
+   🚀 تسريع واجهة إدخال النتائج
+══════════════════════════════════════════════════════ */
+
+/* تسريع جدول النتائج */
+#sec-results .gc{
+  contain:layout style;
+  transform:translateZ(0);
+}
+#res-entry-tbody{
+  contain:layout style;
+  transform:translateZ(0);
+}
+#res-entry-tbody tr{
+  transition:background 0.1s ease !important;
+}
+
+/* input النتائج - تفاعلي وسريع */
+.res-tbl input,.res-tbl select,.res-tbl textarea{
+  transition:all 0.13s ease !important;
+  transform:translateZ(0);
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:5px 8px;
+  color:var(--text);
+  font-family:'Cairo',sans-serif;
+  font-size:12px;
+  outline:none;
+}
+.res-tbl input:focus,.res-tbl select:focus{
+  border-color:var(--primary) !important;
+  background:rgba(0,212,255,0.06) !important;
+  box-shadow:0 0 0 3px rgba(0,212,255,0.1) !important;
+  transform:scale(1.01) translateZ(0) !important;
+}
+/* تمييز القيم الغير طبيعية */
+.res-tbl input.high-val{
+  border-color:var(--danger) !important;
+  background:rgba(255,34,68,0.07) !important;
+  color:var(--danger);
+  font-weight:800;
+}
+.res-tbl input.low-val{
+  border-color:var(--warning) !important;
+  background:rgba(255,204,0,0.07) !important;
+  color:var(--warning);
+  font-weight:800;
+}
+
+/* select الطلب - أبرز */
+#res-req-sel{
+  font-size:14px !important;
+  font-weight:700 !important;
+  padding:11px 16px !important;
+  border:2px solid var(--primary) !important;
+  background:rgba(0,212,255,0.06) !important;
+  border-radius:10px !important;
+  cursor:pointer;
+  transition:all 0.16s ease !important;
+}
+#res-req-sel:focus{
+  box-shadow:0 0 0 4px rgba(0,212,255,0.15),0 0 20px rgba(0,212,255,0.1) !important;
+}
+
+/* أزرار النتائج الكبيرة */
+#sec-results .btn-p,
+#sec-results .btn-ok,
+#sec-results .btn-w{
+  font-size:13px !important;
+  font-weight:800 !important;
+  padding:11px 22px !important;
+  letter-spacing:0.3px;
+}
+
+/* ══════════════════════════════════════════════════════
+   🎯 تفاعلات عامة محسّنة
+══════════════════════════════════════════════════════ */
+
+/* mclose أجمل */
+.mclose{
+  transition:all 0.16s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+.mclose:hover{
+  background:rgba(255,77,109,0.22) !important;
+  color:var(--danger) !important;
+  border-color:var(--danger) !important;
+  transform:rotate(90deg) scale(1.1) !important;
+}
+
+/* Modal entrance أسرع */
+@keyframes su{
+  from{transform:translateY(18px) scale(0.97);opacity:0}
+  to{transform:translateY(0) scale(1);opacity:1}
+}
+.modal{animation:su 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+
+/* wizard footer buttons */
+#wiz-ftr{
+  padding:14px 22px;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  background:rgba(0,0,0,0.15);
+  flex-shrink:0;
+}
+#wiz-ftr .btn{font-size:13px !important;font-weight:800 !important;}
+#wiz-ftr .btn-lg{padding:12px 32px !important;}
+
+/* تحسين pt-bar */
+.pt-bar{
+  background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(123,47,255,0.06));
+  border:1.5px solid rgba(0,212,255,0.2);
+  border-radius:12px;
+  padding:12px 18px;
+}
+.pt-bar-item span{font-size:12px;font-weight:800;}
+
+/* scrollbar أجمل */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(to bottom,var(--primary),var(--secondary));
+  border-radius:6px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background:var(--primary);
+}
+
+/* تحسين select الطبيب في الـ wizard */
+#wp-doctor{
+  font-size:14px !important;
+  font-weight:700 !important;
+  cursor:pointer;
+}
+
+/* تحسين حقول العمر */
+#wp-age-y,#wp-age-m,#wp-age-d{
+  text-align:center;
+  font-size:16px !important;
+  font-weight:800 !important;
+}
+
+/* تحسين أداء rendering العام للـ wizard */
+.wiz-s2-panels{
+  contain:layout;
+  transform:translateZ(0);
+}
+#wiz-test-srch{
+  transition:all 0.16s ease !important;
+}
+#wiz-test-srch:focus{
+  border-color:var(--primary) !important;
+  background:rgba(0,212,255,0.07) !important;
+  box-shadow:0 0 0 3px rgba(0,212,255,0.12) !important;
+}
+
+/* badge اختيار التحاليل في الـ wizard */
+#wiz-sel-count{
+  transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  transform:translateZ(0);
+}
+.wiz-count-pop{
+  animation:countPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes countPop{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.5);}
+  100%{transform:scale(1);}
+}
+
 /* ── طابور الانتظار ── */
 .wq-row-pending td { border-right: 3px solid var(--warning); }
 .wq-row-inprogress td:first-child { border-right: 3px solid var(--primary); }
@@ -26505,4 +26862,70 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(adminPanel, { attributes: true });
   }
 });
+
+/* ══════════════════════════════════════════════════════
+   ✨ Ripple Effect — تفاعل الضغط على الأزرار
+══════════════════════════════════════════════════════ */
+(function initRipple(){
+  document.addEventListener('mousedown',function(e){
+    const btn=e.target.closest('.btn');
+    if(!btn) return;
+    const rect=btn.getBoundingClientRect();
+    btn.style.setProperty('--rx',((e.clientX-rect.left)/rect.width*100).toFixed(1)+'%');
+    btn.style.setProperty('--ry',((e.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
+    btn.classList.remove('ripple-go','ripple-fade');
+    requestAnimationFrame(function(){
+      btn.classList.add('ripple-go');
+      setTimeout(function(){
+        btn.classList.remove('ripple-go');
+        btn.classList.add('ripple-fade');
+        setTimeout(function(){btn.classList.remove('ripple-fade');},400);
+      },450);
+    });
+  },{passive:true});
+})();
+
+/* ══════════════════════════════════════════════════════
+   🚀 تحسين wizard — badge animation + scroll reset
+══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  // keyboard navigation في جدول النتائج
+  const secRes=document.getElementById('sec-results');
+  if(secRes){
+    secRes.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||(e.key==='Tab'&&!e.shiftKey)){
+        const inputs=[...document.querySelectorAll('#res-entry-tbody input:not([disabled]),#res-entry-tbody select:not([disabled])')];
+        const idx=inputs.indexOf(document.activeElement);
+        if(idx>=0&&idx<inputs.length-1){
+          e.preventDefault();
+          const next=inputs[idx+1];
+          next.focus();
+          if(next.tagName==='INPUT') next.select();
+        }
+      }
+    });
+  }
+});
+
+/* patch renderWizRightPanel لإضافة badge pop */
+setTimeout(function(){
+  if(typeof renderWizRightPanel==='function'){
+    const _orig=window.renderWizRightPanel;
+    window.renderWizRightPanel=function(){
+      _orig.apply(this,arguments);
+      requestAnimationFrame(function(){
+        const badge=document.getElementById('wiz-sel-count');
+        if(badge){badge.classList.remove('wiz-count-pop');void badge.offsetWidth;badge.classList.add('wiz-count-pop');}
+      });
+    };
+  }
+  if(typeof filterWizTests==='function'){
+    const _orig2=window.filterWizTests;
+    window.filterWizTests=function(){
+      _orig2.apply(this,arguments);
+      const list=document.getElementById('wiz-test-list');
+      if(list) list.scrollTop=0;
+    };
+  }
+},0);
 </script>
