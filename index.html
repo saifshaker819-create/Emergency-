@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="MedLab Pro">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1181,16 +1181,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .logo-txt p{font-size:11px;color:var(--text2);}
 .nav-grp{padding:12px 10px 4px;}
 .nav-grp-lbl{font-size:11px;letter-spacing:2px;color:var(--text2);padding:0 6px;margin-bottom:6px;text-transform:uppercase;}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.14s,color 0.14s,border-color 0.14s;color:#ffffff;font-size:13px;font-weight:700;margin-bottom:1px;position:relative;overflow:hidden;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all 0.18s;color:#ffffff;font-size:13px;font-weight:700;margin-bottom:1px;position:relative;}
 .ni:hover{background:var(--bg-glass);color:#ffffff;}
 .ni.active{background:linear-gradient(135deg,rgba(0,212,255,0.14),rgba(123,47,255,0.09));color:var(--primary);border:1px solid rgba(0,212,255,0.18);}
 .ni.active::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--primary),var(--secondary));border-radius:2px 0 0 2px;}
-/* Slice sweep line */
-.ni::after{content:'';position:absolute;top:0;right:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.55),rgba(255,255,255,0.15),transparent);transform:skewX(-15deg);pointer-events:none;transition:none;}
-@keyframes ni-slice{0%{right:110%}100%{right:-110%}}
-.ni.ni-clicked::after{animation:ni-slice 0.28s ease-out forwards;}
-@keyframes ni-press{0%{transform:scale(1)}40%{transform:scale(0.95,0.92)}100%{transform:scale(1)}}
-.ni.ni-clicked{animation:ni-press 0.22s ease-out forwards;}
+
 .ni-ic{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
 .ni-badge{margin-right:auto;background:var(--danger);color:#fff;font-size:11px;padding:2px 6px;border-radius:20px;font-weight:700;}
 .ni-badge.warn{background:var(--warning);color:#000;}
@@ -26934,29 +26929,5 @@ setTimeout(function(){
 
 
 
-/* ── Ni Slice Effect ── */
-(function(){
-  function attach(){
-    document.querySelectorAll('.ni').forEach(function(ni){
-      if(ni._sliceBound) return;
-      ni._sliceBound=1;
-      ni.addEventListener('mousedown',function(){
-        this.classList.remove('ni-clicked');
-        void this.offsetWidth;
-        this.classList.add('ni-clicked');
-      },{passive:true});
-      ni.addEventListener('animationend',function(){
-        this.classList.remove('ni-clicked');
-      },{passive:true});
-      ni.addEventListener('touchstart',function(){
-        this.classList.remove('ni-clicked');
-        void this.offsetWidth;
-        this.classList.add('ni-clicked');
-      },{passive:true});
-    });
-  }
-  document.readyState==='loading'
-    ? document.addEventListener('DOMContentLoaded',attach)
-    : attach();
-})();
+
 </script>
