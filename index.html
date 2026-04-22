@@ -26925,6 +26925,245 @@ setTimeout(function(){
   }
 },0);
 
+/* ══════════════════════════════════════════════════════════════
+   ⚡ حزمة تحسينات الأداء — MedLab Performance Patch
+   تُطبَّق بعد تحميل كل الكود الأصلي لضمان الأولوية
+══════════════════════════════════════════════════════════════ */
+(function applyPerfPatches(){
+
+  // ─── أداة debounce مشتركة ────────────────────────────────────
+  function _debounce(fn, ms){
+    var t;
+    return function(){
+      var ctx=this, args=arguments;
+      clearTimeout(t);
+      t=setTimeout(function(){ fn.apply(ctx,args); }, ms);
+    };
+  }
+
+  // ─── 1. suggestPatients: debounce على البحث في IDB ───────────
+  // المشكلة: كل حرف يطلق query إلى IDB (async) — يُبطئ الكتابة
+  // الحل: debounce 150ms على استدعاء الجزء الـ IDB فقط
+  if(typeof window.suggestPatients === 'function'){
+    var _origSuggest = window.suggestPatients;
+    var _idbSuggestDebounced = _debounce(function(v){
+      // هذا الجزء يعيد استدعاء الدالة الأصلية — IDB سيعمل بعد 150ms من توقف الكتابة
+      _origSuggest(v);
+    }, 150);
+
+    window.suggestPatients = function(v){
+      var box = document.getElementById('pt-suggest-box');
+      if(!v || v.length < 1){ if(box) box.style.display='none'; return; }
+      // عرض نتائج الذاكرة (patients[]) فوراً بدون تأخير
+      var q = v.toLowerCase();
+      var lsMatches = (typeof patients !== 'undefined' ? patients : []).filter(function(p){
+        return p.name.toLowerCase().includes(q) || ((p.phone||'').includes(q));
+      });
+      if(lsMatches.length && box){
+        box.innerHTML = lsMatches.slice(0,8).map(function(p){
+          return '<div class="pt-suggest-item" onclick="selectExistingPatient(\''+p.id+'\')">'
+            +'<div class="pt-suggest-name">'+p.name+'</div>'
+            +'<div class="pt-suggest-sub">📞 '+(p.phone||'-')+' | '+(typeof calcAgeFromInput==='function'?calcAgeFromInput(p.dob,p.age):'—')+' سنة | '+p.id+'</div>'
+            +'</div>';
+        }).join('');
+        box.style.display='block';
+      } else if(box) {
+        box.style.display='none';
+      }
+      // البحث في IDB يتم فقط بعد 150ms من توقف الكتابة
+      _idbSuggestDebounced(v);
+    };
+  }
+
+  // ─── 2. filterWizTests: debounce على البحث النصي السريع ──────
+  // المشكلة: oninput يستدعي renderWizTestList فوراً لكل حرف
+  // الحل: debounce 120ms على renderWizTestList داخل filterWizTests
+  if(typeof window.filterWizTests === 'function'){
+    var _origFilterWiz = window.filterWizTests;
+    var _renderWizDebounced = _debounce(function(cat){
+      _origFilterWiz(cat);
+      // scroll reset
+      var list = document.getElementById('wiz-test-list');
+      if(list) list.scrollTop = 0;
+    }, 120);
+
+    window.filterWizTests = function(cat){
+      // إذا كان التغيير بسبب ضغطة فئة (cat مُعطى) — اعمل فوراً
+      if(cat && cat !== (typeof currentTestCat !== 'undefined' ? currentTestCat : '')){
+        _origFilterWiz(cat);
+        var list = document.getElementById('wiz-test-list');
+        if(list) list.scrollTop = 0;
+        return;
+      }
+      // إذا كان التغيير بسبب البحث النصي — debounce
+      _renderWizDebounced(cat);
+    };
+  }
+
+  // ─── 3. filterPrintSearch: debounce على بحث الطباعة ─────────
+  // المشكلة: يعيد بناء DOM كامل مع كل حرف
+  if(typeof window.filterPrintSearch === 'function'){
+    var _origPrintSearch = window.filterPrintSearch;
+    window.filterPrintSearch = _debounce(function(v){
+      _origPrintSearch(v);
+    }, 150);
+  }
+
+  // ─── 4. searchReq: debounce حقيقي بدلاً من setTimeout(0) ────
+  // المشكلة: كان setTimeout(...,0) = لا تأخير = يعيد بناء جدول الطلبات فوراً
+  if(typeof window.searchReq === 'function'){
+    window.searchReq = function(v){
+      if(window._srTimer) clearTimeout(window._srTimer);
+      window._srTimer = setTimeout(function(){
+        var activeTab = document.querySelector('#sec-requests .tabs .tab.active');
+        var filter = (activeTab && activeTab.getAttribute('data-filter')) || 'today';
+        if(typeof renderRequestsFiltered === 'function') renderRequestsFiltered(filter, v);
+      }, 200);
+    };
+  }
+
+  // ─── 5. _autoSaveResults: رفع delay لتقليل حفظ أثناء الكتابة ─
+  // المشكلة: 500ms كان جيداً لكن updateDashboard+updateBadges يُثقّلان
+  // الحل: تأجيل updateDashboard/updateBadges لما بعد توقف الكتابة
+  if(typeof window._autoSaveResults === 'function'){
+    window._autoSaveResults = function(){
+      if(window._autoSaveTimer) clearTimeout(window._autoSaveTimer);
+      window._autoSaveTimer = setTimeout(function(){
+        var id = document.getElementById('res-req-sel') && document.getElementById('res-req-sel').value;
+        if(!id) return;
+        var req = (typeof requests !== 'undefined') ? requests.find(function(r){return r.id===id;}) : null;
+        if(!req) return;
+        var reqTests = req.tests.map(function(tid){return (typeof tests!=='undefined'?tests:[]).find(function(t){return t.id===tid;});}).filter(Boolean);
+        if(!req.resultNotesPer) req.resultNotesPer={};
+        reqTests.forEach(function(t){
+          if(t.isSpecialExam) return;
+          var sel=document.getElementById('rv-'+t.id);
+          if(!sel) return;
+          var v=sel.value;
+          if(v==='__manual__'){var m=document.getElementById('rv-manual-'+t.id);v=m?m.value:'';}
+          if(v!==undefined&&v!=='') req.results[t.id]=v;
+          var noteEl=document.getElementById('rnote-'+t.id);
+          if(noteEl&&noteEl.value) req.resultNotesPer[t.id]=noteEl.value;
+        });
+        var tech=document.getElementById('res-tech');
+        if(tech) req.tech=tech.value;
+        var rd=document.getElementById('res-date');
+        if(rd) req.resultDate=rd.value;
+        var rn=document.getElementById('res-notes');
+        if(rn) req.resultNotes=rn.value;
+        // تحديث الحالة
+        var regularTests=reqTests.filter(function(t){return !t.isSpecialExam;});
+        var allFilled=regularTests.length>0 && regularTests.every(function(t){
+          var v=req.results[t.id];
+          return v!==undefined && v!==null && String(v).trim()!=='';
+        });
+        if(allFilled) req.status='done';
+        else if(req.status!=='done') req.status='inprogress';
+        if(typeof save==='function') save('requests',requests);
+        // تحديث الـ badges فقط بتأخير إضافي لتجنب إعاقة الكتابة
+        setTimeout(function(){
+          if(typeof updateDashboard==='function') updateDashboard();
+          if(typeof updateBadges==='function') updateBadges();
+        }, 300);
+      }, 600);
+    };
+  }
+
+  // ─── 6. _sendReportAsImage: تخزين html2canvas مؤقتاً ────────
+  // المشكلة: كل إرسال يحمّل html2canvas من CDN من جديد (تأخير شبكة)
+  // الحل: تحميله مرة واحدة وتخزين الوعد
+  if(typeof window._sendReportAsImage === 'function'){
+    var _origSendReport = window._sendReportAsImage;
+    // preload html2canvas في الخلفية فوراً
+    var _h2cReady = null;
+    function _preloadH2C(){
+      if(window.html2canvas){ _h2cReady = Promise.resolve(window.html2canvas); return; }
+      if(_h2cReady) return; // جاري التحميل بالفعل
+      _h2cReady = new Promise(function(resolve, reject){
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        s.onload = function(){ resolve(window.html2canvas); };
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    // بدء preload فوراً بعد 2 ثانية من تحميل الصفحة
+    setTimeout(_preloadH2C, 2000);
+
+    window._sendReportAsImage = function(req){
+      if(typeof buildPrintHTML !== 'function'){ _origSendReport(req); return; }
+      showNotif('','⏳ جاري تحويل التقرير...','info');
+      var printHtml = buildPrintHTML(req);
+      var iframe = document.createElement('iframe');
+      iframe.style.cssText='position:fixed;left:-9999px;top:0;width:794px;height:1px;border:none;visibility:hidden;';
+      document.body.appendChild(iframe);
+      iframe.contentDocument.open();
+      iframe.contentDocument.write(printHtml);
+      iframe.contentDocument.close();
+
+      _preloadH2C(); // تأكد من التحميل
+      var loaded = false;
+      iframe.onload = function(){
+        if(loaded) return; loaded = true;
+        // استخدم html2canvas المُحمَّل مسبقاً بدون تأخير
+        setTimeout(function(){
+          (_h2cReady || Promise.resolve(window.html2canvas)).then(function(h2c){
+            if(!h2c){ document.body.removeChild(iframe); if(typeof chatSendResultAsText==='function') chatSendResultAsText(req,''); return; }
+            // حقن html2canvas في الـ iframe إذا لزم
+            if(!iframe.contentWindow.html2canvas){
+              iframe.contentWindow.html2canvas = h2c;
+            }
+            h2c(iframe.contentDocument.body,{
+              scale:1.8, useCORS:true, backgroundColor:'#ffffff',
+              width:794, windowWidth:794
+            }).then(function(canvas){
+              if(typeof push==='function') push({t:'img', d:canvas.toDataURL('image/jpeg',0.85)});
+              document.body.removeChild(iframe);
+              showNotif('تم','تم إرسال التقرير كصورة 📄','success');
+            }).catch(function(){
+              document.body.removeChild(iframe);
+              if(typeof chatSendResultAsText==='function') chatSendResultAsText(req,'');
+            });
+          }).catch(function(){
+            document.body.removeChild(iframe);
+            if(typeof chatSendResultAsText==='function') chatSendResultAsText(req,'');
+          });
+        }, 300); // تخفيض من 600ms إلى 300ms
+      };
+      setTimeout(function(){
+        if(!loaded && iframe.contentDocument && iframe.contentDocument.body){
+          loaded = true;
+          iframe.onload && iframe.onload();
+        }
+      }, 800);
+    };
+  }
+
+  // ─── 7. wizFinish: انتقال مباشر أسرع لصفحة النتائج ──────────
+  // المشكلة: setTimeout 50ms بعد nav يسبب وميضاً
+  // تحسين: ربط currentReqId قبل nav ليُحمَّل مباشرةً
+  if(typeof window.wizFinish === 'function'){
+    var _origWizFinish = window.wizFinish;
+    window.wizFinish = function(){
+      // استدعاء الدالة الأصلية — ستضع currentReqId وتستدعي nav
+      _origWizFinish.apply(this, arguments);
+      // بعد nav، إذا لم يُحمَّل loadResultEntry تلقائياً عبر _goToResultCalled → نُشغّله
+      setTimeout(function(){
+        if(typeof loadResultEntry === 'function' && typeof currentReqId !== 'undefined' && currentReqId){
+          var sel = document.getElementById('res-req-sel');
+          if(sel && sel.value !== currentReqId){
+            sel.value = currentReqId;
+            loadResultEntry();
+          }
+        }
+      }, 80);
+    };
+  }
+
+  console.log('[MedLab] ✅ حزمة تحسينات الأداء مفعّلة — v2.1');
+
+})(); // END applyPerfPatches
+
 
 
 
