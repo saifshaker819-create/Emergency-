@@ -3854,8 +3854,6 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
         </div>
       </div>
 
-    </div><!-- end accordion -->
-
         <!-- ■ شاشة الانتظار -->
         <div class="st-card" id="stc-waitscreen">
           <div class="st-card-hdr" onclick="toggleStCard('stc-waitscreen')">
@@ -3909,9 +3907,9 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
           </div>
         </div>
 
-    </div><!-- end settings-accordion outer -->
+    </div><!-- end accordion -->
 
-  </div><!-- end .page -->
+    </div><!-- end settings-accordion outer -->
 
 
     <!-- DATABASE SECTION -->
@@ -4112,7 +4110,9 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
           </div><!-- end db-main-content -->
         </div>
       </div>
-    </div>
+    </div><!-- end sec-database -->
+
+  </div><!-- end .page -->
 
 </div><!-- end .main -->
 </div><!-- end .layout -->
@@ -17792,9 +17792,9 @@ function _abxRowHTML(code, abx, result, mic, idx){
       <span style="font-size:12px;font-weight:700;color:var(--text)">${abx.name.split('(')[0].trim()}</span>
       <span style="font-size:9px;color:var(--text2)">${abx.r||''}</span>
     </div>
-    <button onclick="setAbxBtn('${code}','S')" id="abx-s-${code}" style="width:42px;height:30px;border-radius:6px;border:${brdS};background:${bgS};color:${result==='S'?'#00ff77':'rgba(0,200,80,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">S</button>
-    <button onclick="setAbxBtn('${code}','I')" id="abx-i-${code}" style="width:42px;height:30px;border-radius:6px;border:${brdI};background:${bgI};color:${result==='I'?'#ffcc00':'rgba(255,170,0,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">I</button>
-    <button onclick="setAbxBtn('${code}','R')" id="abx-r-${code}" style="width:42px;height:30px;border-radius:6px;border:${brdR};background:${bgR};color:${result==='R'?'#ff5566':'rgba(220,0,0,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">R</button>
+    <button onclick="setAbxBtn('${code}','S')" id="abx-s-${code}" data-active="${result==='S'?'1':''}" style="width:42px;height:30px;border-radius:6px;border:${brdS};background:${bgS};color:${result==='S'?'#00ff77':'rgba(0,200,80,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">S</button>
+    <button onclick="setAbxBtn('${code}','I')" id="abx-i-${code}" data-active="${result==='I'?'1':''}" style="width:42px;height:30px;border-radius:6px;border:${brdI};background:${bgI};color:${result==='I'?'#ffcc00':'rgba(255,170,0,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">I</button>
+    <button onclick="setAbxBtn('${code}','R')" id="abx-r-${code}" data-active="${result==='R'?'1':''}" style="width:42px;height:30px;border-radius:6px;border:${brdR};background:${bgR};color:${result==='R'?'#ff5566':'rgba(220,0,0,0.5)'};font-weight:900;cursor:pointer;font-size:13px;transition:all 0.15s">R</button>
     <div style="display:flex;align-items:center;gap:2px">
       <input type="text" id="abx-mic-${code}" value="${mic}" placeholder="MIC" style="width:72px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:5px;padding:4px 6px;color:var(--text);font-family:monospace;font-size:11px;outline:none">
       <button onclick="deleteCultAbxRow('${code}')" style="background:none;border:none;color:rgba(255,100,100,0.5);cursor:pointer;font-size:14px;padding:2px 4px" title="حذف">×</button>
