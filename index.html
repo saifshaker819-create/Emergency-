@@ -9481,6 +9481,12 @@ function vrSavePatientEdit(pid, rid){
 // ============================================================
 function loadResultsDropdown(){
   const sel=document.getElementById('res-req-sel');if(!sel)return;
+  // ── حماية: إذا المستخدم يكتب في حقول النتائج — لا تُعيد البناء ──
+  const _ae=document.activeElement;
+  const _tb=document.getElementById('res-entry-tbody');
+  if(_tb&&_ae&&_tb.contains(_ae)&&(_ae.tagName==='INPUT'||_ae.tagName==='SELECT'||_ae.tagName==='TEXTAREA')){
+    return;
+  }
   sel.innerHTML='<option value="">-- اختر طلب --</option>'+requests.filter(r=>r.status!=='done').map(r=>`<option value="${r.id}">${r.id} - ${r.patientName}</option>`).join('');
   // فقط حدد الطلب إذا currentReqId موجود فعلاً في القائمة
   if(currentReqId){
