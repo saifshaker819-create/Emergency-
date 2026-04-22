@@ -1188,9 +1188,35 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .ni-ic{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
 .ni-badge{margin-right:auto;background:var(--danger);color:#fff;font-size:11px;padding:2px 6px;border-radius:20px;font-weight:700;}
 .ni-badge.warn{background:var(--warning);color:#000;}
-/* ── Nav Break & Smoke ── */
+/* ── Nav Click Effect — CSS Particles Only ── */
 .ni{isolation:isolate;overflow:visible!important;}
-.ni-crack-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:999999;}
+
+/* الجزيء الأساسي */
+@keyframes ni-spark-fly{
+  0%  {transform:translate(0,0) scale(1);   opacity:1;}
+  60% {opacity:.8;}
+  100%{transform:translate(var(--tx),var(--ty)) scale(0); opacity:0;}
+}
+@keyframes ni-flash{
+  0%  {box-shadow:0 0 0 0 rgba(0,212,255,0);}
+  30% {box-shadow:0 0 0 4px rgba(0,212,255,.45),0 0 18px rgba(0,212,255,.25);}
+  100%{box-shadow:0 0 0 0 rgba(0,212,255,0);}
+}
+@keyframes ni-squeeze{
+  0%  {transform:scale(1);}
+  25% {transform:scale(.93,.88);}
+  65% {transform:scale(1.04,1.02);}
+  100%{transform:scale(1);}
+}
+.ni-spark{
+  position:absolute;
+  width:5px;height:5px;
+  border-radius:2px;
+  pointer-events:none;
+  z-index:9999;
+  animation:ni-spark-fly .55s ease-out forwards;
+  will-change:transform,opacity;
+}
 .sidebar-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border);flex-shrink:0;}
 .lab-card{background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(123,47,255,0.06));border:1px solid var(--border);border-radius:10px;padding:12px;}
 .lab-card h4{font-size:11px;color:var(--primary);margin-bottom:3px;}
@@ -26932,237 +26958,81 @@ setTimeout(function(){
   }
 },0);
 
+
+
 /* ══════════════════════════════════════════════════════
-   💥 Nav Break & Smoke Effect — Canvas Particle System
-   خفيف 100% — لا يؤثر على الأداء — يشتغل off-thread
+   💥 Nav Click Effect — CSS Particles (No Canvas, No Flash)
 ══════════════════════════════════════════════════════ */
 (function(){
   'use strict';
 
-  /* ── Canvas مُعاد استخدامه ── */
-  let _cvs=null, _ctx=null, _raf=null, _particles=[];
+  /* ألوان الجزيئات */
+  var COLORS=['#00d4ff','#8b3fff','#00ff9d','#ffcc00','#ffffff'];
 
-  function getCanvas(){
-    if(!_cvs){
-      _cvs=document.createElement('canvas');
-      _cvs.className='ni-crack-canvas';
-      _cvs.style.cssText='position:fixed;top:0;left:0;pointer-events:none;z-index:999999;';
-      document.body.appendChild(_cvs);
-      _cvs.width=window.innerWidth;
-      _cvs.height=window.innerHeight;
-      _ctx=_cvs.getContext('2d',{alpha:true,desynchronized:true});
-    }
-    return {cvs:_cvs,ctx:_ctx};
+  /* اتجاهات الانتشار: 16 زاوية موزعة */
+  var DIRS=[];
+  for(var a=0;a<16;a++){
+    var rad=(Math.PI*2/16)*a;
+    var spd=28+Math.random()*32;
+    DIRS.push([
+      Math.round(Math.cos(rad)*spd),
+      Math.round(Math.sin(rad)*spd)
+    ]);
   }
 
-  /* ── توليد جزيئات الكسر + الدخان ── */
-  function spawnParticles(rect){
-    _particles=[];
-    const cx=rect.left+rect.width/2;
-    const cy=rect.top+rect.height/2;
-    const w=rect.width, h=rect.height;
+  function fire(ni){
+    /* squeeze animation على الـ ni */
+    ni.style.animation='ni-squeeze 0.32s cubic-bezier(.36,.07,.19,.97) both, ni-flash 0.32s ease both';
+    /* أعد تشغيل الـ animation لو ضُغط مرتين */
+    void ni.offsetWidth;
 
-    /* ① شظايا المستطيل — 12 قطعة */
-    const shardCount=12;
-    for(let i=0;i<shardCount;i++){
-      const angle=(Math.PI*2/shardCount)*i + Math.random()*0.4;
-      const speed=3+Math.random()*5;
-      const size=(w*0.12)+(Math.random()*w*0.12);
-      _particles.push({
-        type:'shard',
-        x:cx+(Math.random()-0.5)*w*0.6,
-        y:cy+(Math.random()-0.5)*h*0.6,
-        vx:Math.cos(angle)*speed,
-        vy:Math.sin(angle)*speed - 1.5,
-        gravity:0.28,
-        rotation:Math.random()*Math.PI*2,
-        rotSpeed:(Math.random()-0.5)*0.28,
-        w:size, h:size*(0.3+Math.random()*0.5),
-        alpha:1,
-        alphaDecay:0.035+Math.random()*0.02,
-        color:'rgba(0,212,255,',
-        life:1
-      });
-    }
+    /* تنظيف سريع للجزيئات القديمة */
+    var old=ni.querySelectorAll('.ni-spark');
+    for(var i=0;i<old.length;i++) old[i].remove();
 
-    /* ② دخان — 18 سحابة */
-    const smokeCount=18;
-    for(let i=0;i<smokeCount;i++){
-      const angle=(Math.PI*2/smokeCount)*i+Math.random()*0.6;
-      const speed=0.8+Math.random()*2.2;
-      _particles.push({
-        type:'smoke',
-        x:cx+(Math.random()-0.5)*w*0.8,
-        y:cy+(Math.random()-0.5)*h*0.5,
-        vx:Math.cos(angle)*speed,
-        vy:Math.sin(angle)*speed - 0.8,
-        gravity:-0.04,
-        r:6+Math.random()*14,
-        rGrow:0.6+Math.random()*1.2,
-        alpha:0.55+Math.random()*0.25,
-        alphaDecay:0.018+Math.random()*0.012,
-        color:i%3===0?'rgba(0,212,255,':'rgba(139,63,255,',
-        life:1
-      });
+    /* أنشئ 10 جزيئات فقط — خفيف */
+    var frag=document.createDocumentFragment();
+    for(var j=0;j<10;j++){
+      var d=DIRS[Math.floor(Math.random()*DIRS.length)];
+      var sp=document.createElement('span');
+      sp.className='ni-spark';
+      sp.style.cssText=[
+        'top:50%','left:50%',
+        'margin:-2px 0 0 -2px',
+        'background:'+COLORS[j%COLORS.length],
+        '--tx:'+d[0]+'px',
+        '--ty:'+d[1]+'px',
+        'animation-delay:'+(j*18)+'ms',
+        'width:'+(4+Math.random()*4)+'px',
+        'height:'+(2+Math.random()*3)+'px',
+        'border-radius:'+(Math.random()>0.5?'50%':'2px')
+      ].join(';');
+      /* احذف بعد الانتهاء */
+      sp.addEventListener('animationend',function(){this.remove();},{once:true});
+      frag.appendChild(sp);
     }
+    ni.appendChild(frag);
 
-    /* ③ نقاط تألق — 20 نقطة */
-    for(let i=0;i<20;i++){
-      const angle=Math.random()*Math.PI*2;
-      const speed=2+Math.random()*7;
-      _particles.push({
-        type:'spark',
-        x:cx+(Math.random()-0.5)*w,
-        y:cy+(Math.random()-0.5)*h,
-        vx:Math.cos(angle)*speed,
-        vy:Math.sin(angle)*speed - 2,
-        gravity:0.35,
-        r:1.5+Math.random()*2.5,
-        alpha:1,
-        alphaDecay:0.04+Math.random()*0.03,
-        color:i%2===0?'rgba(0,245,147,':'rgba(255,204,0,',
-        life:1
-      });
-    }
+    /* أزل الـ animation من الـ ni بعد انتهائها */
+    setTimeout(function(){
+      ni.style.animation='';
+    },350);
   }
 
-  function loop(){
-    const {cvs,ctx}=getCanvas();
-    ctx.clearRect(0,0,cvs.width,cvs.height);
-
-    let alive=false;
-
-    for(let i=0;i<_particles.length;i++){
-      const p=_particles[i];
-      if(p.alpha<=0) continue;
-      alive=true;
-
-      /* تحديث الفيزياء */
-      p.vx*=0.94;
-      p.vy+=p.gravity;
-      p.x+=p.vx;
-      p.y+=p.vy;
-      p.alpha-=p.alphaDecay;
-      if(p.alpha<0) p.alpha=0;
-
-      ctx.save();
-      ctx.globalAlpha=p.alpha;
-
-      if(p.type==='shard'){
-        /* شظية مستطيل */
-        p.rotation+=p.rotSpeed;
-        ctx.translate(p.x,p.y);
-        ctx.rotate(p.rotation);
-        ctx.fillStyle=p.color+'0.6)';
-        ctx.strokeStyle=p.color+'0.9)';
-        ctx.lineWidth=1;
-        ctx.beginPath();
-        ctx.rect(-p.w/2,-p.h/2,p.w,p.h);
-        ctx.fill();
-        ctx.stroke();
-        /* خط توهج داخلي */
-        ctx.strokeStyle=p.color+'1)';
-        ctx.lineWidth=0.5;
-        ctx.beginPath();
-        ctx.moveTo(-p.w/2,-p.h/2);
-        ctx.lineTo(p.w/2,p.h/2);
-        ctx.stroke();
-      } else if(p.type==='smoke'){
-        /* دائرة دخان */
-        p.r+=p.rGrow;
-        const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-        grad.addColorStop(0,p.color+p.alpha*0.5+')');
-        grad.addColorStop(0.5,p.color+p.alpha*0.25+')');
-        grad.addColorStop(1,p.color+'0)');
-        ctx.fillStyle=grad;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fill();
-      } else {
-        /* شرارة */
-        ctx.fillStyle=p.color+'1)';
-        ctx.shadowColor=p.color+'1)';
-        ctx.shadowBlur=6;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fill();
-        /* ذيل الشرارة */
-        ctx.strokeStyle=p.color+'0.6)';
-        ctx.lineWidth=1;
-        ctx.beginPath();
-        ctx.moveTo(p.x,p.y);
-        ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    if(alive){
-      _raf=requestAnimationFrame(loop);
-    } else {
-      /* امسح Canvas عند الانتهاء */
-      ctx.clearRect(0,0,cvs.width,cvs.height);
-      _particles=[];
-      if(_raf){cancelAnimationFrame(_raf);_raf=null;}
-    }
-  }
-
-  /* ── تشغيل التأثير ── */
-  function fireEffect(niEl){
-    if(!niEl) return;
-    const rect=niEl.getBoundingClientRect();
-    const {cvs}=getCanvas();
-    /* تحديث حجم Canvas لو تغيّر الشاشة */
-    cvs.width=window.innerWidth;
-    cvs.height=window.innerHeight;
-
-    if(_raf){cancelAnimationFrame(_raf);_raf=null;}
-    spawnParticles(rect);
-
-    /* تأثير flash خفيف على الـ ni نفسه */
-    niEl.style.transition='none';
-    niEl.style.background='rgba(0,212,255,0.35)';
-    niEl.style.boxShadow='0 0 0 2px rgba(0,212,255,0.6),0 0 20px rgba(0,212,255,0.3)';
-    niEl.style.transform='scale(0.94)';
-    setTimeout(()=>{
-      niEl.style.transition='all 0.3s cubic-bezier(0.34,1.56,0.64,1)';
-      niEl.style.background='';
-      niEl.style.boxShadow='';
-      niEl.style.transform='scale(1)';
-      setTimeout(()=>{
-        niEl.style.transition='';
-        niEl.style.transform='';
-      },320);
-    },80);
-
-    requestAnimationFrame(loop);
-  }
-
-  /* ── ربط مع كل .ni ── */
-  function attachToAll(){
-    document.querySelectorAll('.ni').forEach(ni=>{
-      if(ni.dataset.breakBound) return;
-      ni.dataset.breakBound='1';
-      ni.addEventListener('mousedown',function(e){
-        /* تشغيل التأثير بدون تأخير الـ nav */
-        fireEffect(this);
-      },{passive:true});
+  function attach(){
+    document.querySelectorAll('.ni').forEach(function(ni){
+      if(ni.dataset.niBound) return;
+      ni.dataset.niBound='1';
+      ni.addEventListener('mousedown',function(){ fire(this); },{passive:true});
+      /* موبايل */
+      ni.addEventListener('touchstart',function(){ fire(this); },{passive:true});
     });
   }
 
-  /* تشغيل فوري + مراقبة لأي .ni جديدة */
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',attachToAll);
+    document.addEventListener('DOMContentLoaded',attach);
   } else {
-    attachToAll();
+    attach();
   }
-
-  /* تحديث حجم Canvas عند تغيير الشاشة */
-  window.addEventListener('resize',()=>{
-    if(_cvs){_cvs.width=window.innerWidth;_cvs.height=window.innerHeight;}
-  },{passive:true});
-
-  /* تصدير للاستخدام الخارجي لو احتجنا */
-  window._niBreakEffect=fireEffect;
 })();
 </script>
