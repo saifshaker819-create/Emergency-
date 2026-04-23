@@ -9530,11 +9530,16 @@ function vrSavePatientEdit(pid, rid){
   const drSel=document.getElementById('vr-ep-doctor-sel');
   const drInp=document.getElementById('vr-ep-doctor');
   let newDoctor='';
-  if(drSel&&drSel.value==='__manual__'){
-    newDoctor=(drInp?drInp.value||'':'').trim();
-  } else if(drSel&&drSel.value){
-    newDoctor=drSel.value;
+  let doctorChanged=false;
+  if(drSel){
+    doctorChanged=true;
+    if(drSel.value==='__manual__'){
+      newDoctor=(drInp?drInp.value||'':'').trim();
+    } else {
+      newDoctor=drSel.value; // قد يكون فارغاً (بدون طبيب) وهذا مقصود
+    }
   } else if(drInp){
+    doctorChanged=true;
     newDoctor=(drInp.value||'').trim();
   }
 
@@ -9543,7 +9548,8 @@ function vrSavePatientEdit(pid, rid){
   if(newDob) pt.dob=newDob;
   pt.gender=newGender;
   pt.phone=newPhone;
-  if(newDoctor){ pt.doctorName=newDoctor; }
+  // نحدّث الطبيب دائماً حتى لو أصبح فارغاً (بدون طبيب)
+  if(doctorChanged){ pt.doctorName=newDoctor; if(!newDoctor) pt.doctorId=''; }
   save('patients',patients);
   if(pt.phone) addToPhoneBook(pt.name, pt.phone);
 
@@ -9551,10 +9557,14 @@ function vrSavePatientEdit(pid, rid){
   const r=requests.find(x=>x.id===rid);
   if(r){
     if(newName) r.patientName=newName;
-    if(newDoctor){ r.doctorName=newDoctor; }
-    // تحديث doctorId إذا وُجد الطبيب في القائمة
-    const doc=doctors.find(d=>d.name===newDoctor);
-    if(doc){ r.doctorId=doc.id; if(pt) pt.doctorId=doc.id; }
+    if(doctorChanged){
+      r.doctorName=newDoctor;
+      if(!newDoctor){ r.doctorId=''; if(pt) pt.doctorId=''; }
+    }
+    if(newDoctor){
+      const doc=doctors.find(d=>d.name===newDoctor);
+      if(doc){ r.doctorId=doc.id; if(pt) pt.doctorId=doc.id; }
+    }
     save('requests',requests);
   }
 
