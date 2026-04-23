@@ -7677,6 +7677,7 @@ function nav(p){
     if(p==='stool') renderStoolList();
     if(p==='semen') renderSemenList();
     if(p==='requests'){
+      // رسم فوري بدون تأخير
       renderRequestsFiltered('today');
       document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));
       const todayTab=document.querySelector('#sec-requests .tabs .tab[onclick*="today"]');
@@ -9082,7 +9083,7 @@ function renderRequestsFiltered(filter='today',srch=''){
       ${r.status!=='done'?`<button class="btn btn-sm btn-p" onclick="goToResult('${r.id}')">🧪 نتائج</button>`:''}
       <button class="btn btn-sm" style="background:rgba(139,63,255,0.15);border-color:rgba(139,63,255,0.4);color:#c084fc;font-size:10px" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
       ${r.status==='done'?`<button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')">🖨️ طباعة</button>`:''}
-      ${r.status==='done'?`<button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')">👁️ عرض النتائج</button>`:''}
+      ${r.status==='done'?`<button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')">✏️ تعديل</button>`:''}
       <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')">🗑️</button>
     </div></td>
   </tr>`).join('');
@@ -27269,11 +27270,11 @@ setTimeout(function(){
     window.updateBadges = _deb(_ob, 120);
   }
 
-  /* renderRequestsFiltered */
+  /* renderRequestsFiltered — بدون rAF إضافي لأن الرسم يجب أن يكون فورياً */
   if(typeof window.renderRequestsFiltered === 'function'){
     var _orf = window.renderRequestsFiltered;
     window.renderRequestsFiltered = function(f,s){
-      requestAnimationFrame(function(){ _orf(f,s); });
+      _orf(f,s);
     };
   }
 
