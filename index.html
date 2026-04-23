@@ -8200,7 +8200,7 @@ function suggestPatients(v){
     box.innerHTML=list.slice(0,8).map(p=>
       `<div class="pt-suggest-item" onclick="selectExistingPatient('${p.id}')">
         <div class="pt-suggest-name">${p.name}</div>
-        <div class="pt-suggest-sub">📞 ${p.phone||'-'} | ${calcAgeFromInput(p.dob,p.age)} سنة | ${p.id}</div>
+        <div class="pt-suggest-sub">📞 ${p.phone||'-'} | ${p.ageDisplay||calcAgeFromInput(p.dob,p.age)+' سنة'} | ${p.id}</div>
       </div>`).join('');
     box.style.display='block';
   };
@@ -26971,7 +26971,7 @@ setTimeout(function(){
         box.innerHTML = lsMatches.slice(0,8).map(function(p){
           return '<div class="pt-suggest-item" onclick="selectExistingPatient(\''+p.id+'\')">'
             +'<div class="pt-suggest-name">'+p.name+'</div>'
-            +'<div class="pt-suggest-sub">📞 '+(p.phone||'-')+' | '+calcAgeFromInput(p.dob,p.age)+' سنة | '+p.id+'</div>'
+            +'<div class="pt-suggest-sub">📞 '+(p.phone||'-')+' | '+(p.ageDisplay||calcAgeFromInput(p.dob,p.age)+' سنة')+' | '+p.id+'</div>'
             +'</div>';
         }).join('');
         box.style.display='block';
