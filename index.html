@@ -7141,7 +7141,6 @@ async function _migrateLegacyLS(){
 async function _mergeIDBInBackground(){
   try{
     const pfx=DB._pfx();
-    // المفاتيح التي تُستبدل بالكامل من IDB (لا دمج) — لأنها تحتوي افتراضيات
     const REPLACE_KEYS=new Set(['packages','inventory','tests']);
     const keyMap={
       patients:'patients', requests:'requests', invoices:'invoices',
@@ -7151,25 +7150,58 @@ async function _mergeIDBInBackground(){
       cultureRecords:'cultureRecords', uaRecords:'uaRecords',
       stoolExamRecords:'stoolExamRecords', semenRecords:'semenRecords'
     };
+
+    // ── تحسين الأداء: تحميل patients + requests أولاً بالتوازي ──
+    const PRIORITY_KEYS=['patients','requests','invoices','doctors'];
+    const priorityResults=await Promise.all(PRIORITY_KEYS.map(k=>IDB.get(pfx+k)));
     let changed=false;
-    for(const [k,varName] of Object.entries(keyMap)){
-      const idbVal=await IDB.get(pfx+k);
-      // للمفاتيح ذات الافتراضيات: تحقق إذا كان المستخدم حفظ يوماً ما
+
+    PRIORITY_KEYS.forEach(function(k,i){
+      const idbVal=priorityResults[i];
+      const varName=keyMap[k];
+      if(!idbVal||!Array.isArray(idbVal)||idbVal.length===0) return;
+      const globals={patients,requests,invoices,doctors,packages,inventory,
+        qcRecords,testGroups,billingRecords,cultureRecords,uaRecords,
+        stoolExamRecords,semenRecords};
+      const current=globals[varName]||[];
+      const currentIds=new Set(current.map(x=>x.id).filter(Boolean));
+      const toAdd=idbVal.filter(x=>x.id&&!currentIds.has(x.id));
+      if(toAdd.length>0){
+        current.push(...toAdd);
+        changed=true;
+      }
+      _MC[pfx+k]=current;
+      switch(k){
+        case 'patients': patients=current; break;
+        case 'requests': requests=current; break;
+        case 'invoices': invoices=current; break;
+        case 'doctors':  doctors=current;  break;
+      }
+    });
+
+    // رسم فوري بعد تحميل البيانات الأساسية
+    if(changed){ renderAll(); updateDashboard(); updateBadges(); }
+    changed=false;
+
+    // ── ثم تحميل باقي البيانات بالتوازي ──
+    const REST_KEYS=Object.keys(keyMap).filter(k=>!PRIORITY_KEYS.includes(k));
+    const restResults=await Promise.all(REST_KEYS.map(k=>IDB.get(pfx+k)));
+
+    for(let i=0;i<REST_KEYS.length;i++){
+      const k=REST_KEYS[i];
+      const idbVal=restResults[i];
+      const varName=keyMap[k];
       if(REPLACE_KEYS.has(k)){
-        // إذا IDB فيه قيمة (حتى لو مصفوفة فارغة) = المستخدم تحكم بها من قبل → استخدمها
-        // إذا IDB = null = لم يُحفظ قط → أبقِ الافتراضيات
-        if(idbVal===null||idbVal===undefined) continue; // لم يُحفظ قط
+        if(idbVal===null||idbVal===undefined) continue;
         const saved=Array.isArray(idbVal)?idbVal:[];
         switch(k){
           case 'packages':  packages=saved;  break;
           case 'inventory': inventory=saved; break;
-          case 'tests':     tests=saved;     break;
         }
         _MC[pfx+k]=saved;
         changed=true;
         continue;
       }
-      // باقي المفاتيح: دمج عادي
       if(!idbVal||!Array.isArray(idbVal)||idbVal.length===0) continue;
       const globals={patients,requests,invoices,doctors,packages,inventory,
         qcRecords,testGroups,billingRecords,cultureRecords,uaRecords,
@@ -7183,10 +7215,6 @@ async function _mergeIDBInBackground(){
       }
       _MC[pfx+k]=current;
       switch(k){
-        case 'patients':         patients=current; break;
-        case 'requests':         requests=current; break;
-        case 'invoices':         invoices=current; break;
-        case 'doctors':          doctors=current; break;
         case 'qc':               qcRecords=current; break;
         case 'testGroups':       testGroups=current; break;
         case 'billing':          billingRecords=current; break;
@@ -7199,21 +7227,17 @@ async function _mergeIDBInBackground(){
     // التحاليل
     const idbTests=await IDB.get(pfx+'tests');
     if(idbTests&&Array.isArray(idbTests)&&idbTests.length>0){
-      // ALL_TESTS هو المصدر الأساسي — ابنِ الخريطة منه أولاً
       const allMap=new Map(ALL_TESTS.map(function(x){return [x.id,x];}));
       const map=new Map(tests.map(function(x){return [x.id,x];}));
       let tc=false;
       idbTests.forEach(function(t){
         if(!t.id)return;
-        // الحصول على البيانات الأصلية من ALL_TESTS لهذا التحليل إن وُجدت
         const orig=allMap.get(t.id);
-        // دمج: بيانات IDB (اسم/فرع/وحدة/سعر) + isCalc/calcFormula من ALL_TESTS
         const merged=Object.assign({},t);
         if(orig){
           if(orig.isCalc){
             merged.isCalc=true;
             merged.calcFormula=orig.calcFormula||t.calcFormula||'';
-            // حفظ calcInputSettings من IDB إذا وُجدت، وإلا من ALL_TESTS
             if(!merged.calcInputSettings && orig.calcInputSettings) merged.calcInputSettings=orig.calcInputSettings;
           }
           else{delete merged.isCalc;delete merged.calcFormula;delete merged.calcInputSettings;}
@@ -7730,12 +7754,27 @@ function nav(p){
     if(p==='stool') renderStoolList();
     if(p==='semen') renderSemenList();
     if(p==='requests'){
-      // رسم فوري بدون تأخير
-      renderRequestsFiltered('today');
+      // إعادة تعيين الـ tab
       document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));
       const todayTab=document.querySelector('#sec-requests .tabs .tab[onclick*="today"]');
       if(todayTab) todayTab.classList.add('active');
-      // rAF مزدوج: الأول يضمن رسم DOM، الثاني يضمن التركيز بعد الرسم
+      // رسم فوري إذا البيانات موجودة في الكاش، وإلا أظهر loading ثم أعد المحاولة
+      if(requests && requests.length > 0){
+        renderRequestsFiltered('today');
+      } else {
+        const tbody=document.getElementById('requests-body');
+        if(tbody) tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">⏳ جاري التحميل...</td></tr>';
+        // انتظر تحميل IDB ثم ارسم
+        (function _waitAndRender(tries){
+          if(requests && requests.length > 0){
+            renderRequestsFiltered('today');
+          } else if(tries > 0){
+            setTimeout(function(){ _waitAndRender(tries-1); }, 200);
+          } else {
+            renderRequestsFiltered('today'); // ارسم حتى لو فارغة
+          }
+        })(20); // حاول 20 مرة × 200ms = 4 ثانية كحد أقصى
+      }
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){
           const srch=document.getElementById('req-srch-inp');
@@ -8755,8 +8794,9 @@ function wizFinish(){
   showNotif('تم الإنشاء',`${rqid} — ${pt.name} | ${total} ${settings.currency||''} — ${payStatus} ✅`,'success');
   currentReqId=rqid;
   window._goToResultCalled=true;
+  // رسم فوري من الكاش في الذاكرة — لا حاجة لانتظار IDB
+  renderRequests(); updateBadges(); updateDashboard();
   nav('results');
-  setTimeout(function(){ renderRequests(); updateBadges(); updateDashboard(); }, 80);
 }
 
 // ── حساب مجموع التحاليل في المعالج ──────────────────────────
@@ -8850,32 +8890,31 @@ function openPatientPortalByPatient(patientId){
 function filterPatients(f,el){document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderPatients(f);}
 function searchPatients(v){
   if(window._spTimer)clearTimeout(window._spTimer);
+  // رسم فوري من الذاكرة أولاً (بدون تأخير)
+  renderPatients('all',v);
+  if(!v||v.length<2){ window._idbSearchTemp=null; return; }
   window._spTimer=setTimeout(async function(){
-    renderPatients('all',v);
-    // إذا كان البحث محدداً، ابحث في IDB أيضاً وأضف النتائج الناقصة
-    if(v&&v.length>=2){
-      try{
-        const pfx=DB._pfx();
-        const idbPts=await IDB.get(pfx+'patients');
-        if(!idbPts||!Array.isArray(idbPts)) return;
-        const q=v.toLowerCase();
-        const lsIds=new Set(patients.map(p=>p.id));
-        const idbMatches=idbPts.filter(p=>
-          !lsIds.has(p.id)&&(
-            p.name.toLowerCase().includes(q)||
-            (p.phone||'').includes(q)||
-            (p.id||'').toLowerCase().includes(q)));
-        if(idbMatches.length>0){
-          // أضف مؤقتاً للذاكرة وأعد الرسم
-          const tempPts=[...patients,...idbMatches];
-          window._idbSearchTemp=idbMatches;
-          renderPatients('all',v,tempPts);
-        }
-      }catch{}
-    } else {
-      window._idbSearchTemp=null;
-    }
-  },200);
+    try{
+      const pfx=DB._pfx();
+      // كاش نتيجة IDB لمدة 60 ثانية بدل قراءته في كل بحث
+      if(!window._idbPtsCache||Date.now()-window._idbPtsCacheTime>60000){
+        window._idbPtsCache=await IDB.get(pfx+'patients')||[];
+        window._idbPtsCacheTime=Date.now();
+      }
+      if(!Array.isArray(window._idbPtsCache)||!window._idbPtsCache.length) return;
+      const q=v.toLowerCase();
+      const lsIds=new Set(patients.map(p=>p.id));
+      const idbMatches=window._idbPtsCache.filter(p=>
+        !lsIds.has(p.id)&&(
+          p.name.toLowerCase().includes(q)||
+          (p.phone||'').includes(q)||
+          (p.id||'').toLowerCase().includes(q)));
+      if(idbMatches.length>0){
+        window._idbSearchTemp=idbMatches;
+        renderPatients('all',v,[...patients,...idbMatches]);
+      }
+    }catch{}
+  },80);
 }
 function deletePatient(id){if(confirm('هل أنت متأكد من حذف هذا المريض؟')){patients=patients.filter(p=>p.id!==id);save('patients',patients);renderAll();updateBadges();showNotif('تم الحذف','تم حذف المريض','success');}}
 function editPatient(id){const p=patients.find(x=>x.id===id);if(!p)return;wizPatient={...p};wizSelectedTests=[];wizStep=1;_wizEditPatientOnly=false;renderWizStep();openModal('m-wizard');}
@@ -19086,12 +19125,16 @@ function saveAndPrintUA(){
     window._uaReqId=null;
   }
   closeModal('m-ua');
-  renderUAList();
-  const resSel=document.getElementById('res-req-sel');
-  if(resSel&&resSel.value){ loadResultEntry(); }
-  window._specialExamInlineMode=false;
   showNotif('تم','جاري الطباعة 🖨️','success');
-  setTimeout(()=>printUAReport(rec.id), 50);
+  // طباعة فورية بالتوازي مع الحفظ — لا حاجة لانتظار setTimeout
+  printUAReport(rec.id);
+  // تحديث القائمة في الخلفية بعد الطباعة
+  requestAnimationFrame(function(){
+    renderUAList();
+    const resSel=document.getElementById('res-req-sel');
+    if(resSel&&resSel.value){ loadResultEntry(); }
+  });
+  window._specialExamInlineMode=false;
 }
 function deleteUARecord(id){
   if(!confirm('حذف هذا السجل؟'))return;
