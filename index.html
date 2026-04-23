@@ -5982,38 +5982,61 @@ function sendAIMsg(){
     parts: [{ text: systemPrompt + '\n\nالأعراض: ' + txt }]
   }];
 
-  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: contents })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    _aiHideTyping();
-    _aiTyping = false;
-    document.getElementById('ai-status-lbl').textContent = '● جاهز';
-    document.getElementById('ai-send-btn').style.opacity = '1';
+  // قائمة موديلات بالترتيب — يجرب الأول فإن امتلأ ينتقل للتالي
+  var _aiModels = [
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-2.0-flash'
+  ];
 
-    if(data.error){
-      _aiAddMsg('bot', '❌ خطأ: ' + (data.error.message||'تأكد من صحة الـ API Key'));
-      return;
+  function _callGemini(models, contents, onSuccess, onError){
+    if(!models.length){ onError('انتهت كل المحاولات'); return; }
+    var model = models[0];
+    var rest  = models.slice(1);
+    fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: contents })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      // quota exceeded → جرب الموديل التالي
+      if(data.error && (data.error.code === 429 || (data.error.message||'').includes('quota'))){
+        _callGemini(rest, contents, onSuccess, onError);
+        return;
+      }
+      onSuccess(data, model);
+    })
+    .catch(function(){ _callGemini(rest, contents, onSuccess, onError); });
+  }
+
+  _callGemini(_aiModels, contents,
+    function(data, usedModel){
+      _aiHideTyping();
+      _aiTyping = false;
+      document.getElementById('ai-status-lbl').textContent = '● جاهز';
+      document.getElementById('ai-send-btn').style.opacity = '1';
+
+      if(data.error){
+        _aiAddMsg('bot', '❌ خطأ: ' + (data.error.message||'تأكد من صحة الـ API Key'));
+        return;
+      }
+      var reply = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || 'لم أتمكن من الرد، حاول مرة أخرى.';
+      reply = reply
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<i>$1</i>')
+        .replace(/^#{1,3}\s(.+)$/gm, '<b style="color:var(--primary)">$1</b>')
+        .replace(/\n/g, '<br>');
+      _aiAddMsg('bot', reply);
+    },
+    function(errMsg){
+      _aiHideTyping();
+      _aiTyping = false;
+      document.getElementById('ai-status-lbl').textContent = '● خطأ';
+      document.getElementById('ai-send-btn').style.opacity = '1';
+      _aiAddMsg('bot', '❌ تعذّر الاتصال. تأكد من الإنترنت والـ API Key.');
     }
-    var reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'لم أتمكن من الرد، حاول مرة أخرى.';
-    // تحويل markdown بسيط لـ HTML
-    reply = reply
-      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-      .replace(/\*(.*?)\*/g, '<i>$1</i>')
-      .replace(/^#{1,3}\s(.+)$/gm, '<b style="color:var(--primary)">$1</b>')
-      .replace(/\n/g, '<br>');
-    _aiAddMsg('bot', reply);
-  })
-  .catch(function(e){
-    _aiHideTyping();
-    _aiTyping = false;
-    document.getElementById('ai-status-lbl').textContent = '● خطأ في الاتصال';
-    document.getElementById('ai-send-btn').style.opacity = '1';
-    _aiAddMsg('bot', '❌ تعذّر الاتصال بالذكاء الاصطناعي، تأكد من الإنترنت والـ API Key.');
-  });
+  );
 }
 
 function saveAIKey(){
