@@ -565,6 +565,8 @@ body.light-mode *:not(a):not(.btn-p):not(.btn-ok):not(.ni.active):not(.ni.active
   color:inherit;
 }
 body.light-mode #sec-requests .req-sticky-bar{background:var(--bg-body)!important;}
+/* ضمان ظهور شريط البحث في الطلبات فوق البانر دائماً */
+#sec-requests .req-sticky-bar{z-index:8000!important;isolation:isolate;}
 /* ── الوضع النهاري: قوائم منسدلة وعناصر خاصة ── */
 body.light-mode select,body.light-mode select.fc{background:#edf0f5!important;color:#000000!important;border-color:#c8d4e0!important;}
 body.light-mode select option{background:#ffffff!important;color:#000000!important;}
@@ -2600,7 +2602,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 
     <!-- REQUESTS -->
     <div class="sec" id="sec-requests">
-      <div class="req-sticky-bar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;position:sticky;top:72px;z-index:50;background:var(--bg-dark);padding:10px 0 10px 0;">
+      <div class="req-sticky-bar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;position:sticky;top:72px;z-index:8000;background:var(--bg-dark);padding:10px 0 10px 0;box-shadow:0 4px 16px rgba(4,8,20,0.98);">
         <div class="tabs">
           <button class="tab active" data-filter="today" onclick="filterReq('today',this)">📅 اليوم</button>
           <button class="tab" data-filter="all" onclick="filterReq('all',this)">الكل</button>
@@ -8198,7 +8200,7 @@ function suggestPatients(v){
     box.innerHTML=list.slice(0,8).map(p=>
       `<div class="pt-suggest-item" onclick="selectExistingPatient('${p.id}')">
         <div class="pt-suggest-name">${p.name}</div>
-        <div class="pt-suggest-sub">📞 ${p.phone||'-'} | ${calcAgeFromInput(p.dob,p.age)} سنة | ${p.id}</div>
+        <div class="pt-suggest-sub">📞 ${p.phone||'-'} | ${(()=>{const a=calcAgeFromInput(p.dob,p.age);return(a&&a!=='-'&&a!=='—')?a+'سنة':'—'})()}  | ${p.id}</div>
       </div>`).join('');
     box.style.display='block';
   };
@@ -14117,9 +14119,9 @@ function _darken(hex){
 // HELPERS
 // ============================================================
 function calcAgeFromInput(dob,age){
-  if(dob)return Math.floor((Date.now()-new Date(dob).getTime())/31557600000);
-  if(age)return age;
-  return '-';
+  if(dob){var a=Math.floor((Date.now()-new Date(dob).getTime())/31557600000);if(!isNaN(a)&&a>=0)return a;}
+  if(age!==undefined&&age!==null&&age!==''&&!isNaN(Number(age)))return Number(age);
+  return '—';
 }
 function getBdg(s){const m={active:'ok',inactive:'d'};return`<span class="bdg bdg-${m[s]||'p'}">${s==='active'?'فعال':'غير فعال'}</span>`;}
 function getStatusBdg(s){const m={pending:'<span class="bdg bdg-w">⏳ معلق</span>',inprogress:'<span class="bdg bdg-p">🔄 جاري</span>',done:'<span class="bdg bdg-ok">✅ مكتمل</span>'};return m[s]||s;}
@@ -26969,7 +26971,7 @@ setTimeout(function(){
         box.innerHTML = lsMatches.slice(0,8).map(function(p){
           return '<div class="pt-suggest-item" onclick="selectExistingPatient(\''+p.id+'\')">'
             +'<div class="pt-suggest-name">'+p.name+'</div>'
-            +'<div class="pt-suggest-sub">📞 '+(p.phone||'-')+' | '+(typeof calcAgeFromInput==='function'?calcAgeFromInput(p.dob,p.age):'—')+' سنة | '+p.id+'</div>'
+            +'<div class="pt-suggest-sub">📞 '+(p.phone||'-')+' | '+(function(){var a=(typeof calcAgeFromInput==='function'?calcAgeFromInput(p.dob,p.age):null);return(a&&a!=='-'&&a!=='—')?a+' سنة':'—';})()+ ' | '+p.id+'</div>'
             +'</div>';
         }).join('');
         box.style.display='block';
@@ -27169,6 +27171,149 @@ setTimeout(function(){
   console.log('[MedLab] ✅ حزمة تحسينات الأداء مفعّلة — v2.1');
 
 })(); // END applyPerfPatches
+
+/* ══════════════════════════════════════════════════════════════
+   ⚡ Speed Boost v3.0 — تسريع شامل كتطبيق موبايل
+══════════════════════════════════════════════════════════════ */
+(function speedBoost(){
+
+  /* ─── 1. CSS: تقليل التحريكات وتسريع كل شيء ─────────────── */
+  var st = document.createElement('style');
+  st.textContent = [
+    /* تقليل كل transitions */
+    '*, *::before, *::after { transition-duration: 0.08s !important; }',
+
+    /* أزرار: استجابة فورية للمس بدون delay */
+    '.btn,.hbtn,.ni,.tab,.cat-btn,.mclose,.tog,.extend-btn,.chpw-btn,',
+    '.session-kick-btn,.wiz-card,.wiz-conn-card,.st-card-hdr,button,[onclick]{',
+    '  touch-action:manipulation;',
+    '  -webkit-tap-highlight-color:transparent;',
+    '  transition-duration:0.06s !important;',
+    '}',
+
+    /* تحريك الصفحات أسرع */
+    '.sec.active { animation:fadeUp 0.07s ease both !important; }',
+
+    /* مودالات: بدون blur مكلف */
+    '.moverlay { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }',
+    '.moverlay.open { animation:none !important; }',
+    '.modal { animation:su 0.1s ease !important; }',
+
+    /* القوائم المنسدلة: ظهور فوري */
+    '.global-search-results,.pt-suggest,#notif-panel,#hdr-cal-panel,#cal-panel,#gs-results {',
+    '  animation:none !important; transition:none !important;',
+    '}',
+
+    /* GPU للعناصر الرئيسية */
+    '.main-content,.sec,.sidebar,.hdr { transform:translateZ(0); -webkit-transform:translateZ(0); }',
+
+    /* إخفاء الأقسام غير النشطة من render tree */
+    '.sec:not(.active) { content-visibility:hidden; }',
+
+    /* تسريع الـ scroll على موبايل */
+    '.main-content,.sidebar,.modal,tbody { -webkit-overflow-scrolling:touch; scroll-behavior:auto !important; }',
+
+    /* منع reflow عند hover */
+    '.ni:hover,.btn:hover,.hbtn:hover { transform:translateZ(0); }',
+
+    /* badges و notifications بدون animation */
+    '.ni-badge,.ndot { animation:none !important; transition:none !important; }',
+    '.notif { animation-duration:0.1s !important; }',
+
+    /* إزالة click delay 300ms على موبايل */
+    'html { touch-action:manipulation; }'
+  ].join('');
+  document.head.appendChild(st);
+
+  /* ─── 2. DOM cache للعناصر الثابتة ──────────────────────── */
+  var _cache = {};
+  var _static = ['ptitle','pbc','sidebar','sidebar-overlay','gs-results',
+                 'global-search','notif-panel','notif-dot','hdr-cal-panel'];
+  var _origGBI = document.getElementById.bind(document);
+  document.getElementById = function(id){
+    if(_static.indexOf(id) !== -1){
+      if(!_cache[id] || !_cache[id].isConnected) _cache[id] = _origGBI(id);
+      return _cache[id];
+    }
+    return _origGBI(id);
+  };
+
+  /* ─── 3. passive listeners للـ scroll و touch ────────────── */
+  try {
+    var _addEvt = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, fn, opts){
+      var passiveTypes = {scroll:1, touchstart:1, touchmove:1, wheel:1, mousewheel:1};
+      if(passiveTypes[type]){
+        if(typeof opts !== 'object' || opts === null) opts = {passive:true, capture:!!opts};
+        else if(opts.passive === undefined) opts = Object.assign({}, opts, {passive:true});
+      }
+      return _addEvt.call(this, type, fn, opts);
+    };
+  } catch(e){}
+
+  /* ─── 4. debounce على دوال الرسم الثقيلة ───────────────── */
+  function _deb(fn, ms){
+    var t;
+    return function(){ var a=arguments,c=this; clearTimeout(t); t=setTimeout(function(){fn.apply(c,a);},ms); };
+  }
+
+  /* updateDashboard */
+  if(typeof window.updateDashboard === 'function'){
+    var _od = window.updateDashboard;
+    window.updateDashboard = _deb(function(){ requestAnimationFrame(_od); }, 60);
+  }
+
+  /* updateBadges */
+  if(typeof window.updateBadges === 'function'){
+    var _ob = window.updateBadges;
+    window.updateBadges = _deb(_ob, 120);
+  }
+
+  /* renderRequestsFiltered */
+  if(typeof window.renderRequestsFiltered === 'function'){
+    var _orf = window.renderRequestsFiltered;
+    window.renderRequestsFiltered = function(f,s){
+      requestAnimationFrame(function(){ _orf(f,s); });
+    };
+  }
+
+  /* renderPatientsList */
+  if(typeof window.renderPatientsList === 'function'){
+    var _orp = window.renderPatientsList;
+    window.renderPatientsList = function(){
+      requestAnimationFrame(_orp);
+    };
+  }
+
+  /* ─── 5. تسريع nav: تنظيف فوري قبل الانتقال ─────────────── */
+  if(typeof window.nav === 'function'){
+    var _on = window.nav;
+    window.nav = function(p){
+      var gs = _origGBI('gs-results');
+      var gi = _origGBI('global-search');
+      if(gs) gs.style.display='none';
+      if(gi) gi.value='';
+      _on(p);
+    };
+  }
+
+  /* ─── 6. preconnect للموارد الخارجية ─────────────────────── */
+  [
+    {rel:'preconnect', href:'https://fonts.googleapis.com'},
+    {rel:'preconnect', href:'https://fonts.gstatic.com', co:'anonymous'},
+    {rel:'dns-prefetch', href:'https://cdnjs.cloudflare.com'}
+  ].forEach(function(l){
+    if(!document.querySelector('link[href="'+l.href+'"]')){
+      var lk=document.createElement('link');
+      lk.rel=l.rel; lk.href=l.href;
+      if(l.co) lk.crossOrigin=l.co;
+      document.head.appendChild(lk);
+    }
+  });
+
+  console.log('[MedLab] ⚡ Speed Boost v3.0 مفعّل');
+
+})(); // END speedBoost
 
 
 
