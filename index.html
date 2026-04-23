@@ -10476,7 +10476,7 @@ function selectPrintReq(id,name){
 // NOTIFICATIONS SYSTEM
 // ============================================================
 const NOTIFS_KEY='medlab_notifications';
-const NOTIF_EXPIRY_DAYS=14;
+const NOTIF_EXPIRY_DAYS=7; // التنبيهات تُحذف بعد أسبوع واحد
 
 function playNotifSound(){
   try{
@@ -10516,6 +10516,14 @@ function _initNotifListener(username){
   _notifListener = fbDb.ref('notifs/'+username);
   _notifListener.on('value', snap=>{
     const raw=snap.val()||{};
+    const oneWeekAgo=Date.now()-(NOTIF_EXPIRY_DAYS*24*60*60*1000);
+    // حذف التنبيهات القديمة من Firebase مباشرة
+    Object.entries(raw).forEach(([nid,n])=>{
+      if(n&&n.ts&&n.ts<oneWeekAgo){
+        fbDb.ref('notifs/'+username+'/'+nid).remove().catch(()=>{});
+        delete raw[nid];
+      }
+    });
     const list=Object.values(raw).sort((a,b)=>(a.ts||0)-(b.ts||0));
     const unread=list.filter(n=>!n.read).length;
     const dot=document.getElementById('notif-dot');
@@ -10552,7 +10560,24 @@ function _startLocalNotifPolling(username){
 
 function getMyNotifs(){
   const session=getSession(); if(!session) return [];
-  const list=JSON.parse(localStorage.getItem(NOTIFS_KEY+'_'+session.username)||'[]');
+  const key=NOTIFS_KEY+'_'+session.username;
+  let list=JSON.parse(localStorage.getItem(key)||'[]');
+  const oneWeekAgo=Date.now()-(NOTIF_EXPIRY_DAYS*24*60*60*1000);
+  // حذف التنبيهات الأقدم من أسبوع
+  const toDelete=list.filter(n=>{
+    if(!n.ts) return false; // بدون timestamp — أبقِها
+    return n.ts < oneWeekAgo;
+  });
+  if(toDelete.length>0){
+    list=list.filter(n=>!n.ts||n.ts>=oneWeekAgo);
+    localStorage.setItem(key,JSON.stringify(list));
+    // حذف من Firebase أيضاً
+    if(fbReady&&fbDb){
+      toDelete.forEach(function(n){
+        if(n.id) fbDb.ref('notifs/'+session.username+'/'+n.id).remove().catch(()=>{});
+      });
+    }
+  }
   return list.slice().reverse();
 }
 
@@ -27681,7 +27706,7 @@ setTimeout(function(){
     { icon:'🩵', test:'الصوديوم (Na)', fact:'يتحكم في توازن السوائل وضغط الدم. القيمة الطبيعية 136–145 mEq/L. انخفاضه يسبب الصداع والتعب، وارتفاعه يدل عادةً على الجفاف.' }
   ];
 
-  var IDLE_MS = 3 * 60 * 1000;
+  var IDLE_MS = 2 * 60 * 1000;
   var idleTimer = null;
   var lastIdx = -1;
   var isShowing = false;
@@ -27729,7 +27754,7 @@ setTimeout(function(){
         '</div>' +
 
         '<div style="padding:12px 22px 20px;border-top:1px solid '+divCol+';display:flex;align-items:center;justify-content:space-between;">' +
-          '<span style="font-size:10.5px;color:'+text2Col+';">تظهر تلقائياً بعد 3 دقائق خمول ✨</span>' +
+          '<span style="font-size:10.5px;color:'+text2Col+';">تظهر تلقائياً بعد دقيقتين خمول ✨</span>' +
           '<button id="dyk-ok-btn" style="background:'+headerBg+';color:#fff;border:none;border-radius:12px;padding:10px 28px;font-size:13px;font-weight:800;font-family:\'Cairo\',\'Inter\',sans-serif;cursor:pointer;box-shadow:'+btnShadow+';transition:transform 0.15s,box-shadow 0.15s;letter-spacing:0.3px;"' +
             ' onmouseover="this.style.transform=\'translateY(-2px)\';this.style.opacity=\'0.92\'"' +
             ' onmouseout="this.style.transform=\'\';this.style.opacity=\'1\'">' +
