@@ -1198,7 +1198,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .main{flex:1;margin-right:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
-.hdr{background:rgba(4,8,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;overflow:hidden;}
+.hdr{background:rgba(4,8,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;gap:10px;overflow:visible;}
 .hdr-left{display:flex;flex-direction:column;flex:1;min-width:0;}
 .page-title{font-size:11px;font-weight:800;}
 .page-bc{font-size:11px;color:var(--text2);margin-top:1px;}
@@ -1210,7 +1210,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .hdr-search{display:flex;align-items:center;gap:7px;background:var(--bg-glass);border:1px solid var(--border);border-radius:9px;padding:7px 12px;width:280px;position:relative;}
 .hdr-search input{background:none;border:none;outline:none;color:var(--text);font-family:'Cairo',sans-serif;font-size:11px;width:100%;}
 .hdr-search input::placeholder{color:var(--text2);}
-.global-search-results{position:absolute;top:calc(100% + 6px);right:0;left:0;background:#080f20;border:1px solid var(--border);border-radius:10px;max-height:280px;overflow-y:auto;z-index:9000;box-shadow:0 8px 30px rgba(0,0,0,0.6);}
+.global-search-results{position:absolute;top:calc(100% + 6px);right:0;left:0;background:#080f20;border:1px solid var(--border);border-radius:10px;max-height:280px;overflow-y:auto;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,0.6);}
 .gs-item{padding:10px 14px;cursor:pointer;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04);}
 .gs-item:hover{background:rgba(0,212,255,0.08);}
 .gs-item-name{font-weight:700;color:var(--text);}
@@ -2495,7 +2495,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
       <!-- زر التقويم بجانب البحث الرئيسي -->
       <div style="position:relative">
         <button class="hbtn" id="hdr-cal-btn" onclick="toggleHdrCalendar(event)" title="فلترة بالتاريخ" style="font-size:16px">📅</button>
-        <div id="hdr-cal-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#080f20;border:1.5px solid var(--border);border-radius:12px;padding:14px;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,0.7);min-width:230px">
+        <div id="hdr-cal-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#080f20;border:1.5px solid var(--border);border-radius:12px;padding:14px;z-index:999999;box-shadow:0 8px 30px rgba(0,0,0,0.7);min-width:230px">
           <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;text-align:center">عرض مراجعي يوم محدد</div>
           <input type="date" id="hdr-cal-date" class="fc" style="margin-bottom:8px" onchange="hdrFilterByDate(this.value)">
           <button onclick="hdrClearDate()" class="btn btn-s btn-sm" style="width:100%">↩ عرض الكل</button>
@@ -2503,7 +2503,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
       </div>
       <div style="position:relative">
         <button class="hbtn" id="notif-bell-btn" onclick="toggleNotifPanel(event)">🔔<div class="ndot" id="notif-dot" style="display:none"></div></button>
-        <div id="notif-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;width:330px;background:#080f20;border:1px solid rgba(0,212,255,0.25);border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.8);z-index:9999;overflow:hidden">
+        <div id="notif-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;width:330px;background:#080f20;border:1px solid rgba(0,212,255,0.25);border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.8);z-index:999999;overflow:hidden">
           <div style="padding:11px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
             <span style="font-size:13px;font-weight:800;color:var(--primary)">🔔 الإشعارات</span>
             <div style="display:flex;gap:6px;align-items:center">
@@ -2577,7 +2577,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
             <button class="btn btn-s" id="cal-btn" onclick="toggleCalendar(event)" title="فلترة بالتاريخ" style="padding:7px 11px;gap:5px">
               📅 <span id="cal-lbl">تاريخ</span>
             </button>
-            <div id="cal-panel" style="display:none;position:absolute;top:calc(100%+6px);right:0;background:#080f20;border:1.5px solid var(--border);border-radius:12px;padding:14px;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,0.7);min-width:240px">
+            <div id="cal-panel" style="display:none;position:absolute;top:calc(100%+6px);right:0;background:#080f20;border:1.5px solid var(--border);border-radius:12px;padding:14px;z-index:999999;box-shadow:0 8px 30px rgba(0,0,0,0.7);min-width:240px">
               <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700">اختر يوم لعرض مراجعيه</div>
               <input type="date" id="cal-date-inp" class="fc" style="margin-bottom:8px" onchange="filterPatientsByDate(this.value)">
               <button onclick="clearDateFilter()" class="btn btn-s btn-sm" style="width:100%">↩ إلغاء الفلتر</button>
