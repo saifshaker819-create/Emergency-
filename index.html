@@ -2610,9 +2610,9 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
           <button class="tab" data-filter="inprogress" onclick="filterReq('inprogress',this)">جارية</button>
           <button class="tab" data-filter="done" onclick="filterReq('done',this)">مكتملة</button>
         </div>
-        <div style="display:flex;gap:8px">
-          <div class="srch-box" style="width:220px"><span class="srch-ic">🔍</span><input class="srch-inp" id="req-srch-inp" lang="ar" dir="rtl" placeholder="بحث..." oninput="searchReq(this.value)" style="padding-left:70px;"><button type="button" class="lang-toggle-btn" id="req-srch-ltb" onclick="toggleInputLang('req-srch-inp','req-srch-ltb')" title="تبديل لغة الإدخال">ع</button></div>
-          <button class="btn btn-p" onclick="startNewPatient()">➕ طلب جديد</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+          <div class="srch-box" style="width:150px"><span class="srch-ic">🔍</span><input class="srch-inp" id="req-srch-inp" lang="ar" dir="rtl" placeholder="بحث..." oninput="searchReq(this.value)" style="padding-left:70px;"><button type="button" class="lang-toggle-btn" id="req-srch-ltb" onclick="toggleInputLang('req-srch-inp','req-srch-ltb')" title="تبديل لغة الإدخال">ع</button></div>
+          <button class="btn btn-p" style="white-space:nowrap;flex-shrink:0;" onclick="startNewPatient()">➕ طلب جديد</button>
         </div>
       </div>
 
