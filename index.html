@@ -1474,7 +1474,7 @@ body.light-mode .lang-toggle-btn.lang-en{background:rgba(85,0,187,0.1);border-co
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
-.res-input{width:110px;background:rgba(0,212,255,0.08);border:2px solid rgba(0,212,255,0.5);border-radius:7px;padding:6px 10px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;outline:none;transition:all 0.2s;text-align:center;box-shadow:0 0 8px rgba(0,212,255,0.12);}
+.res-input{width:110px;background:rgba(0,212,255,0.08);border:2px solid rgba(0,212,255,0.5);border-radius:7px;padding:6px 10px!important;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;outline:none;transition:all 0.2s;text-align:center;box-shadow:0 0 8px rgba(0,212,255,0.12);}
 .res-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,212,255,0.25);background:rgba(0,212,255,0.12);}
 .res-input.res-high{border-color:rgba(255,77,109,0.5);color:var(--danger);}
 .res-input.res-low{border-color:rgba(255,214,10,0.5);color:var(--warning);}
@@ -8446,8 +8446,8 @@ function renderWizTestList(){
       const sel=selectedSet.has(t.id);
       const div=document.createElement('div');
       div.className='test-item'+(sel?' selected':'');
-      div.setAttribute('onclick',`toggleWizTest('${t.id}',true)`);
-      div.innerHTML=`<input type="checkbox"${sel?' checked':''} onclick="event.stopPropagation();toggleWizTest('${t.id}',true)"><div class="test-item-info"><div class="test-item-code">${t.code}</div><div class="test-item-name">${tDisplayName(t)}</div></div>`;
+      div.setAttribute('onclick',`toggleWizTest('${t.id}')`);
+      div.innerHTML=`<input type="checkbox"${sel?' checked':''} onclick="event.stopPropagation();toggleWizTest('${t.id}')"><div class="test-item-info"><div class="test-item-code">${t.code}</div><div class="test-item-name">${tDisplayName(t)}</div></div>`;
       frag.appendChild(div);
     });
   }
@@ -8455,18 +8455,12 @@ function renderWizTestList(){
   el.appendChild(frag);
 }
 
-function toggleWizTest(tid,fromSearch){
+function toggleWizTest(tid){
   const t=tests.find(x=>x.id===tid);if(!t)return;
   const idx=wizSelectedTests.findIndex(x=>x.id===tid);
   const nowSelected=idx===-1;
   if(idx>-1) wizSelectedTests.splice(idx,1);
   else wizSelectedTests.push(t);
-
-  // إذا الاختيار من نتائج البحث — ارجع التركيز فوراً وحدد الكل
-  if(fromSearch){
-    const s=document.getElementById('wiz-test-srch');
-    if(s){s.focus();s.select();}
-  }
 
   // 1) تحديث test-item في القائمة اليسرى (checkbox + class)
   const item=document.querySelector(`.test-item[onclick*="'${tid}'"]`)||
@@ -21437,6 +21431,9 @@ function toggleInputLang(inputId, btnId){
     if(!el || !el.id) return;
     if(SKIP_IDS.indexOf(el.id) !== -1) return;
     if(el.getAttribute('data-ltb')) return;
+    // تجاهل حقول إدخال النتائج (res-input) وحقول الملاحظات (rnote-)
+    if(el.classList && el.classList.contains('res-input')) return;
+    if(el.id && el.id.indexOf('rnote-') === 0) return;
     if(el.type === 'hidden' || el.type === 'number' || el.type === 'date' ||
        el.type === 'color'  || el.type === 'file'   || el.type === 'checkbox' ||
        el.type === 'radio'  || el.type === 'range'  || el.type === 'password') return;
