@@ -28306,11 +28306,7 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
   'use strict';
 
   /* ── ثوابت ── */
-  /* PeerJS — إعدادات السيرفر العام */
-  var PEER_HOST = 'peerjs-server.herokuapp.com';
-  var PEER_PORT = 443;
-  var PEER_PATH = '/';
-  var PEER_SECURE = true;
+  /* لا نحتاج إعدادات سيرفر — نستخدم السيرفر الافتراضي لـ PeerJS */
 
   /* ── حالة النظام ── */
   var myPeer = null;
@@ -28335,22 +28331,33 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     var codeEl = document.getElementById('mls-my-code');
     if (codeEl) codeEl.textContent = myCode;
 
-    /* استخدم السيرفر الافتراضي لـ PeerJS (الأكثر استقراراً) */
+    /* إنشاء Peer بالسيرفر الافتراضي الرسمي لـ PeerJS */
+    try { if (myPeer && !myPeer.destroyed) myPeer.destroy(); } catch(e) {}
+
     myPeer = new Peer(myCode, {
-      debug: 2,
+      debug: 1,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' }
         ]
       }
     });
 
+    /* timeout: إذا ما اتصل خلال 10 ثوان → أعد المحاولة */
+    var _openTimeout = setTimeout(function() {
+      if (!myPeer || myPeer.disconnected) {
+        var hint = document.getElementById('mls-server-status');
+        if (hint) { hint.textContent = '🔄 إعادة محاولة...'; hint.style.color = '#ffcc00'; }
+        try { myPeer.destroy(); } catch(e) {}
+        setTimeout(initPeer, 2000);
+      }
+    }, 10000);
+
     myPeer.on('open', function(id) {
+      clearTimeout(_openTimeout);
       console.log('[MedSync] جاهز، كودي:', id);
       setDot('waiting');
-      /* تحديث الواجهة: السيرفر متصل */
       var sub = document.getElementById('mls-hdr-sub');
       if (sub) sub.textContent = '✅ جاهز للاتصال';
       var hint = document.getElementById('mls-server-status');
