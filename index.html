@@ -9192,7 +9192,7 @@ function renderRequestsFiltered(filter='today',srch=''){
   else if(filter==='pending') list=list.filter(r=>r.status==='pending'&&r.date===today);
   else if(filter==='inprogress') list=list.filter(r=>r.status==='inprogress'&&r.date===today);
   else if(filter==='done') list=list.filter(r=>r.status==='done'&&r.date===today);
-  if(srch) list=list.filter(r=>(r.id+r.patientName).toLowerCase().includes(srch.toLowerCase()));
+  if(srch){const q=srch.toLowerCase();list=list.filter(r=>(r.id+r.patientName).toLowerCase().includes(q));}
   if(!list.length){
     tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">${filter==='today'?'لا توجد طلبات اليوم':'لا توجد طلبات اليوم في هذه الحالة'}</td></tr>`;
     return;
@@ -9218,11 +9218,9 @@ function renderRequests(filter='all',srch=''){renderRequestsFiltered(filter,srch
 function filterReq(f,el){document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
 function searchReq(v){
   if(window._srTimer)clearTimeout(window._srTimer);
-  window._srTimer=setTimeout(function(){
-    const activeTab=document.querySelector('#sec-requests .tabs .tab.active');
-    const filter=activeTab?.getAttribute('data-filter')||'today';
-    renderRequestsFiltered(filter,v);
-  },80);
+  const activeTab=document.querySelector('#sec-requests .tabs .tab.active');
+  const filter=activeTab?.getAttribute('data-filter')||'today';
+  renderRequestsFiltered(filter,v);
 }
 function deleteReq(id){if(confirm('حذف هذا الطلب؟')){requests=requests.filter(r=>r.id!==id);save('requests',requests);renderRequests();updateBadges();updateDashboard();showNotif('تم الحذف','تم حذف الطلب');}}
 function goToResult(id){
@@ -22343,34 +22341,6 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   // 7. تحسين تحميل IDB
-  if (typeof _mergeIDBInBackground === 'function') {
-    var _origMerge = window._mergeIDBInBackground;
-    window._mergeIDBInBackground = async function() {
-      try {
-        var pfx = DB._pfx();
-        var results = await Promise.all([
-          IDB.get(pfx + 'patients'),
-          IDB.get(pfx + 'requests')
-        ]);
-        var newPatients = results[0], newRequests = results[1];
-        if (newPatients && Array.isArray(newPatients)) {
-          var ids = new Set(patients.map(function(p) { return p.id; }));
-          newPatients.forEach(function(p) { if (!ids.has(p.id)) patients.push(p); });
-        }
-        if (newRequests && Array.isArray(newRequests)) {
-          var rIds = new Set(requests.map(function(r) { return r.id; }));
-          newRequests.forEach(function(r) { if (!rIds.has(r.id)) requests.push(r); });
-        }
-        window.renderAll();
-        window.updateDashboard();
-        window.updateBadges();
-        setTimeout(function() { if (_origMerge) _origMerge(); }, 200);
-      } catch(e) {
-        if (_origMerge) _origMerge();
-      }
-    };
-  }
-
   console.log('✅ MedLab Pro تحسينات الأداء مفعلة');
 })();
 </script>
@@ -27297,16 +27267,13 @@ setTimeout(function(){
     }, 150);
   }
 
-  // ─── 4. searchReq: debounce حقيقي بدلاً من setTimeout(0) ────
-  // المشكلة: كان setTimeout(...,0) = لا تأخير = يعيد بناء جدول الطلبات فوراً
+  // ─── 4. searchReq: فوري بدون أي تأخير ────────────────────────
   if(typeof window.searchReq === 'function'){
     window.searchReq = function(v){
       if(window._srTimer) clearTimeout(window._srTimer);
-      window._srTimer = setTimeout(function(){
-        var activeTab = document.querySelector('#sec-requests .tabs .tab.active');
-        var filter = (activeTab && activeTab.getAttribute('data-filter')) || 'today';
-        if(typeof renderRequestsFiltered === 'function') renderRequestsFiltered(filter, v);
-      }, 80);
+      var activeTab = document.querySelector('#sec-requests .tabs .tab.active');
+      var filter = (activeTab && activeTab.getAttribute('data-filter')) || 'today';
+      if(typeof renderRequestsFiltered === 'function') renderRequestsFiltered(filter, v);
     };
   }
 
@@ -27659,7 +27626,7 @@ setTimeout(function(){
 
   window.syncReqSearch = function(v) {
     var m = document.getElementById('req-srch-inp');
-    if (m) { m.value = v; searchReq(v); }
+    if (m) m.value = v;
   };
 
   function openBox() {
