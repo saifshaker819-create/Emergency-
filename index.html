@@ -28039,3 +28039,697 @@ setTimeout(function(){
 })();
 
 </script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     🔗 MedLab Sync — ربط حاسبتين عبر الراوتر
+     WebRTC عبر PeerJS | بدون سيرفر | بدون Firebase
+     يعتمد مباشرة على IDB (medlab_idb / kv)
+══════════════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<style>
+/* ══ زر الربط العائم ══ */
+#mls-fab {
+  position:fixed; bottom:24px; left:24px; z-index:99990;
+  width:54px; height:54px; border-radius:50%;
+  background:linear-gradient(135deg,#00d4ff,#8b3fff);
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(0,212,255,0.4);
+  transition:all 0.25s; font-size:22px; color:#fff;
+  font-family:'Cairo','Inter',sans-serif;
+}
+#mls-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,212,255,0.55);}
+
+#mls-dot {
+  position:absolute; top:3px; right:3px;
+  width:13px; height:13px; border-radius:50%;
+  background:#ff2244; border:2px solid #04080f;
+  transition:background 0.3s;
+}
+#mls-dot.connected{background:#00e87a;}
+#mls-dot.waiting{background:#ffcc00;animation:mlsPulse 1s infinite;}
+@keyframes mlsPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ══ نافذة الربط ══ */
+#mls-overlay {
+  position:fixed;inset:0;z-index:999990;
+  background:rgba(0,0,0,0.82);
+  display:none;align-items:center;justify-content:center;
+  padding:16px;direction:rtl;
+}
+#mls-overlay.open{display:flex;}
+
+#mls-modal {
+  background:linear-gradient(145deg,#070d1c,#0d1528);
+  border:2px solid rgba(0,212,255,0.45);
+  border-radius:20px; width:100%; max-width:440px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 60px rgba(0,212,255,0.08);
+  overflow:hidden; font-family:'Cairo','Inter',sans-serif;
+  animation:mlsPopIn 0.18s ease;
+}
+@keyframes mlsPopIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+body.light-mode #mls-modal{
+  background:linear-gradient(145deg,#fff,#f0f5fb);
+  border-color:rgba(0,95,153,0.4);
+  box-shadow:0 4px 24px rgba(0,0,0,0.16);
+}
+
+#mls-hdr{
+  padding:16px 20px 14px;
+  background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(139,63,255,0.1));
+  border-bottom:1px solid rgba(0,212,255,0.18);
+  display:flex;align-items:center;justify-content:space-between;
+}
+body.light-mode #mls-hdr{
+  background:linear-gradient(135deg,rgba(0,95,153,0.07),rgba(85,0,187,0.05));
+  border-bottom-color:rgba(0,95,153,0.13);
+}
+
+#mls-body{padding:20px;}
+
+/* ══ كود الربط ══ */
+.mls-code-box{
+  background:rgba(0,212,255,0.06);
+  border:2px dashed rgba(0,212,255,0.35);
+  border-radius:14px; padding:16px 18px;
+  text-align:center; margin:14px 0;
+  cursor:pointer; transition:all 0.2s;
+}
+.mls-code-box:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.6);}
+body.light-mode .mls-code-box{background:rgba(0,95,153,0.05);border-color:rgba(0,95,153,0.25);}
+body.light-mode .mls-code-box:hover{background:rgba(0,95,153,0.1);}
+
+#mls-my-code{
+  font-size:26px;font-weight:900;letter-spacing:6px;
+  color:#00d4ff;font-family:'Inter',monospace;
+  text-shadow:0 0 18px rgba(0,212,255,0.4);
+}
+body.light-mode #mls-my-code{color:#005f99;text-shadow:none;}
+
+/* ══ حقل الإدخال ══ */
+.mls-inp{
+  width:100%;padding:12px 14px;border-radius:12px;
+  background:rgba(255,255,255,0.06);
+  border:1.5px solid rgba(0,212,255,0.25);
+  color:#fff;font-size:18px;font-weight:700;
+  font-family:'Inter',monospace;letter-spacing:4px;
+  text-align:center;outline:none;
+  transition:all 0.2s; box-sizing:border-box;
+}
+.mls-inp:focus{border-color:#00d4ff;background:rgba(0,212,255,0.07);}
+.mls-inp::placeholder{letter-spacing:2px;font-size:13px;font-weight:400;color:rgba(255,255,255,0.3);}
+body.light-mode .mls-inp{background:#f0f4f8;border-color:#b0bfcc;color:#0d1b2a;}
+body.light-mode .mls-inp:focus{border-color:#005f99;background:#e8f4fb;}
+body.light-mode .mls-inp::placeholder{color:#8899aa;}
+
+/* ══ أزرار ══ */
+.mls-btn{
+  width:100%;padding:12px;border-radius:12px;border:none;
+  cursor:pointer;font-size:14px;font-weight:800;
+  font-family:'Cairo','Inter',sans-serif;
+  transition:all 0.2s; margin-top:10px;
+}
+.mls-btn-primary{
+  background:linear-gradient(135deg,#00d4ff,#0099bb);
+  color:#04080f; box-shadow:0 4px 16px rgba(0,212,255,0.3);
+}
+.mls-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,212,255,0.45);}
+.mls-btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.mls-btn-danger{
+  background:rgba(255,34,68,0.12);
+  border:1px solid rgba(255,34,68,0.35);
+  color:#ff2244; margin-top:8px;
+}
+.mls-btn-danger:hover{background:rgba(255,34,68,0.22);}
+
+/* ══ شريط الحالة ══ */
+#mls-status-bar{
+  position:fixed;bottom:86px;left:20px;z-index:99989;
+  background:rgba(7,13,28,0.95);
+  border:1px solid rgba(0,212,255,0.25);
+  border-radius:12px;padding:8px 14px;
+  font-size:12px;font-weight:700;
+  font-family:'Cairo','Inter',sans-serif;
+  color:#00d4ff;display:none;
+  box-shadow:0 4px 16px rgba(0,0,0,0.5);
+  max-width:220px;direction:rtl;
+  animation:mlsSlideUp 0.2s ease;
+}
+@keyframes mlsSlideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+body.light-mode #mls-status-bar{
+  background:rgba(255,255,255,0.97);
+  border-color:rgba(0,95,153,0.25);
+  color:#005f99;
+  box-shadow:0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* ══ نبضة المزامنة ══ */
+@keyframes mlsSyncFlash{
+  0%{box-shadow:0 4px 20px rgba(0,232,122,0.6)}
+  100%{box-shadow:0 4px 20px rgba(0,212,255,0.4)}
+}
+#mls-fab.syncing{animation:mlsSyncFlash 0.4s ease;}
+
+/* ══ فاصل ══ */
+.mls-sep{
+  display:flex;align-items:center;gap:10px;margin:16px 0;
+  color:rgba(255,255,255,0.25);font-size:11px;
+}
+body.light-mode .mls-sep{color:#aab4c0;}
+.mls-sep::before,.mls-sep::after{
+  content:'';flex:1;height:1px;
+  background:rgba(255,255,255,0.1);
+}
+body.light-mode .mls-sep::before,
+body.light-mode .mls-sep::after{background:#dde4ec;}
+
+/* ══ بادج المزامنة ══ */
+.mls-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;
+}
+.mls-badge.ok{background:rgba(0,232,122,0.12);color:#00e87a;border:1px solid rgba(0,232,122,0.25);}
+.mls-badge.warn{background:rgba(255,204,0,0.12);color:#ffcc00;border:1px solid rgba(255,204,0,0.25);}
+.mls-badge.err{background:rgba(255,34,68,0.1);color:#ff2244;border:1px solid rgba(255,34,68,0.2);}
+</style>
+
+<!-- زر الربط العائم -->
+<button id="mls-fab" title="ربط الأجهزة" onclick="mlsOpenModal()">
+  🔗
+  <span id="mls-dot"></span>
+</button>
+
+<!-- شريط الحالة -->
+<div id="mls-status-bar"></div>
+
+<!-- نافذة الربط -->
+<div id="mls-overlay" onclick="if(event.target===this)mlsCloseModal()">
+  <div id="mls-modal">
+
+    <!-- رأس النافذة -->
+    <div id="mls-hdr">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">🔗</span>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--primary)">ربط الأجهزة</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;" id="mls-hdr-sub">اربط جهازين على نفس الشبكة</div>
+        </div>
+      </div>
+      <button onclick="mlsCloseModal()" style="
+        width:32px;height:32px;border-radius:50%;
+        border:1px solid rgba(255,255,255,0.12);
+        background:rgba(255,255,255,0.05);
+        color:rgba(255,255,255,0.5);cursor:pointer;
+        font-size:16px;display:flex;align-items:center;justify-content:center;
+        transition:all 0.2s;
+      " onmouseover="this.style.background='rgba(255,34,68,0.18)';this.style.color='#ff2244'"
+         onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='rgba(255,255,255,0.5)'">✕</button>
+    </div>
+
+    <!-- جسم النافذة -->
+    <div id="mls-body">
+
+      <!-- كود هذا الجهاز -->
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:6px;">📱 كود هذا الجهاز (انقر للنسخ)</div>
+      <div class="mls-code-box" onclick="mlsCopyCode()" title="انقر لنسخ الكود">
+        <div id="mls-my-code">...</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;" id="mls-copy-hint">انقر لنسخ الكود</div>
+      </div>
+
+      <div class="mls-sep">أو اتصل بجهاز آخر</div>
+
+      <!-- حقل كود الجهاز الثاني -->
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:8px;">💻 أدخل كود الجهاز الثاني</div>
+      <input
+        id="mls-remote-inp"
+        class="mls-inp"
+        type="text"
+        maxlength="6"
+        placeholder="أدخل الكود المكوّن من 6 أرقام"
+        oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"
+        onkeydown="if(event.key==='Enter')mlsConnect()"
+      />
+      <button class="mls-btn mls-btn-primary" id="mls-connect-btn" onclick="mlsConnect()">🔗 اتصل الآن</button>
+
+      <!-- حالة الاتصال -->
+      <div id="mls-conn-status" style="margin-top:14px;display:none;">
+        <div style="background:rgba(0,232,122,0.07);border:1px solid rgba(0,232,122,0.2);border-radius:12px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:800;color:#00e87a;">✅ متصل</span>
+            <span class="mls-badge ok" id="mls-sync-count">0 عملية</span>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);" id="mls-conn-info">جاري المزامنة...</div>
+          <button class="mls-btn mls-btn-danger" onclick="mlsDisconnect()">⛔ قطع الاتصال</button>
+        </div>
+      </div>
+
+      <!-- حالة انتظار -->
+      <div id="mls-waiting-status" style="margin-top:14px;display:none;">
+        <div style="background:rgba(255,204,0,0.07);border:1px solid rgba(255,204,0,0.2);border-radius:12px;padding:12px 14px;text-align:center;">
+          <div style="font-size:13px;font-weight:800;color:#ffcc00;">⏳ في انتظار الاتصال...</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">شارك الكود أعلاه مع الجهاز الثاني</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   MedLab Sync Engine — WebRTC via PeerJS
+   يعترض IDB.set() ويرسل التغييرات مباشرة بين الجهازين
+════════════════════════════════════════════════════════════ */
+(function() {
+  'use strict';
+
+  /* ── ثوابت ── */
+  var PEER_HOST = '0.peerjs.com';
+  var PEER_PORT = 443;
+  var PEER_PATH = '/';
+  var PEER_SECURE = true;
+
+  /* ── حالة النظام ── */
+  var myPeer = null;
+  var activeConn = null;
+  var myCode = null;
+  var syncCount = 0;
+  var isApplying = false; // منع حلقة المزامنة اللانهائية
+
+  /* ── توليد كود 6 أرقام فريد ── */
+  function genCode() {
+    var saved = localStorage.getItem('mls_my_code');
+    if (saved && /^\d{6}$/.test(saved)) return saved;
+    var code = String(Math.floor(100000 + Math.random() * 900000));
+    localStorage.setItem('mls_my_code', code);
+    return code;
+  }
+
+  /* ── تهيئة PeerJS ── */
+  function initPeer() {
+    myCode = genCode();
+    document.getElementById('mls-my-code').textContent = myCode;
+
+    myPeer = new Peer(myCode, {
+      host: PEER_HOST,
+      port: PEER_PORT,
+      path: PEER_PATH,
+      secure: PEER_SECURE,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    myPeer.on('open', function(id) {
+      console.log('[MedSync] جاهز، كودي:', id);
+      setDot('waiting');
+    });
+
+    /* استقبال اتصال وارد */
+    myPeer.on('connection', function(conn) {
+      setupConnection(conn, false);
+    });
+
+    myPeer.on('error', function(err) {
+      console.warn('[MedSync] خطأ PeerJS:', err);
+      if (err.type === 'peer-unavailable') {
+        showStatus('❌ الكود غير موجود أو الجهاز غير متصل', 3000);
+        resetConnUI();
+      } else if (err.type === 'network' || err.type === 'disconnected') {
+        // إعادة الاتصال تلقائياً بعد 3 ثوان
+        setTimeout(initPeer, 3000);
+      }
+    });
+
+    myPeer.on('disconnected', function() {
+      myPeer.reconnect();
+    });
+  }
+
+  /* ── إعداد قناة الاتصال ── */
+  function setupConnection(conn, isInitiator) {
+    activeConn = conn;
+
+    conn.on('open', function() {
+      setDot('connected');
+      showConnStatus(conn.peer);
+      showStatus('✅ متصل بـ ' + conn.peer, 3000);
+
+      /* إذا كنا المبادرين، نرسل snapshot كامل من IDB */
+      if (isInitiator) {
+        sendFullSnapshot();
+      }
+    });
+
+    /* استقبال البيانات */
+    conn.on('data', function(data) {
+      handleIncoming(data);
+    });
+
+    conn.on('close', function() {
+      activeConn = null;
+      setDot('waiting');
+      resetConnUI();
+      showStatus('🔌 انقطع الاتصال', 3000);
+    });
+
+    conn.on('error', function(err) {
+      console.warn('[MedSync] خطأ في الاتصال:', err);
+    });
+  }
+
+  /* ── إرسال snapshot كامل من IDB ── */
+  async function sendFullSnapshot() {
+    try {
+      if (!window.IDB) return;
+      var allItems = await window.IDB.getAll();
+      if (!allItems || !allItems.length) return;
+
+      // إرسال على دفعات لتجنب تجاوز حجم الرسالة
+      var BATCH = 50;
+      for (var i = 0; i < allItems.length; i += BATCH) {
+        var batch = allItems.slice(i, i + BATCH);
+        send({
+          type: 'snapshot',
+          items: batch.map(function(r) {
+            return { k: r.k, v: r.v }; // نرسل كما هو (مضغوط)
+          }),
+          total: allItems.length
+        });
+        await sleep(50); // تأخير خفيف بين الدفعات
+      }
+      send({ type: 'snapshot_done', total: allItems.length });
+      console.log('[MedSync] أُرسل snapshot كامل:', allItems.length, 'عنصر');
+    } catch(e) {
+      console.warn('[MedSync] فشل إرسال snapshot:', e);
+    }
+  }
+
+  /* ── استقبال البيانات الواردة ── */
+  async function handleIncoming(data) {
+    if (!data || !data.type) return;
+
+    if (data.type === 'set') {
+      // تغيير مفتاح واحد
+      await applyRemoteSet(data.key, data.rawValue);
+      syncCount++;
+      updateSyncCount();
+      flashFab();
+
+    } else if (data.type === 'del') {
+      // حذف مفتاح
+      await applyRemoteDel(data.key);
+      syncCount++;
+      updateSyncCount();
+      flashFab();
+
+    } else if (data.type === 'snapshot') {
+      // استقبال دفعة من البيانات
+      var items = data.items || [];
+      for (var i = 0; i < items.length; i++) {
+        await applyRawItem(items[i].k, items[i].v);
+      }
+      syncCount += items.length;
+      updateSyncCount();
+
+    } else if (data.type === 'snapshot_done') {
+      showStatus('📥 استُقبل ' + data.total + ' عنصر', 3000);
+      flashFab();
+      // إعادة تحميل الصفحة بعد ثانيتين لتحديث الواجهة
+      setTimeout(function() {
+        if (confirm('تم استقبال بيانات المزامنة. هل تريد تحديث الصفحة لعرضها؟')) {
+          location.reload();
+        }
+      }, 500);
+    }
+  }
+
+  /* ── كتابة قيمة خام في IDB مباشرة (بدون مرور بـ IDB.set) ── */
+  async function applyRawItem(key, rawV) {
+    isApplying = true;
+    try {
+      var dbReq = indexedDB.open('medlab_idb', 1);
+      await new Promise(function(res) {
+        dbReq.onsuccess = function(e) {
+          var db = e.target.result;
+          var tx = db.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put({ k: key, v: rawV });
+          tx.oncomplete = res;
+          tx.onerror = res;
+        };
+        dbReq.onerror = res;
+      });
+    } catch(e) {}
+    isApplying = false;
+  }
+
+  /* ── تطبيق set وارد (القيمة مشفرة JSON) ── */
+  async function applyRemoteSet(key, rawV) {
+    await applyRawItem(key, rawV);
+  }
+
+  /* ── تطبيق حذف وارد ── */
+  async function applyRemoteDel(key) {
+    isApplying = true;
+    try {
+      if (window.IDB) await window.IDB.del(key);
+    } catch(e) {}
+    isApplying = false;
+  }
+
+  /* ── إرسال رسالة للجهاز الآخر ── */
+  function send(data) {
+    try {
+      if (activeConn && activeConn.open) {
+        activeConn.send(data);
+      }
+    } catch(e) {
+      console.warn('[MedSync] فشل الإرسال:', e);
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     اعتراض IDB.set() لإرسال التغييرات تلقائياً
+  ════════════════════════════════════════════ */
+  function hookIDB() {
+    if (!window.IDB) {
+      setTimeout(hookIDB, 500);
+      return;
+    }
+
+    var _origSet = window.IDB.set.bind(window.IDB);
+    var _origDel = window.IDB.del ? window.IDB.del.bind(window.IDB) : null;
+
+    /* اعتراض IDB.set */
+    window.IDB.set = async function(key, value) {
+      var result = await _origSet(key, value);
+
+      /* إرسال للجهاز الآخر فقط إذا لم يكن هذا الاستدعاء من المزامنة */
+      if (!isApplying && activeConn && activeConn.open) {
+        try {
+          /* نقرأ القيمة الخام المضغوطة من IDB مباشرة */
+          var rawV = await getRawValue(key);
+          if (rawV !== null) {
+            send({ type: 'set', key: key, rawValue: rawV });
+          }
+        } catch(e) {}
+      }
+
+      return result;
+    };
+
+    /* اعتراض IDB.del */
+    if (_origDel) {
+      window.IDB.del = async function(key) {
+        var result = await _origDel(key);
+        if (!isApplying && activeConn && activeConn.open) {
+          send({ type: 'del', key: key });
+        }
+        return result;
+      };
+    }
+
+    console.log('[MedSync] ✅ تم ربط IDB.set بنظام المزامنة');
+  }
+
+  /* ── قراءة القيمة الخام المضغوطة من IDB ── */
+  function getRawValue(key) {
+    return new Promise(function(res) {
+      var dbReq = indexedDB.open('medlab_idb', 1);
+      dbReq.onsuccess = function(e) {
+        var db = e.target.result;
+        var tx = db.transaction('kv', 'readonly');
+        var req = tx.objectStore('kv').get(key);
+        req.onsuccess = function() {
+          res(req.result ? req.result.v : null);
+        };
+        req.onerror = function() { res(null); };
+      };
+      dbReq.onerror = function() { res(null); };
+    });
+  }
+
+  /* ════ دوال الواجهة ════ */
+
+  function setDot(state) {
+    var dot = document.getElementById('mls-dot');
+    if (!dot) return;
+    dot.className = state; // 'waiting' | 'connected' | ''
+  }
+
+  function showConnStatus(peerId) {
+    document.getElementById('mls-conn-status').style.display = 'block';
+    document.getElementById('mls-waiting-status').style.display = 'none';
+    document.getElementById('mls-connect-btn').style.display = 'none';
+    document.getElementById('mls-remote-inp').style.display = 'none';
+    document.getElementById('mls-conn-info').textContent = 'متصل بـ: ' + peerId;
+    updateSyncCount();
+  }
+
+  function resetConnUI() {
+    var cs = document.getElementById('mls-conn-status');
+    var ws = document.getElementById('mls-waiting-status');
+    var btn = document.getElementById('mls-connect-btn');
+    var inp = document.getElementById('mls-remote-inp');
+    if (cs) cs.style.display = 'none';
+    if (ws) ws.style.display = 'none';
+    if (btn) btn.style.display = 'block';
+    if (inp) inp.style.display = 'block';
+    syncCount = 0;
+  }
+
+  function updateSyncCount() {
+    var el = document.getElementById('mls-sync-count');
+    if (el) el.textContent = syncCount + ' عملية';
+  }
+
+  function flashFab() {
+    var fab = document.getElementById('mls-fab');
+    if (!fab) return;
+    fab.classList.add('syncing');
+    setTimeout(function() { fab.classList.remove('syncing'); }, 500);
+  }
+
+  function showStatus(msg, duration) {
+    var bar = document.getElementById('mls-status-bar');
+    if (!bar) return;
+    bar.textContent = msg;
+    bar.style.display = 'block';
+    clearTimeout(bar._t);
+    bar._t = setTimeout(function() {
+      bar.style.display = 'none';
+    }, duration || 3000);
+  }
+
+  function sleep(ms) {
+    return new Promise(function(r) { setTimeout(r, ms); });
+  }
+
+  /* ════ دوال عامة (تُستدعى من HTML) ════ */
+
+  window.mlsOpenModal = function() {
+    document.getElementById('mls-overlay').classList.add('open');
+    /* تحديث حالة الاتصال في النافذة */
+    if (activeConn && activeConn.open) {
+      showConnStatus(activeConn.peer);
+    } else {
+      document.getElementById('mls-waiting-status').style.display = 'block';
+    }
+  };
+
+  window.mlsCloseModal = function() {
+    document.getElementById('mls-overlay').classList.remove('open');
+  };
+
+  window.mlsCopyCode = function() {
+    if (!myCode) return;
+    navigator.clipboard.writeText(myCode).then(function() {
+      document.getElementById('mls-copy-hint').textContent = '✅ تم النسخ!';
+      setTimeout(function() {
+        document.getElementById('mls-copy-hint').textContent = 'انقر لنسخ الكود';
+      }, 2000);
+    }).catch(function() {
+      /* fallback */
+      var ta = document.createElement('textarea');
+      ta.value = myCode;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      document.getElementById('mls-copy-hint').textContent = '✅ تم النسخ!';
+      setTimeout(function() {
+        document.getElementById('mls-copy-hint').textContent = 'انقر لنسخ الكود';
+      }, 2000);
+    });
+  };
+
+  window.mlsConnect = function() {
+    var inp = document.getElementById('mls-remote-inp');
+    var code = inp ? inp.value.trim() : '';
+    if (!/^\d{6}$/.test(code)) {
+      showStatus('⚠️ أدخل كود مكوّن من 6 أرقام', 2500);
+      return;
+    }
+    if (code === myCode) {
+      showStatus('⚠️ لا يمكن الاتصال بنفس الجهاز', 2500);
+      return;
+    }
+    if (activeConn) activeConn.close();
+
+    document.getElementById('mls-connect-btn').disabled = true;
+    document.getElementById('mls-connect-btn').textContent = '⏳ جاري الاتصال...';
+    showStatus('⏳ جاري الاتصال بـ ' + code + '...', 5000);
+
+    var conn = myPeer.connect(code, {
+      reliable: true,
+      serialization: 'json'
+    });
+
+    setTimeout(function() {
+      document.getElementById('mls-connect-btn').disabled = false;
+      document.getElementById('mls-connect-btn').textContent = '🔗 اتصل الآن';
+    }, 5000);
+
+    setupConnection(conn, true);
+  };
+
+  window.mlsDisconnect = function() {
+    if (activeConn) {
+      activeConn.close();
+      activeConn = null;
+    }
+    setDot('waiting');
+    resetConnUI();
+    document.getElementById('mls-waiting-status').style.display = 'block';
+    showStatus('🔌 تم قطع الاتصال', 2000);
+  };
+
+  /* ════ تشغيل النظام ════ */
+  function boot() {
+    /* انتظر تحميل PeerJS */
+    if (typeof Peer === 'undefined') {
+      setTimeout(boot, 300);
+      return;
+    }
+    /* انتظر تحميل IDB */
+    if (typeof window.IDB === 'undefined') {
+      setTimeout(boot, 300);
+      return;
+    }
+    initPeer();
+    hookIDB();
+    console.log('[MedSync] 🚀 نظام المزامنة يعمل');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    setTimeout(boot, 800); // تأخير خفيف لضمان تحميل IDB
+  }
+
+})();
+</script>
