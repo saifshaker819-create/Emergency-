@@ -14811,14 +14811,8 @@ function _usersObjToArr(obj){
 }
 
 function getAdminUsers(){
-  // إذا الكاش فيه بيانات — ارجعه مباشرة
-  if(_fbUsersCache !== null && _fbUsersCache.length > 0) return _fbUsersCache;
-  // إذا الكاش فارغ أو null — جرب localStorage
-  try{ 
-    const local = JSON.parse(localStorage.getItem(ADMIN_KEY)||'[]');
-    if(local.length > 0){ _fbUsersCache = local; return local; }
-    return _fbUsersCache || [];
-  }catch(e){ return []; }
+  if(_fbUsersCache !== null) return _fbUsersCache;
+  try{ return JSON.parse(localStorage.getItem(ADMIN_KEY)||'[]'); }catch(e){ return []; }
 }
 
 function saveAdminUsers(users){
@@ -14858,7 +14852,10 @@ function loadUsersFromFirebase(){
         fbDb.ref('admin/users').set(obj);
         console.log('✅ رُحّل', local.length, 'مستخدم من المحلي إلى Firebase');
       } else {
-        // ❌ كلاهما فارغ — لا تغيّر الكاش أبداً، اتركه null لإعادة المحاولة لاحقاً
+        // ❌ كلاهما فارغ — لا تفعل شيء، ابقَ على الكاش الحالي
+        if(!_fbUsersCache || _fbUsersCache.length === 0){
+          _fbUsersCache = [];
+        }
         console.warn('⚠️ Firebase والمحلي كلاهما فارغان');
       }
       _fbUsersLoaded = true;
@@ -15133,9 +15130,6 @@ function doLogin(){
   err.style.display='none';
   if(btn){ btn.textContent='⏳ جاري التحقق...'; btn.disabled=true; }
 
-  // ── إعادة ضبط Firebase إذا لم يكن جاهزاً — لإعادة المحاولة ──
-  if(!fbReady){ _fbLoadingPromise = null; }
-
   // ── دالة الدخول من الكاش المحلي ──────────────────
   function _tryLocalCache(reason){
     if(btn){ btn.textContent='🔐 تسجيل الدخول'; btn.disabled=false; }
@@ -15170,13 +15164,7 @@ function doLogin(){
       if(btn){ btn.textContent='🔐 تسجيل الدخول'; btn.disabled=false; }
       const users = getAdminUsers();
       const user  = users.find(u => u.username===uname);
-      if(!user){ 
-        err.innerHTML='❌ اسم المستخدم "'+uname+'" غير موجود على هذا الجهاز.<br><small style="font-size:11px;opacity:0.8">إذا كان الحساب موجوداً — تأكد من الإنترنت ثم <strong>أعد الضغط على تسجيل الدخول</strong></small>';
-        err.style.display='block'; 
-        // إعادة ضبط كاش Firebase لمحاولة جلب المستخدمين من جديد
-        if(_fbUsersCache && _fbUsersCache.length === 0){ _fbUsersCache = null; }
-        return; 
-      }
+      if(!user){ err.textContent='❌ اسم المستخدم "'+uname+'" غير موجود — تحقق من الكتابة أو تواصل مع المدير'; err.style.display='block'; return; }
       const passOk = await checkPassword(pass, user.password);
       if(!passOk){ err.textContent='❌ كلمة المرور غير صحيحة — جرّب مرة أخرى أو اضغط "إصلاح الحساب"'; err.style.display='block'; return; }
       // ── إذا كلمة المرور نص صريح قديم — رحّلها لـ hash تلقائياً ──
@@ -28246,6 +28234,7 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
         <div>
           <div style="font-size:15px;font-weight:800;color:var(--primary)">ربط الأجهزة</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);font-weight:600;" id="mls-hdr-sub">اربط جهازين على نفس الشبكة</div>
+          <div style="font-size:10px;font-weight:700;margin-top:2px;color:#ffcc00;" id="mls-server-status">⏳ جاري الاتصال بالسيرفر...</div>
         </div>
       </div>
       <button onclick="mlsCloseModal()" style="
@@ -28317,7 +28306,8 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
   'use strict';
 
   /* ── ثوابت ── */
-  var PEER_HOST = '0.peerjs.com';
+  /* PeerJS — إعدادات السيرفر العام */
+  var PEER_HOST = 'peerjs-server.herokuapp.com';
   var PEER_PORT = 443;
   var PEER_PATH = '/';
   var PEER_SECURE = true;
@@ -28345,15 +28335,14 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     var codeEl = document.getElementById('mls-my-code');
     if (codeEl) codeEl.textContent = myCode;
 
+    /* استخدم السيرفر الافتراضي لـ PeerJS (الأكثر استقراراً) */
     myPeer = new Peer(myCode, {
-      host: PEER_HOST,
-      port: PEER_PORT,
-      path: PEER_PATH,
-      secure: PEER_SECURE,
+      debug: 2,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
         ]
       }
     });
@@ -28361,6 +28350,11 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     myPeer.on('open', function(id) {
       console.log('[MedSync] جاهز، كودي:', id);
       setDot('waiting');
+      /* تحديث الواجهة: السيرفر متصل */
+      var sub = document.getElementById('mls-hdr-sub');
+      if (sub) sub.textContent = '✅ جاهز للاتصال';
+      var hint = document.getElementById('mls-server-status');
+      if (hint) { hint.textContent = '🟢 السيرفر متصل'; hint.style.color = '#00e87a'; }
     });
 
     /* استقبال اتصال وارد */
@@ -28369,13 +28363,23 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     });
 
     myPeer.on('error', function(err) {
-      console.warn('[MedSync] خطأ PeerJS:', err);
+      console.warn('[MedSync] خطأ PeerJS:', err.type, err);
+      var hint = document.getElementById('mls-server-status');
       if (err.type === 'peer-unavailable') {
         showStatus('❌ الكود غير موجود أو الجهاز غير متصل', 3000);
+        if (hint) { hint.textContent = '❌ الكود غير موجود'; hint.style.color = '#ff2244'; }
         resetConnUI();
-      } else if (err.type === 'network' || err.type === 'disconnected') {
-        // إعادة الاتصال تلقائياً بعد 3 ثوان
+        document.getElementById('mls-waiting-status').style.display = 'block';
+      } else if (err.type === 'network' || err.type === 'disconnected' || err.type === 'server-error') {
+        if (hint) { hint.textContent = '🔴 انقطع السيرفر — إعادة محاولة...'; hint.style.color = '#ffcc00'; }
         setTimeout(initPeer, 3000);
+      } else if (err.type === 'unavailable-id') {
+        /* الكود محجوز — ولّد كود جديد */
+        localStorage.removeItem('mls_my_code');
+        myCode = genCode();
+        var codeEl = document.getElementById('mls-my-code');
+        if (codeEl) codeEl.textContent = myCode;
+        setTimeout(initPeer, 1000);
       }
     });
 
