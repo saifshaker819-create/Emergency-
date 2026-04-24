@@ -203,8 +203,11 @@ body.light-mode .btn-s { background:#f0f3f7; color:#0d1b2a; border-color:#ccd4dc
 body.light-mode .btn-s:hover { background:#e0eef8; border-color:var(--primary); color:var(--primary); }
 body.light-mode .hbtn { background:#f0f3f7; border-color:#ccd4dc; color:#5a6a7a; }
 body.light-mode .hbtn:hover { background:#e0eef8; color:var(--primary); border-color:var(--primary); }
-body.light-mode .hdr-search { background:#f0f3f7; border-color:#ccd4dc; }
-body.light-mode .hdr-search input { color:#0d1b2a; }
+
+body.light-mode .hdr{background:linear-gradient(135deg,rgba(230,242,255,0.99) 0%,rgba(215,235,255,0.99) 50%,rgba(230,242,255,0.99) 100%)!important;border-bottom-color:rgba(0,110,200,0.3)!important;box-shadow:0 2px 16px rgba(0,0,0,0.08),inset 0 1px 0 rgba(0,110,200,0.1)!important;}
+body.light-mode .hdr .wnb-line{background:linear-gradient(90deg,transparent,rgba(0,100,200,0.35),transparent)!important;}
+body.light-mode .hdr .wnb-bg-layer{background:radial-gradient(ellipse at 50% 50%,rgba(0,110,200,0.07) 0%,transparent 70%)!important;}
+body.light-mode .hdr .wnb-icon{filter:drop-shadow(0 0 6px rgba(0,100,200,0.4))!important;}
 body.light-mode .uavatar { box-shadow:0 0 10px rgba(0,136,170,0.2); }
 body.light-mode .tabs { background:#edf0f4; }
 body.light-mode .tab { color:#5a6a7a; }
@@ -241,9 +244,7 @@ body.light-mode .chat-list { background:#f8f9fb; }
 body.light-mode .chat-empty { color:#8899aa; }
 body.light-mode .chat-msg-bubble { background:#f0f3f7; border-color:#dde4ec; color:#0d1b2a; }
 body.light-mode .chat-msg.sent .chat-msg-bubble { background:linear-gradient(135deg,rgba(0,136,170,0.12),rgba(0,100,140,0.08)); border-color:rgba(0,136,170,0.25); }
-body.light-mode .global-search-results { background:#fff; border-color:#dde4ec; }
-body.light-mode .gs-item:hover { background:#f0f5fa; }
-body.light-mode .gs-item-name { color:#0d1b2a; }
+
 body.light-mode .moverlay { background:rgba(0,0,0,0.5); }
 body.light-mode #login-screen { background:linear-gradient(135deg,#e8f4fa 0%,#f5f7fa 50%,#eff3fa 100%); }
 body.light-mode .login-logo h1 { color:var(--primary); }
@@ -263,7 +264,7 @@ body.light-mode .logo-txt p { color:#4a5568; }
 body.light-mode .bdg-s { background:#eeeefd; color:#5500aa; border:1.5px solid #bbaaee; font-weight:700; }
 body.light-mode .chat-item-name { color:#000000; font-weight:700; }
 body.light-mode .chat-item-preview { color:#4a5568; }
-body.light-mode .gs-item-sub { color:#4a5568; }
+
 /* ══════════════════════════════════════════════════
    LIGHT MODE THEMES — 3 variants
 ══════════════════════════════════════════════════ */
@@ -455,7 +456,7 @@ body.light-mode #notif-panel{background:#ffffff!important;border-color:#c8d4e0!i
 body.light-mode #notif-panel>div:first-child{background:#f8fafc!important;border-bottom-color:#dde4ec!important;}
 body.light-mode #notif-panel-list>div{background:#ffffff;border-bottom-color:#eef2f6!important;color:#000000!important;}
 body.light-mode #notif-panel-list button{color:#888!important;}
-body.light-mode #hdr-cal-panel,body.light-mode #cal-panel{background:#ffffff!important;border-color:#c8d4e0!important;box-shadow:0 8px 25px rgba(0,0,0,0.15)!important;}
+body.light-mode #cal-panel{background:#ffffff!important;border-color:#c8d4e0!important;box-shadow:0 8px 25px rgba(0,0,0,0.15)!important;}
 body.light-mode #grp-inline-dropdown{background:#ffffff!important;border-color:#c8d4e0!important;box-shadow:0 8px 25px rgba(0,0,0,0.15)!important;}
 body.light-mode #grp-inline-dropdown *{color:#000000!important;}
 body.light-mode .ni-badge.warn{background:#f59e0b!important;color:#000000!important;font-weight:900!important;}
@@ -498,9 +499,8 @@ body.light-mode{color:#000000!important;}
 body.light-mode *:not(a):not(.btn-p):not(.btn-ok):not(.ni.active):not(.ni.active *):not(.bdg-ok):not(.bdg-d):not(.bdg-w):not(.primary):not([style*="color:var(--primary)"]):not([style*="color:#cc"]):not([style*="color:#00"]){
   color:inherit;
 }
-body.light-mode #sec-requests .req-sticky-bar{background:var(--bg-body)!important;}
 /* ضمان ظهور شريط البحث في الطلبات فوق البانر دائماً */
-#sec-requests .req-sticky-bar{z-index:8000!important;isolation:isolate;}
+#sec-requests .req-sticky-bar{z-index:8000!important;isolation:isolate;background:transparent!important;box-shadow:none!important;}
 
 /* ── زر البحث العائم في قسم الطلبات ── */
 #req-float-btn {
@@ -526,6 +526,140 @@ body.light-mode #sec-requests .req-sticky-bar{background:var(--bg-body)!importan
 #req-float-btn:hover { box-shadow: 0 6px 28px rgba(0,212,255,0.65), 0 2px 10px rgba(0,0,0,0.5); transform: scale(1.07); }
 #req-float-btn.dragging { opacity: 0.85; transform: scale(1.12); box-shadow: 0 8px 36px rgba(0,212,255,0.7); }
 body.light-mode #req-float-btn { box-shadow: 0 4px 20px rgba(0,95,153,0.35), 0 2px 8px rgba(0,0,0,0.2); }
+
+/* ══ أزرار دائرية عائمة — قسم الطلبات ══ */
+.req-float-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.req-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  position: relative;
+  will-change: transform;
+}
+.req-pill-ic {
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+.req-pill-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1;
+  pointer-events: none;
+}
+/* الألوان الافتراضية */
+.req-pill-today  { border-color: rgba(0,212,255,0.3);  color: var(--primary); }
+.req-pill-pending{ border-color: rgba(255,204,0,0.3);   color: var(--warning); }
+.req-pill-inprogress{ border-color: rgba(139,63,255,0.3); color: var(--secondary); }
+.req-pill-done   { border-color: rgba(0,232,122,0.3);  color: var(--success); }
+.req-pill-new    { border-color: rgba(0,212,255,0.35); color: #fff; background: linear-gradient(135deg,rgba(0,212,255,0.18),rgba(139,63,255,0.15)); }
+
+/* hover */
+.req-pill:hover {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.req-pill-today:hover   { border-color: var(--primary);    box-shadow: 0 6px 22px rgba(0,212,255,0.35); }
+.req-pill-pending:hover { border-color: var(--warning);    box-shadow: 0 6px 22px rgba(255,204,0,0.3); }
+.req-pill-inprogress:hover { border-color: var(--secondary); box-shadow: 0 6px 22px rgba(139,63,255,0.35); }
+.req-pill-done:hover    { border-color: var(--success);    box-shadow: 0 6px 22px rgba(0,232,122,0.3); }
+.req-pill-new:hover     { border-color: var(--primary);    box-shadow: 0 6px 22px rgba(0,212,255,0.4); }
+
+/* active state */
+.req-pill.active {
+  transform: translateY(-2px) scale(1.04);
+}
+.req-pill-today.active   { background: rgba(0,212,255,0.16);  border-color: var(--primary);    box-shadow: 0 0 0 3px rgba(0,212,255,0.18), 0 6px 20px rgba(0,212,255,0.25); }
+.req-pill-pending.active { background: rgba(255,204,0,0.14);  border-color: var(--warning);    box-shadow: 0 0 0 3px rgba(255,204,0,0.18), 0 6px 20px rgba(255,204,0,0.2); }
+.req-pill-inprogress.active { background: rgba(139,63,255,0.16); border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(139,63,255,0.18), 0 6px 20px rgba(139,63,255,0.25); }
+.req-pill-done.active    { background: rgba(0,232,122,0.14);  border-color: var(--success);    box-shadow: 0 0 0 3px rgba(0,232,122,0.18), 0 6px 20px rgba(0,232,122,0.2); }
+
+/* مستطيل البحث العائم */
+.req-srch-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 8px 0 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--primary);
+  border-radius: 21px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: box-shadow 0.18s, border-color 0.18s, background 0.18s;
+  min-width: 140px;
+}
+.req-srch-pill:focus-within {
+  background: rgba(0,212,255,0.07);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.14), 0 4px 16px rgba(0,0,0,0.4);
+}
+.req-srch-pill-ic {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: var(--primary);
+}
+.req-srch-pill-inp {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  flex: 1;
+  min-width: 0;
+  direction: rtl;
+}
+.req-srch-pill-inp::placeholder { color: var(--text2); }
+.req-srch-pill .req-srch-pill-ltb {
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* وضع نهاري */
+body.light-mode .req-pill {
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+body.light-mode .req-pill-today   { border-color: rgba(0,95,153,0.35);  color: var(--primary); }
+body.light-mode .req-pill-pending { border-color: rgba(153,85,0,0.35);  color: var(--warning); }
+body.light-mode .req-pill-inprogress { border-color: rgba(85,0,187,0.35); color: var(--secondary); }
+body.light-mode .req-pill-done    { border-color: rgba(0,102,34,0.35);  color: var(--success); }
+body.light-mode .req-pill-new     { background: linear-gradient(135deg,rgba(0,95,153,0.12),rgba(85,0,187,0.08)); border-color: rgba(0,95,153,0.4); color: var(--primary); }
+body.light-mode .req-pill-today.active   { background: rgba(0,95,153,0.1);  box-shadow: 0 0 0 3px rgba(0,95,153,0.15), 0 4px 14px rgba(0,95,153,0.2); }
+body.light-mode .req-pill-pending.active { background: rgba(153,85,0,0.1); }
+body.light-mode .req-pill-inprogress.active { background: rgba(85,0,187,0.1); }
+body.light-mode .req-pill-done.active    { background: rgba(0,102,34,0.1); }
+body.light-mode .req-srch-pill {
+  background: rgba(255,255,255,0.9);
+  border-color: var(--primary);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+body.light-mode .req-srch-pill-inp { color: #000; }
 
 /* نافذة البحث العائمة */
 #req-float-search-box {
@@ -554,7 +688,7 @@ body.light-mode #req-float-search-box { background: #ffffff; border-color: var(-
 /* ── الوضع النهاري: قوائم منسدلة وعناصر خاصة ── */
 body.light-mode select,body.light-mode select.fc{background:#edf0f5!important;color:#000000!important;border-color:#c8d4e0!important;}
 body.light-mode select option{background:#ffffff!important;color:#000000!important;}
-body.light-mode .res-add-test-results,body.light-mode #res-add-test-results,body.light-mode #print-search-results,body.light-mode .global-search-results{background:#ffffff!important;border-color:#c8d4e0!important;box-shadow:0 8px 25px rgba(0,0,0,0.12)!important;color:#000000!important;}
+body.light-mode .res-add-test-results,body.light-mode #res-add-test-results,body.light-mode #print-search-results{background:#ffffff!important;border-color:#c8d4e0!important;box-shadow:0 8px 25px rgba(0,0,0,0.12)!important;color:#000000!important;}
 body.light-mode .res-add-test-results *,body.light-mode #res-add-test-results *,body.light-mode #print-search-results *{color:#000000!important;}
 /* ── الوضع النهاري: جميع القوائم المنسدلة الداكنة ── */
 body.light-mode .pt-suggest,
@@ -564,10 +698,8 @@ body.light-mode #stool-pt-suggest,
 body.light-mode #grp-inline-dropdown,
 body.light-mode #vr-add-results,
 body.light-mode .chat-search-results,
-body.light-mode #hdr-cal-panel,
 body.light-mode #cal-panel,
 body.light-mode #notif-panel,
-body.light-mode .global-search-results,
 body.light-mode #add-abx-quick{
   background:#ffffff!important;
   border-color:#c8d4e0!important;
@@ -838,14 +970,6 @@ body:not(.light-mode) .session-card {
   border-color:var(--border)!important;
 }
 
-/* ── global-search-results items text ── */
-body:not(.light-mode) .gs-item-name {
-  color:var(--text)!important;
-}
-body:not(.light-mode) .gs-item-sub {
-  color:var(--text2)!important;
-}
-
 /* ── pt-suggest items text ── */
 body:not(.light-mode) .pt-suggest-name {
   color:var(--primary)!important;
@@ -992,20 +1116,7 @@ body.light-mode .res-tbl tbody tr:nth-child(even){
   background:#eef8f2!important;
 }
 
-/* ── الـ hdr-cal-panel و notif-panel ── */
-body.light-mode #hdr-cal-panel{
-  background:#ffffff!important;
-  border-color:#c8d4e0!important;
-  box-shadow:0 8px 25px rgba(0,0,0,0.14)!important;
-  color:#000000!important;
-}
-body.light-mode #hdr-cal-panel *{color:#000000!important;}
-body.light-mode #hdr-cal-panel input{
-  background:#edf0f5!important;
-  border-color:#c8d4e0!important;
-  color:#000000!important;
-}
-body.light-mode #notif-panel{
+/* ── notif-panel ── */
   background:#ffffff!important;
   border-color:#c8d4e0!important;
   box-shadow:0 12px 40px rgba(0,0,0,0.15)!important;
@@ -1026,8 +1137,6 @@ body.light-mode #stool-pt-suggest,
 body.light-mode #semen-pt-suggest,
 body.light-mode #res-add-test-results,
 body.light-mode #vr-add-results,
-body.light-mode .global-search-results,
-body.light-mode #gs-results,
 body.light-mode #print-search-results,
 body.light-mode #add-abx-quick,
 body.light-mode #grp-inline-dropdown{
@@ -1042,7 +1151,6 @@ body.light-mode #stool-pt-suggest *,
 body.light-mode #semen-pt-suggest *,
 body.light-mode #res-add-test-results *,
 body.light-mode #vr-add-results *,
-body.light-mode #gs-results *,
 body.light-mode #add-abx-quick *,
 body.light-mode #grp-inline-dropdown *{
   color:#000000!important;
@@ -1184,7 +1292,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 3s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.45}}
 .main{flex:1;margin-right:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
-.hdr{background:rgba(4,8,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;gap:10px;overflow:visible;}
+.hdr{background:linear-gradient(135deg,rgba(4,8,20,0.97) 0%,rgba(0,20,40,0.97) 50%,rgba(4,8,20,0.97) 100%);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,212,255,0.25);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:9999;gap:10px;overflow:visible;box-shadow:0 2px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(0,212,255,0.08);}
 .hdr-left{display:flex;flex-direction:column;flex:1;min-width:0;}
 .page-title{font-size:11px;font-weight:800;}
 .page-bc{font-size:11px;color:var(--text2);margin-top:1px;}
@@ -1193,14 +1301,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .hbtn:hover{background:rgba(0,212,255,0.1);color:var(--primary);border-color:var(--primary);}
 .ndot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid var(--bg-dark);}
 /* IMPROVED GLOBAL SEARCH */
-.hdr-search{display:flex;align-items:center;gap:7px;background:var(--bg-glass);border:1px solid var(--border);border-radius:9px;padding:7px 12px;width:280px;position:relative;}
-.hdr-search input{background:none;border:none;outline:none;color:var(--text);font-family:'Cairo',sans-serif;font-size:11px;width:100%;}
-.hdr-search input::placeholder{color:var(--text2);}
-.global-search-results{position:absolute;top:calc(100% + 6px);right:0;left:0;background:#080f20;border:1px solid var(--border);border-radius:10px;max-height:280px;overflow-y:auto;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,0.6);}
-.gs-item{padding:10px 14px;cursor:pointer;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04);}
-.gs-item:hover{background:rgba(0,212,255,0.08);}
-.gs-item-name{font-weight:700;color:var(--text);}
-.gs-item-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
 .uavatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
 .page{padding:22px;flex:1;}
 .sec{display:none;}
@@ -1735,9 +1836,6 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   .hdr-left .page-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .hdr-left .page-bc{display:none;}
   .hdr-right{flex-shrink:0;gap:5px;}
-  .hdr-search{width:130px!important;min-width:0;padding:5px 8px;}
-  .hdr-search input{font-size:10px;}
-  #gs-wrap{width:130px!important;}
 
   /* ── المحتوى الرئيسي ── */
   .sec{padding:12px 8px!important;}
@@ -1789,8 +1887,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 
 @media(max-width:480px){
   .hdr{padding:8px 10px;}
-  .hdr-search{display:none!important;}
-  #gs-wrap{display:none!important;}
+  .hdr .wnb-content{display:none!important;}
   .hdr-right{gap:4px;}
   .hbtn{width:32px!important;height:32px!important;font-size:13px!important;}
 
@@ -2382,7 +2479,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 .sec:not(.active){content-visibility:auto;contain-intrinsic-size:0 500px}
 .moverlay{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .moverlay.open{animation:fi 0.1s ease!important}
-.global-search-results,.pt-suggest,#notif-panel,#hdr-cal-panel,#cal-panel,#gs-results{animation:none!important;transition:none!important}
+.pt-suggest,#notif-panel,#cal-panel{animation:none!important;transition:none!important}
 </style>
 </head>
 <body>
@@ -2456,28 +2553,26 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 <div id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('show')"></div>
 
 <div class="main">
-  <div class="hdr">
-    <div class="hdr-left">
+  <div class="hdr" style="position:relative;">
+    <!-- طبقة الخلفية المتحركة للبانر -->
+    <div class="wnb-bg-layer" style="position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,212,255,0.05) 0%,transparent 70%);"></div>
+    <div class="wnb-line wnb-line-top" style="position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.4),transparent);animation:wnb-line-scan 4s ease-in-out infinite;z-index:0;"></div>
+    <div class="wnb-line wnb-line-bottom" style="position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.4),transparent);animation:wnb-line-scan 4s ease-in-out infinite;animation-delay:2s;z-index:0;"></div>
+    <div class="hdr-left" style="position:relative;z-index:1;">
       <button id="hamburger-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')" style="display:none;background:none;border:1px solid var(--border);color:var(--text);border-radius:8px;width:36px;height:36px;font-size:18px;cursor:pointer;margin-left:8px;flex-shrink:0">☰</button>
       <div class="page-title" id="ptitle">لوحة التحكم</div>
       <div class="page-bc" id="pbc">الرئيسية / لوحة التحكم</div>
     </div>
-    <div class="hdr-right">
-      <div class="hdr-search" id="gs-wrap" style="padding-left:8px;">
-        <button type="button" class="lang-toggle-btn" id="global-search-ltb" onclick="toggleInputLang('global-search','global-search-ltb')" title="تبديل لغة الإدخال" style="position:static;transform:none;flex-shrink:0;">ع</button>
-        <span style="flex-shrink:0;color:var(--text2);font-size:13px">🔍</span>
-        <input type="text" placeholder="بحث سريع عن مريض أو طلب..." id="global-search" lang="ar" oninput="globalSearch(this.value)" autocomplete="off" style="flex:1;min-width:0;">
-        <div class="global-search-results" id="gs-results" style="display:none"></div>
+    <!-- نص النيون في وسط الهيدر -->
+    <div class="wnb-content" style="position:absolute;left:50%;transform:translateX(-50%);z-index:1;pointer-events:none;display:flex;align-items:center;gap:10px;">
+      <div class="wnb-icon" style="font-size:18px;filter:drop-shadow(0 0 6px rgba(0,212,255,0.5));animation:wnb-icon-pulse 3s ease-in-out infinite alternate;">🧪</div>
+      <div class="wnb-text-wrap">
+        <p class="wnb-text" id="wnb-hdr-text-el" style="font-size:clamp(12px,1.4vw,17px);">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
       </div>
-      <!-- زر التقويم بجانب البحث الرئيسي -->
-      <div style="position:relative">
-        <button class="hbtn" id="hdr-cal-btn" onclick="toggleHdrCalendar(event)" title="فلترة بالتاريخ" style="font-size:16px">📅</button>
-        <div id="hdr-cal-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#080f20;border:1.5px solid var(--border);border-radius:12px;padding:14px;z-index:999999;box-shadow:0 8px 30px rgba(0,0,0,0.7);min-width:230px">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700;text-align:center">عرض مراجعي يوم محدد</div>
-          <input type="date" id="hdr-cal-date" class="fc" style="margin-bottom:8px" onchange="hdrFilterByDate(this.value)">
-          <button onclick="hdrClearDate()" class="btn btn-s btn-sm" style="width:100%">↩ عرض الكل</button>
-        </div>
-      </div>
+      <div class="wnb-icon" style="font-size:18px;filter:drop-shadow(0 0 6px rgba(0,212,255,0.5));animation:wnb-icon-pulse 3s ease-in-out infinite alternate;">⚕️</div>
+    </div>
+    <div class="hdr-right" style="position:relative;z-index:1;">
+
       <div style="position:relative">
         <button class="hbtn" id="notif-bell-btn" onclick="toggleNotifPanel(event)">🔔<div class="ndot" id="notif-dot" style="display:none"></div></button>
         <div id="notif-panel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;width:330px;background:#080f20;border:1px solid rgba(0,212,255,0.25);border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.8);z-index:999999;overflow:hidden">
@@ -2506,22 +2601,6 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 
     <!-- DASHBOARD -->
     <div class="sec active" id="sec-dashboard">
-
-      <!-- ══════════════ بانر الترحيب النيون — لوحة التحكم ══════════════ -->
-      <div class="welcome-neon-banner" id="wnb-dash-banner">
-        <div class="wnb-bg-layer"></div>
-        <div class="wnb-particles" id="wnb-particles-dash"></div>
-        <div class="wnb-content">
-          <div class="wnb-icon">🧪</div>
-          <div class="wnb-text-wrap">
-            <p class="wnb-text" id="wnb-dash-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
-          </div>
-          <div class="wnb-icon wnb-icon-alt">⚕️</div>
-        </div>
-        <div class="wnb-line wnb-line-top"></div>
-        <div class="wnb-line wnb-line-bottom"></div>
-      </div>
-      <!-- ══════════════════════════════════════════════ -->
 
       <div class="stats" id="dash-stats">
         <div class="scard" style="--cc:rgba(0,212,255,0.22)"><div class="scard-lbl" style="font-size:14px;color:#000;font-weight:800">المرضى اليوم</div><div class="scard-val" id="ds-today" style="color:var(--primary);font-size:22px;font-weight:900">0</div><div class="scard-sub up">↑ جديد</div><div class="scard-ic">👥</div></div>
@@ -2560,7 +2639,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
               <button onclick="clearDateFilter()" class="btn btn-s btn-sm" style="width:100%">↩ إلغاء الفلتر</button>
             </div>
           </div>
-          <div class="srch-box" style="width:240px"><span class="srch-ic">🔍</span><input class="srch-inp" lang="ar" dir="rtl" placeholder="ابحث باسم أو هاتف أو رقم ملف..." oninput="searchPatients(this.value)"></div>
+          <div class="srch-box" style="width:240px"><span class="srch-ic">🔍</span><input class="srch-inp" id="pts-srch-inp" lang="ar" dir="rtl" placeholder="ابحث باسم أو هاتف أو رقم ملف..." oninput="searchPatients(this.value)"><button type="button" class="lang-toggle-btn" id="pts-srch-ltb" onclick="toggleInputLang('pts-srch-inp','pts-srch-ltb')" title="تبديل لغة الإدخال">ع</button></div>
           <button class="btn btn-p" onclick="startNewPatient()">➕ مريض جديد</button>
         </div>
       </div>
@@ -2577,35 +2656,20 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 
     <!-- REQUESTS -->
     <div class="sec" id="sec-requests">
-      <div class="req-sticky-bar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;position:sticky;top:72px;z-index:8000;background:var(--bg-dark);padding:10px 0 10px 0;box-shadow:0 4px 16px rgba(4,8,20,0.98);">
-        <div class="tabs">
-          <button class="tab active" data-filter="today" onclick="filterReq('today',this)">📅 اليوم</button>
-          <button class="tab" data-filter="all" onclick="filterReq('all',this)">الكل</button>
-          <button class="tab" data-filter="pending" onclick="filterReq('pending',this)">معلقة</button>
-          <button class="tab" data-filter="inprogress" onclick="filterReq('inprogress',this)">جارية</button>
-          <button class="tab" data-filter="done" onclick="filterReq('done',this)">مكتملة</button>
+      <div class="req-sticky-bar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;position:sticky;top:60px;z-index:8000;background:transparent;padding:4px 0 4px 0;box-shadow:none;">
+        <div class="req-float-pills">
+          <button class="req-pill req-pill-today active" data-filter="today" onclick="filterReq('today',this)"><span class="req-pill-ic">📅</span><span class="req-pill-lbl">اليوم</span></button>
+          <button class="req-pill req-pill-pending" data-filter="pending" onclick="filterReq('pending',this)"><span class="req-pill-ic">⏳</span><span class="req-pill-lbl">معلقة</span></button>
+          <button class="req-pill req-pill-inprogress" data-filter="inprogress" onclick="filterReq('inprogress',this)"><span class="req-pill-ic">⚡</span><span class="req-pill-lbl">جارية</span></button>
+          <button class="req-pill req-pill-done" data-filter="done" onclick="filterReq('done',this)"><span class="req-pill-ic">✅</span><span class="req-pill-lbl">مكتملة</span></button>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-          <div class="srch-box" style="width:150px"><span class="srch-ic">🔍</span><input class="srch-inp" id="req-srch-inp" lang="ar" dir="rtl" placeholder="بحث..." oninput="searchReq(this.value)" style="padding-left:70px;"><button type="button" class="lang-toggle-btn" id="req-srch-ltb" onclick="toggleInputLang('req-srch-inp','req-srch-ltb')" title="تبديل لغة الإدخال">ع</button></div>
-          <button class="btn btn-p" style="white-space:nowrap;flex-shrink:0;" onclick="startNewPatient()">➕ طلب جديد</button>
+          <div class="req-srch-pill"><span class="req-srch-pill-ic">🔍</span><input class="req-srch-pill-inp" id="req-srch-inp" lang="ar" dir="rtl" placeholder="بحث..." oninput="searchReq(this.value)"><button type="button" class="req-srch-pill-ltb lang-toggle-btn" id="req-srch-ltb" onclick="toggleInputLang('req-srch-inp','req-srch-ltb')" title="تبديل لغة الإدخال">ع</button></div>
+          <button class="req-pill req-pill-new" onclick="startNewPatient()"><span class="req-pill-ic">➕</span><span class="req-pill-lbl">طلب جديد</span></button>
         </div>
       </div>
 
-      <!-- ══════════════ بانر الترحيب النيون — الطلبات ══════════════ -->
-      <div class="welcome-neon-banner wnb-requests" id="wnb-requests-banner">
-        <div class="wnb-bg-layer"></div>
-        <div class="wnb-particles wnb-p2" id="wnb-particles-req"></div>
-        <div class="wnb-content">
-          <div class="wnb-icon wnb-icon-alt">📋</div>
-          <div class="wnb-text-wrap">
-            <p class="wnb-text" id="wnb-req-text-el">أهلاً وسهلاً بكم في نظام MedLab Pro</p>
-          </div>
-          <div class="wnb-icon wnb-icon-alt">🧬</div>
-        </div>
-        <div class="wnb-line wnb-line-top"></div>
-        <div class="wnb-line wnb-line-bottom"></div>
-      </div>
-      <!-- ══════════════════════════════════════════ -->
+
 
       <div class="gc">
         <div style="overflow-x:auto">
@@ -2654,7 +2718,6 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
             <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:16px">
               <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
                 <div class="fg" style="margin-bottom:0;flex:1;min-width:160px"><label class="fl">تاريخ الفحص</label><input class="fc" type="date" id="res-date"></div>
-                <div class="fg" style="margin-bottom:0;flex:2;min-width:200px"><label class="fl">ملاحظات عامة</label><input class="fc" id="res-notes" placeholder="ملاحظات اختيارية"></div>
                 <button class="btn btn-s" style="white-space:nowrap;padding:9px 14px;font-size:13px;font-weight:800" onclick="printCBCBlank()" title="طباعة ورقة CBC فارغة">🖨️ طباعة CBC</button>
               </div>
               <input type="hidden" id="res-tech">
@@ -2828,7 +2891,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
     <!-- INVOICES -->
     <div class="sec" id="sec-invoices">
       <div class="gc">
-        <div class="gc-hdr"><div class="gc-title">💰 الفواتير</div><button class="btn btn-p btn-sm" onclick="openModal('m-invoice')">➕ فاتورة</button></div>
+        <div class="gc-hdr"><div class="gc-title">💰 الفواتير</div><div style="display:flex;gap:8px"><button class="btn btn-p btn-sm" onclick="openModal('m-invoice')">➕ فاتورة</button><button class="btn btn-d btn-sm" onclick="clearAllInvoices()">🗑️ مسح الكل</button></div></div>
         <div style="overflow-x:auto">
           <table class="tbl"><thead><tr><th>رقم</th><th>المريض</th><th>التاريخ</th><th>المبلغ</th><th>التأمين</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="inv-body"></tbody></table>
         </div>
@@ -5220,22 +5283,36 @@ F: 12 - 16 g/dL" style="font-size:12px;resize:vertical"></textarea></div>
 
         <!-- Positive / Negative block -->
         <div id="ref-pos-neg-block" style="display:none">
-          <div style="background:rgba(0,255,157,0.06);border:1px solid rgba(0,255,157,0.25);border-radius:9px;padding:14px;display:flex;align-items:flex-start;gap:12px">
-            <div style="font-size:28px;line-height:1">✅</div>
+          <div style="background:rgba(0,255,157,0.06);border:1px solid rgba(0,255,157,0.25);border-radius:9px;padding:12px;display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+            <div style="font-size:24px;line-height:1">✅</div>
             <div>
-              <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px">تحليل نوعي — Qualitative</div>
+              <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:3px">تحليل نوعي — Qualitative</div>
               <div style="font-size:11px;color:var(--text2);line-height:1.6">
-                النتيجة ستكون اختيارية: <b style="color:var(--success)">Negative</b> أو <b style="color:var(--danger)">Positive</b> أو <b style="color:var(--warning)">Weak Positive</b>.<br>
+                حدّد الخيارات التي ستظهر عند إدخال نتيجة هذا التحليل.<br>
                 الوحدة ستُعيَّن تلقائياً على <b style="color:var(--primary)">qualitative</b> وتُلغى حقول Min/Max.
               </div>
             </div>
           </div>
-          <div class="fg" style="margin-top:10px">
-            <label class="fl">القيمة الطبيعية الافتراضية (للمدى المرجعي)</label>
-            <select class="fc" id="et-pos-neg-default">
-              <option value="Negative">Negative (سلبي) — افتراضي</option>
-              <option value="Positive">Positive (إيجابي)</option>
-            </select>
+          <!-- لوحة إدارة الخيارات -->
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px">📋 خيارات النتيجة</div>
+            <!-- قائمة الخيارات الديناميكية -->
+            <div id="qual-options-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:200px;overflow-y:auto">
+              <div style="text-align:center;color:var(--text2);font-size:11px;padding:10px">لا توجد خيارات — أضف من الأدوات أدناه</div>
+            </div>
+            <!-- حقل إضافة خيار -->
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">
+              <input class="fc" id="qual-new-option-input" placeholder="مثال: Trace أو +" style="flex:1;padding:6px 10px;font-size:12px" onkeydown="if(event.key==='Enter'){event.preventDefault();addQualOption();}">
+              <button class="btn btn-s btn-sm" onclick="addQualOption()" style="flex-shrink:0;white-space:nowrap;padding:6px 12px">➕ إضافة</button>
+            </div>
+            <!-- أزرار الإضافة السريعة - تُبنى بـ JS -->
+            <div style="font-size:10px;color:var(--text2);margin-bottom:6px">إضافة سريعة:</div>
+            <div id="qual-quick-btns" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+            <!-- القيمة الطبيعية الافتراضية -->
+            <div class="fg" style="margin-top:12px;margin-bottom:0">
+              <label class="fl">القيمة الطبيعية الافتراضية (للمدى المرجعي)</label>
+              <select class="fc" id="et-pos-neg-default"></select>
+            </div>
           </div>
         </div>
 
@@ -6033,7 +6110,7 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
   // ══════════════════════════════════════════════════
   var AR_FIELDS = [
     'wp-name','wp-fname','wp-mname','wp-lname','inline-dr-name',
-    'global-search','print-search-inp','del-pt-srch','ps-search',
+    'print-search-inp','del-pt-srch','ps-search',
     'cult-pt-search','ua-pt-search',
     'stool-pt-search','semen-pt-search','chat-input-text',
     'chat-search-inp','chat-result-search'
@@ -6087,9 +6164,9 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
     'print-search-inp',
     'cult-pt-search','ua-pt-search','stool-pt-search',
     'adm-labname','adm-labaddr','inline-dr-name',
-    'chat-result-search','global-search',
+    'chat-result-search',
     'ii-name','pkg-name','pkg-desc','ftr-txt-address','ftr-txt-note',
-    'res-notes','hdr-lab-name'
+    'hdr-lab-name'
   ];
   var EN_IDS=[
     'tests-srch','et-name-en','et-code','et-unit','et-ref','et-price',
@@ -7207,11 +7284,6 @@ window.onload=()=>{
     // إذا أعادت promise لا تكتمل (أول تشغيل) لن يصل هنا أبداً
     checkAuth();
   });
-  document.addEventListener('click',e=>{
-    if(!document.getElementById('gs-wrap').contains(e.target)){
-      document.getElementById('gs-results').style.display='none';
-    }
-  });
 };
 
 function startApp(){
@@ -7686,9 +7758,9 @@ function nav(p){
   if(p==='stool') renderStoolList();
   if(p==='semen') renderSemenList();
   if(p==='requests'){
-    // إعادة تعيين الـ tab
-    document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));
-    const todayTab=document.querySelector('#sec-requests .tabs .tab[onclick*="today"]');
+    // إعادة تعيين الـ pill
+    document.querySelectorAll('#sec-requests .req-pill[data-filter]').forEach(t=>t.classList.remove('active'));
+    const todayTab=document.querySelector('#sec-requests .req-pill[data-filter="today"]');
     if(todayTab) todayTab.classList.add('active');
     // رسم فوري إذا البيانات موجودة في الكاش، وإلا أظهر loading ثم أعد المحاولة
     if(requests && requests.length > 0){
@@ -7707,7 +7779,7 @@ function nav(p){
       })(20);
     }
     const srch=document.getElementById('req-srch-inp');
-    if(srch){srch.focus();srch.select();}
+    if(srch){ requestAnimationFrame(function(){ srch.focus(); srch.select(); }); }
   }
   if(p==='patients') renderPatients();
   if(p==='doctors') renderDoctors();
@@ -7730,32 +7802,9 @@ document.querySelectorAll('.moverlay').forEach(m=>{m.addEventListener('click',e=
 // ============================================================
 // GLOBAL SEARCH - IMPROVED
 // ============================================================
-function globalSearch(v){
-  if(window._gsTimer) clearTimeout(window._gsTimer);
-  window._gsTimer=setTimeout(function(){_doGlobalSearch(v);},120);
-}
-function _doGlobalSearch(v){
-  const res=document.getElementById('gs-results');
-  if(!v||v.trim().length<1){res.style.display='none';return;}
-  const q=v.toLowerCase();
-  const pts=patients.filter(p=>(p.name+p.phone+(p.id||'')).toLowerCase().includes(q)).slice(0,5);
-  const reqs=requests.filter(r=>(r.id+r.patientName).toLowerCase().includes(q)).slice(0,4);
-  let html='';
-  if(pts.length){
-    html+='<div style="padding:6px 14px;font-size:10px;color:var(--primary);font-weight:700;border-bottom:1px solid rgba(255,255,255,0.05)">👥 المرضى</div>';
-    html+=pts.map(p=>`<div class="gs-item" onclick="openPatientQuickPanel('${p.id}');document.getElementById('gs-results').style.display='none';document.getElementById('global-search').value=''"><div class="gs-item-name">${p.name}</div><div class="gs-item-sub">📞 ${p.phone||'-'} | ${p.id||'-'} | ${calcAgeFromInput(p.dob,p.age)} سنة</div></div>`).join('');
-  }
-  if(reqs.length){
-    html+='<div style="padding:6px 14px;font-size:10px;color:var(--warning);font-weight:700;border-bottom:1px solid rgba(255,255,255,0.05)">📋 الطلبات</div>';
-    html+=reqs.map(r=>`<div class="gs-item" onclick="${r.status==='done'?`goToPrint('${r.id}')`:`goToResult('${r.id}')`};document.getElementById('gs-results').style.display='none'"><div class="gs-item-name">${r.id} - ${r.patientName}</div><div class="gs-item-sub">${getStatusText(r.status)} | ${r.date}</div></div>`).join('');
-  }
-  if(!html)html='<div style="padding:16px;text-align:center;color:var(--text2);font-size:12px">لا توجد نتائج</div>';
-  res.innerHTML=html;
-  res.style.display='block';
-}
 
 // ============================================================
-// PATIENT QUICK PANEL (from global search click)
+// PATIENT QUICK PANEL
 // ============================================================
 function openPatientQuickPanel(pid){
   const p=patients.find(x=>x.id===pid);if(!p)return;
@@ -7813,7 +7862,7 @@ function openPatientQuickPanel(pid){
     </div>
     <div class="mftr">
       <button class="btn btn-s" onclick="document.getElementById('m-pt-quick').remove()">إغلاق</button>
-      <button class="btn btn-p" onclick="startNewPatient();document.getElementById('global-search').value='';document.getElementById('m-pt-quick').remove()">➕ طلب جديد</button>
+      <button class="btn btn-p" onclick="startNewPatient();document.getElementById('m-pt-quick').remove()">➕ طلب جديد</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
@@ -8803,7 +8852,6 @@ function renderPatients(filter='all',srch='',_overridePts=null){
     <td>${getBdg(p.status||'active')}</td>
     <td><div style="display:flex;gap:5px">
       <button class="btn btn-sm btn-p" onclick="viewPatientFullModal('${p.id}')">📋 ملف</button>
-      <button class="btn btn-sm btn-s" onclick="editPatient('${p.id}')">✏️</button>
       ${_ptHasDoneReq(p.id)?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#25d366,#1a9e4a);border:1.5px solid rgba(37,211,102,0.6);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(37,211,102,0.25)" onclick="openPatientPortalByPatient('${p.id}')">📲 إرسال للمريض</button>`:''}
       <button class="btn btn-sm btn-d" onclick="deletePatient('${p.id}')">🗑️</button>
     </div></td>
@@ -8866,34 +8914,6 @@ function toggleCalendar(e){
       });
     },10);
   }
-}
-function toggleHdrCalendar(e){
-  e.stopPropagation();
-  const p=document.getElementById('hdr-cal-panel');
-  p.style.display=p.style.display==='none'?'block':'none';
-  if(p.style.display==='block'){
-    setTimeout(()=>{
-      document.addEventListener('click',function _c(ev){
-        if(!p.contains(ev.target)&&ev.target!==document.getElementById('hdr-cal-btn')){
-          p.style.display='none'; document.removeEventListener('click',_c);
-        }
-      });
-    },10);
-  }
-}
-function hdrFilterByDate(d){
-  _dateFilter=d;
-  document.getElementById('hdr-cal-panel').style.display='none';
-  nav('patients');
-  setTimeout(()=>renderPatients('all'),50);
-  if(d) showNotif('📅 فلتر','مراجعو '+d.split('-').reverse().join('/'),'info');
-}
-function hdrClearDate(){
-  _dateFilter='';
-  const inp=document.getElementById('hdr-cal-date');
-  if(inp) inp.value='';
-  document.getElementById('hdr-cal-panel').style.display='none';
-  renderPatients('all');
 }
 function filterPatientsByDate(d){
   _dateFilter=d;
@@ -9116,14 +9136,15 @@ function getTubeColors(testIds){
 function renderRequestsFiltered(filter='today',srch=''){
   const today=new Date().toISOString().split('T')[0];
   const tbody=document.getElementById('requests-body');
+  if(!tbody) return;
   let list=[...requests].reverse();
   if(filter==='today') list=list.filter(r=>r.date===today);
   else if(filter==='pending') list=list.filter(r=>r.status==='pending'&&r.date===today);
   else if(filter==='inprogress') list=list.filter(r=>r.status==='inprogress'&&r.date===today);
   else if(filter==='done') list=list.filter(r=>r.status==='done'&&r.date===today);
-  if(srch){const q=srch.toLowerCase();list=list.filter(r=>(r.id+r.patientName).toLowerCase().includes(q));}
+  if(srch){const q=srch.trim().toLowerCase();list=list.filter(r=>(r.patientName||'').toLowerCase().includes(q)||(r.id||'').toLowerCase().includes(q));}
   if(!list.length){
-    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">${filter==='today'?'لا توجد طلبات اليوم':'لا توجد طلبات اليوم في هذه الحالة'}</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">لا توجد طلبات اليوم في هذه الحالة</td></tr>`;
     return;
   }
   tbody.innerHTML=list.map(r=>`<tr>
@@ -9134,20 +9155,68 @@ function renderRequestsFiltered(filter='today',srch=''){
     <td>${getPriorityBdg(r.priority)}</td>
     <td>${getStatusBdg(r.status)}</td>
     <td>${r.printed?'<span class="bdg bdg-ok">🖨️ مطبوع</span>':'<span class="bdg" style="background:rgba(255,214,10,0.13);color:var(--warning);border:1px solid rgba(255,214,10,0.28)">⏸ غير مطبوع</span>'}</td>
-    <td><div style="display:flex;gap:5px;flex-wrap:wrap">
-      ${r.status!=='done'?`<button class="btn btn-sm btn-p" onclick="goToResult('${r.id}')">🧪 نتائج</button>`:''}
-      <button class="btn btn-sm" style="background:rgba(139,63,255,0.15);border-color:rgba(139,63,255,0.4);color:#c084fc;font-size:10px" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
-      ${r.status==='done'?`<button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')">🖨️ طباعة</button>`:''}
-      ${r.status==='done'?`<button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')">✏️ تعديل</button>`:''}
-      <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')">🗑️</button>
+    <td><div style="display:flex;gap:5px;align-items:center;flex-wrap:nowrap">
+      ${r.printed && r.status==='done' ? `
+        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,rgba(0,200,100,0.18),rgba(0,160,80,0.12));border:1.5px solid rgba(0,210,100,0.5);color:#00e87a;font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="تعديل وطباعة">✏️🖨️ تعديل وطباعة</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+        </div>
+        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
+          <button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🖨️ طباعة</button>
+          <button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">✏️ تعديل</button>
+          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
+        </div>
+      ` : r.status!=='done' ? `
+        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
+          <button class="btn btn-sm btn-p" style="font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="نتائج وطباعة">🧪 نتائج وطباعة</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+        </div>
+        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
+          <button class="btn btn-sm btn-p" onclick="goToResult('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🧪 نتائج</button>
+          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
+        </div>
+      ` : `
+        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,rgba(0,200,100,0.18),rgba(0,160,80,0.12));border:1.5px solid rgba(0,210,100,0.5);color:#00e87a;font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="تعديل وطباعة">✏️🖨️ تعديل وطباعة</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+        </div>
+        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
+          <button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🖨️ طباعة</button>
+          <button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">✏️ تعديل</button>
+          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
+          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
+          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
+        </div>
+      `}
     </div></td>
   </tr>`).join('');
 }
 function renderRequests(filter='all',srch=''){renderRequestsFiltered(filter,srch);}
-function filterReq(f,el){document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
+function toggleReqBtns(id,expand){
+  const col=document.getElementById('req-btns-'+id);
+  const exp=document.getElementById('req-btns-'+id+'-exp');
+  if(!col||!exp)return;
+  if(expand){
+    col.style.display='none';
+    exp.style.display='flex';
+    if(window['_rbt_'+id])clearTimeout(window['_rbt_'+id]);
+    window['_rbt_'+id]=setTimeout(()=>{
+      if(col&&exp){col.style.display='flex';exp.style.display='none';}
+    },8000);
+  }else{
+    col.style.display='flex';
+    exp.style.display='none';
+    if(window['_rbt_'+id])clearTimeout(window['_rbt_'+id]);
+  }
+}
+function filterReq(f,el){document.querySelectorAll('#sec-requests .req-pill[data-filter]').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
 function searchReq(v){
   if(window._srTimer)clearTimeout(window._srTimer);
-  const activeTab=document.querySelector('#sec-requests .tabs .tab.active');
+  const activeTab=document.querySelector('#sec-requests .req-pill[data-filter].active');
   const filter=activeTab?.getAttribute('data-filter')||'today';
   renderRequestsFiltered(filter,v);
 }
@@ -9241,24 +9310,22 @@ function openViewResultsModal(rid){
     let inputHtml;
     // Fix 4: Always allow editing - remove printed lock
     if(isQual){
-        const isManual = val && !['','Negative','Positive','Reactive','Non-Reactive','Acceptable'].includes(val);
-        inputHtml=`<div style="display:flex;flex-direction:column;gap:4px">
-          <select class="res-input" id="vr-rv-${t.id}" style="width:145px" onchange="vrHandleQualChange('${t.id}',this)">
-            <option value="">-- Select --</option>
-            <option ${val==='Negative'?'selected':''}>Negative</option>
-            <option ${val==='Positive'?'selected':''}>Positive</option>
-            <option ${val==='Reactive'?'selected':''}>Reactive</option>
-            <option ${val==='Non-Reactive'?'selected':''}>Non-Reactive</option>
-            <option ${val==='Acceptable'?'selected':''}>Acceptable</option>
-            <option value="__manual__" ${isManual?'selected':''}>✏️ إدخال يدوي</option>
-          </select>
-          <input type="text" class="res-input" id="vr-rv-manual-${t.id}"
-            lang="en" inputmode="email"
-            placeholder="اكتب النتيجة..."
-            style="width:145px;display:${isManual?'block':'none'}"
-            value="${isManual?val:''}"
-            oninput="vrCheckResult('${t.id}',this.value);document.getElementById('vr-rv-${t.id}').value='__manual__'">
-        </div>`;
+        var _qOpts1=(t.qualOptions&&t.qualOptions.length>0)?t.qualOptions:['Negative','Positive','Reactive','Non-Reactive','Acceptable'];
+        const isManual = val && _qOpts1.indexOf(val)===-1 && val!=='';
+        var _qOptHtml1='<option value="">-- Select --</option>';
+        _qOpts1.forEach(function(o){_qOptHtml1+='<option '+(val===o?'selected':'')+'>'+o+'</option>';});
+        _qOptHtml1+='<option value="__manual__" '+(isManual?'selected':'')+'>✏️ إدخال يدوي</option>';
+        inputHtml='<div style="display:flex;flex-direction:column;gap:4px">'
+          +'<select class="res-input" id="vr-rv-'+t.id+'" style="width:145px" onchange="vrHandleQualChange(\''+t.id+'\',this)">'
+          +_qOptHtml1
+          +'</select>'
+          +'<input type="text" class="res-input" id="vr-rv-manual-'+t.id+'"'
+          +' lang="en" inputmode="email"'
+          +' placeholder="اكتب النتيجة..."'
+          +' style="width:145px;display:'+(isManual?'block':'none')+'"'
+          +' value="'+(isManual?val:'')+'"'
+          +' oninput="vrCheckResult(\''+t.id+'\',this.value);document.getElementById(\'vr-rv-'+t.id+'\').value=\'__manual__\'">'
+          +'</div>';
     } else {
       const iCls=val?(parseFloat(val)>t.maxVal?'res-high':parseFloat(val)<t.minVal?'res-low':'res-ok'):'';
       inputHtml=`<input type="text" class="res-input ${iCls}" id="vr-rv-${t.id}" lang="en" inputmode="decimal" value="${val}" oninput="vrCheckResult('${t.id}',this.value)" placeholder="...">`;
@@ -9601,7 +9668,6 @@ function loadResultEntry(){
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('res-date').value=req.resultDate||today;
   document.getElementById('res-tech').value=req.tech||settings.dir||'';
-  document.getElementById('res-notes').value=req.resultNotes||'';
   const reqTests=req.tests.map(tid=>tests.find(t=>t.id===tid)).filter(Boolean);
   const ptAge=parseFloat(pt.ageVal)||Math.floor((Date.now()-new Date(pt.dob||0).getTime())/31557600000)||0;
   const ptGender=pt.gender||'male';
@@ -9675,25 +9741,22 @@ function loadResultEntry(){
         +'<input type="hidden" id="rv-'+t.id+'" value="'+(savedVal||'')+'">'
         +'</div>';
     } else if(isQual){
-      const isManual2 = savedVal && !['','Negative','Positive','Weak','Reactive','Non-Reactive','Acceptable'].includes(savedVal);
-      inputHtml=`<div style="display:flex;flex-direction:column;gap:4px">
-        <select class="res-input" id="rv-${t.id}" style="width:145px" onchange="handleQualChange('${t.id}',this)">
-          <option value="">-- Select --</option>
-          <option ${savedVal==='Negative'?'selected':''}>Negative</option>
-          <option ${savedVal==='Positive'?'selected':''}>Positive</option>
-          <option ${savedVal==='Weak'?'selected':''}>Weak</option>
-          <option ${savedVal==='Reactive'?'selected':''}>Reactive</option>
-          <option ${savedVal==='Non-Reactive'?'selected':''}>Non-Reactive</option>
-          <option ${savedVal==='Acceptable'?'selected':''}>Acceptable</option>
-          <option value="__manual__" ${isManual2?'selected':''}>✏️ إدخال يدوي</option>
-        </select>
-        <input type="text" class="res-input" id="rv-manual-${t.id}"
-          lang="en" inputmode="email"
-          placeholder="اكتب النتيجة..."
-          style="width:145px;display:${isManual2?'block':'none'}"
-          value="${isManual2?savedVal:''}"
-          oninput="checkResult('${t.id}',this.value);document.getElementById('rv-${t.id}').value='__manual__';_autoSaveResults()">
-      </div>`;
+      var _qOpts2=(t.qualOptions&&t.qualOptions.length>0)?t.qualOptions:['Negative','Positive','Weak','Reactive','Non-Reactive','Acceptable'];
+      const isManual2 = savedVal && _qOpts2.indexOf(savedVal)===-1 && savedVal!=='';
+      var _qOptHtml2='<option value="">-- Select --</option>';
+      _qOpts2.forEach(function(o){_qOptHtml2+='<option '+(savedVal===o?'selected':'')+'>'+o+'</option>';});
+      _qOptHtml2+='<option value="__manual__" '+(isManual2?'selected':'')+'>✏️ إدخال يدوي</option>';
+      inputHtml='<div style="display:flex;flex-direction:column;gap:4px">'
+        +'<select class="res-input" id="rv-'+t.id+'" style="width:145px" onchange="handleQualChange(\''+t.id+'\',this)">'
+        +_qOptHtml2
+        +'</select>'
+        +'<input type="text" class="res-input" id="rv-manual-'+t.id+'"'
+        +' lang="en" inputmode="email"'
+        +' placeholder="اكتب النتيجة..."'
+        +' style="width:145px;display:'+(isManual2?'block':'none')+'"'
+        +' value="'+(isManual2?savedVal:'')+'"'
+        +' oninput="checkResult(\''+t.id+'\',this.value);document.getElementById(\'rv-'+t.id+'\').value=\'__manual__\';_autoSaveResults()">'
+        +'</div>';
     } else {
       const cls=savedVal&&ref.min!==null?(parseFloat(savedVal)>ref.max?'res-high':parseFloat(savedVal)<ref.min?'res-low':'res-ok'):'';
       inputHtml=`<input type="text" class="res-input ${cls}" id="rv-${t.id}" lang="en" inputmode="decimal" value="${savedVal||''}" oninput="checkResult('${t.id}',this.value)" placeholder="...">`;
@@ -9869,7 +9932,6 @@ function _autoSaveResults(){
     if(tech) req.tech=tech.value;
     const rd=document.getElementById('res-date');
     if(rd) req.resultDate=rd.value;
-    const rn=document.getElementById('res-notes');
     if(rn) req.resultNotes=rn.value;
     // تحديث الحالة تلقائياً: إذا كل التحاليل العادية مكتملة → done، وإلا → inprogress
     const regularTests=reqTests.filter(function(t){return !t.isSpecialExam;});
@@ -9981,7 +10043,6 @@ function collectResults(){
   });
   req.tech=document.getElementById('res-tech').value;
   req.resultDate=document.getElementById('res-date').value;
-  req.resultNotes=document.getElementById('res-notes').value;
   return req;
 }
 
@@ -11083,16 +11144,36 @@ function buildPrintHTML(req, opts){
         ref=getPatientRef(t,ptGender,ptAge);
       }
 
-      let isHigh=false, isLow=false;
+      let isHigh=false, isLow=false, isQualAbnormal=false;
       if(!isQual&&displayVal!=='—'){
         const v=parseFloat(displayVal);
         if(ref.min!==null&&v>ref.max) isHigh=true;
         else if(ref.min!==null&&v<ref.min) isLow=true;
-      } else if(displayVal==='Positive'||displayVal==='Reactive') isHigh=true;
+      } else if(isQual&&displayVal!=='—'){
+        // Option-based (qualitative) tests: red box when value differs from normal — no H/L letter
+        const _qNormal = t.qualDefault || null;
+        if(_qNormal){
+          isQualAbnormal = (displayVal !== _qNormal);
+        } else {
+          // Built-in qualitative tests: detect by ref or known abnormal keywords
+          const _ql = displayVal.toLowerCase();
+          const _knownAbn = ['positive','reactive','detected','present','found'];
+          const _knownNrm = ['negative','non-reactive','not detected','normal','absent','compatible','not present','none detected','not found','see report'];
+          if(_knownAbn.some(a=>_ql===a||_ql.startsWith(a+' ')||_ql.startsWith(a+'/'))){
+            isQualAbnormal = true;
+          } else if(!_knownNrm.some(n=>_ql===n||_ql.startsWith(n))){
+            // Compare against the test's ref value if it is a simple single value
+            const _ref = (t.ref||'').trim();
+            if(_ref && !_ref.includes('|') && !_ref.includes('/') && _ref.toLowerCase()!=='see report' && displayVal!==_ref){
+              isQualAbnormal = true;
+            }
+          }
+        }
+      }
 
       const isAbnormal = isHigh||isLow;
-      const valColor   = showHL&&isHigh?'#cc0000':showHL&&isLow?'#0055cc':'#000000';
-      const boxBorder  = showHL&&isAbnormal?valColor:'#000000';
+      const valColor   = showHL&&isHigh?'#cc0000':showHL&&isLow?'#0055cc':showHL&&isQualAbnormal?'#cc0000':'#000000';
+      const boxBorder  = showHL&&isAbnormal?valColor:showHL&&isQualAbnormal?'#cc0000':'#000000';
       const flagLetter = showHL&&isHigh
         ?`<span style="font-size:10px;font-weight:600;color:#cc0000;margin-right:2px;flex-shrink:0">H</span>`
         :showHL&&isLow
@@ -11959,6 +12040,80 @@ function shareWhatsApp(){
 // ============================================================
 let ageRangeCount=0;
 
+// ── Qualitative Options Management ──────────────────────────
+var currentQualOptions=[];
+var QUAL_QUICK=['Negative','Positive','Weak Positive','Reactive','Non-Reactive','Trace','+','++','+++','++++','Nil','Absent'];
+
+function _buildQualQuickBtns(){
+  var c=document.getElementById('qual-quick-btns');
+  if(!c)return;
+  c.innerHTML='';
+  QUAL_QUICK.forEach(function(o){
+    var b=document.createElement('button');
+    b.className='btn btn-sm';
+    b.textContent=o;
+    b.style.cssText='font-size:10px;padding:3px 8px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);color:var(--primary)';
+    b.onclick=function(){_quickAddQualOpt(o);};
+    c.appendChild(b);
+  });
+}
+
+function _renderQualOptionsList(){
+  var c=document.getElementById('qual-options-list');
+  if(!c)return;
+  if(currentQualOptions.length===0){
+    c.innerHTML='<div style="text-align:center;color:var(--text2);font-size:11px;padding:10px">لا توجد خيارات — أضف من الأدوات أدناه</div>';
+  } else {
+    var html='';
+    for(var i=0;i<currentQualOptions.length;i++){
+      var v=currentQualOptions[i];
+      html+='<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;padding:5px 8px">'
+        +'<input type="text" class="fc" value="'+v+'" id="qo-inp-'+i+'" style="flex:1;padding:4px 8px;font-size:12px;min-width:0" onchange="(function(idx,el){currentQualOptions[idx]=el.value.trim();_syncQualDefaultSel();})('+i+',this)">'
+        +'<button class="btn btn-d btn-sm" onclick="_removeQualOpt('+i+')" style="flex-shrink:0;padding:3px 7px">🗑️</button>'
+        +'</div>';
+    }
+    c.innerHTML=html;
+  }
+  _syncQualDefaultSel();
+}
+
+function _syncQualDefaultSel(){
+  var sel=document.getElementById('et-pos-neg-default');
+  if(!sel)return;
+  var prev=sel.value;
+  sel.innerHTML='';
+  currentQualOptions.forEach(function(o){
+    var opt=document.createElement('option');
+    opt.value=o; opt.textContent=o;
+    if(o===prev) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  if(!sel.value && currentQualOptions.length>0) sel.value=currentQualOptions[0];
+}
+
+function addQualOption(){
+  var inp=document.getElementById('qual-new-option-input');
+  if(!inp)return;
+  var v=inp.value.trim();
+  if(!v){showNotif('تنبيه','أدخل قيمة الخيار','warn');return;}
+  if(currentQualOptions.indexOf(v)>-1){showNotif('تنبيه','هذا الخيار موجود بالفعل','warn');return;}
+  currentQualOptions.push(v);
+  inp.value='';
+  _renderQualOptionsList();
+}
+
+function _quickAddQualOpt(v){
+  if(currentQualOptions.indexOf(v)>-1){showNotif('تنبيه','الخيار موجود بالفعل','warn');return;}
+  currentQualOptions.push(v);
+  _renderQualOptionsList();
+}
+
+function _removeQualOpt(idx){
+  currentQualOptions.splice(idx,1);
+  _renderQualOptionsList();
+}
+// ────────────────────────────────────────────────────────────
+
 function changeRefType(){
   const val=document.querySelector('input[name="ref-type"]:checked').value;
   document.getElementById('ref-simple-block').style.display=val==='simple'?'block':'none';
@@ -11973,6 +12128,14 @@ function changeRefType(){
     if(uInp) uInp.value='qualitative';
     const refEl=document.getElementById('et-ref');
     if(refEl && !refEl.value) refEl.value='Negative';
+    _buildQualQuickBtns();
+    _renderQualOptionsList();
+    // تطبيق القيمة الافتراضية المحفوظة إذا وجدت
+    if(openEditTest._pendingQualDefault){
+      var sel=document.getElementById('et-pos-neg-default');
+      if(sel) sel.value=openEditTest._pendingQualDefault;
+      openEditTest._pendingQualDefault=null;
+    }
   }
 }
 
@@ -12057,6 +12220,7 @@ function renderTestsDB(){
 function openEditTest(id){
   editTestId=id;
   ageRangeCount=0;
+  currentQualOptions=[];
   document.getElementById('age-ranges-list').innerHTML='';
   const etCat=document.getElementById('et-cat');
   etCat.innerHTML=TEST_CATS.filter(c=>c!=='All').map(c=>`<option>${c}</option>`).join('');
@@ -12083,8 +12247,12 @@ function openEditTest(id){
     const isPosNeg=t.refType==='pos-neg'||(t.unit==='qualitative'&&t.minVal===null&&t.maxVal===null&&t.minF===null&&t.maxF===null&&(!t.ageRanges||t.ageRanges.length===0));
     if(isPosNeg){
       document.getElementById('rt-pos-neg').checked=true;
-      const defSel=document.getElementById('et-pos-neg-default');
-      if(defSel) defSel.value=(t.ref&&t.ref.trim()==='Positive')?'Positive':'Negative';
+      // تحميل الخيارات المحفوظة أو الافتراضية
+      currentQualOptions=(t.qualOptions&&t.qualOptions.length>0)?t.qualOptions.slice():['Negative','Positive'];
+      const defVal=t.qualDefault||(t.ref&&t.ref.trim()==='Positive'?'Positive':'Negative');
+      // سيتم بناء القائمة عند استدعاء changeRefType لاحقاً
+      // نحفظ القيمة الافتراضية مؤقتاً
+      openEditTest._pendingQualDefault=defVal;
     } else if(hasAgeRanges){
       document.getElementById('rt-age').checked=true;
       const unitOpts='<option value="year">سنة</option><option value="month">شهر</option><option value="day">يوم</option>';
@@ -12212,6 +12380,13 @@ function saveTest(){
     price:parseFloat(document.getElementById('et-price').value)||0,
     notes:document.getElementById('et-notes').value
   };
+  // حفظ خيارات التحليل النوعي
+  if(refType==='pos-neg'){
+    var _defVal=(document.getElementById('et-pos-neg-default')||{}).value||'Negative';
+    t.qualOptions=currentQualOptions.length>0?currentQualOptions.slice():['Negative','Positive'];
+    t.qualDefault=_defVal;
+    if(!t.ref) t.ref=_defVal;
+  }
   // الحفاظ على isCalc وcalcFormula وcalcInputSettings إذا كان التحليل محسوباً (المشكلة ٣)
   if(editTestId){
     const origTest=tests.find(x=>x.id===editTestId);
@@ -12726,6 +12901,7 @@ function renderInvoices(){
 function saveInvoice(){const pid=document.getElementById('inv-pt').value;const pt=patients.find(p=>p.id===pid);invoices.push({id:'INV-'+(1000+invoices.length+1),patientId:pid,patientName:pt?pt.name:'-',total:parseFloat(document.getElementById('inv-total').value)||0,insType:document.getElementById('inv-ins').value,insAmt:parseFloat(document.getElementById('inv-ins-amt').value)||0,status:document.getElementById('inv-status').value,date:new Date().toISOString().split('T')[0]});save('invoices',invoices);renderInvoices();closeModal('m-invoice');showNotif('تم','تم حفظ الفاتورة ✅','success');}
 function loadInvPtDropdown(){const sel=document.getElementById('inv-pt');if(sel)sel.innerHTML=patients.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');}
 function deleteInv(id){if(confirm('حذف؟')){invoices=invoices.filter(i=>i.id!==id);save('invoices',invoices);renderInvoices();}}
+function clearAllInvoices(){if(confirm('هل تريد مسح جميع الفواتير بالكامل؟ لا يمكن التراجع عن هذا الإجراء.')){invoices=[];save('invoices',invoices);renderInvoices();showNotif('تم المسح','تم مسح جميع الفواتير ✅','success');}}
 function getInvStatusBdg(s){const m={مدفوعة:'ok',معلقة:'d',مؤجلة:'w',جزئية:'w',pending:'d'};return`<span class="bdg bdg-${m[s]||'p'}">${s}</span>`;}
 function renderQC(){document.getElementById('qc-body').innerHTML=qcRecords.map(r=>`<tr><td>${r.date}</td><td>${r.device}</td><td>${r.type}</td><td>${r.result}</td><td>${r.status==='مقبول'?'<span class="bdg bdg-ok">مقبول</span>':'<span class="bdg bdg-d">مرفوض</span>'}</td><td>${r.note||'-'}</td></tr>`).join('');}
 function saveQC(){qcRecords.push({date:new Date().toISOString().split('T')[0],device:document.getElementById('qc-dev').value,type:document.getElementById('qc-type').value,result:document.getElementById('qc-res').value,status:document.getElementById('qc-st').value,note:document.getElementById('qc-note').value});save('qc',qcRecords);renderQC();closeModal('m-qc');showNotif('تم','تم حفظ سجل الجودة ✅','success');}
@@ -19127,7 +19303,7 @@ function _buildUAPrintHTML(r){
           <span style="color:#000;margin-right:6px">■</span>${f.label}
         </td>
         <td style="font-size:15px;font-weight:700;color:#000000;padding:3px 10px;width:32%;border:none;border-bottom:1px solid #e0e0e0;text-align:center">
-          <span style="display:inline-block;border:1.5px solid #b0b0b0;border-radius:4px;padding:1px 10px;min-width:90px;text-align:center;background:#fff;color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'}">${val}</span>
+          <span style="display:inline-block;border:1.5px solid ${isAbn?'#cc0000':'#b0b0b0'};border-radius:4px;padding:1px 10px;min-width:90px;text-align:center;background:${isAbn?'#fff5f5':'#fff'};color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'}">${val}</span>
         </td>
         <td style="font-size:15px;font-weight:700;color:#000000;padding:3px 10px;width:30%;border:none;border-bottom:1px solid #e0e0e0">${f.normal||'—'}</td>
       </tr>`;
@@ -19693,7 +19869,7 @@ function _buildStoolPrintHTML(r){
         return `<tr style="background:${rowBg}">
           <td style="font-size:14px;font-weight:700;color:#000000;padding:2px 8px;width:38%;border:none;border-bottom:1px solid #e0e0e0"><span style="color:#000;margin-right:5px">■</span>${f.label}</td>
           <td style="font-size:14px;font-weight:700;padding:2px 8px;width:32%;border:none;border-bottom:1px solid #e0e0e0;text-align:center">
-            <span style="display:inline-block;border:1.5px solid #b0b0b0;border-radius:4px;padding:3px 10px;min-width:220px;text-align:left;background:#fff;color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'};line-height:1.6">${parasiteLines}</span>
+            <span style="display:inline-block;border:1.5px solid ${isAbn?'#cc0000':'#b0b0b0'};border-radius:4px;padding:3px 10px;min-width:220px;text-align:left;background:${isAbn?'#fff5f5':'#fff'};color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'};line-height:1.6">${parasiteLines}</span>
           </td>
           <td style="font-size:14px;font-weight:700;color:#000000;padding:2px 8px;width:30%;border:none;border-bottom:1px solid #e0e0e0">${f.normal||'—'}</td>
         </tr>`;
@@ -19703,7 +19879,7 @@ function _buildStoolPrintHTML(r){
       return `<tr style="background:${rowBg}">
         <td style="font-size:14px;font-weight:700;color:#000000;padding:2px 8px;width:38%;border:none;border-bottom:1px solid #e0e0e0"><span style="color:#000;margin-right:5px">■</span>${f.label}</td>
         <td style="font-size:14px;font-weight:700;color:#000000;padding:2px 8px;width:32%;border:none;border-bottom:1px solid #e0e0e0;text-align:center">
-          <span style="display:inline-block;border:1.5px solid #b0b0b0;border-radius:4px;padding:1px 8px;min-width:80px;text-align:center;background:#fff;color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'}">${val}</span>
+          <span style="display:inline-block;border:1.5px solid ${isAbn?'#cc0000':'#b0b0b0'};border-radius:4px;padding:1px 8px;min-width:80px;text-align:center;background:${isAbn?'#fff5f5':'#fff'};color:${isAbn?'#cc0000':'#000000'};font-weight:${isAbn?'900':'700'}">${val}</span>
         </td>
         <td style="font-size:14px;font-weight:700;color:#000000;padding:2px 8px;width:30%;border:none;border-bottom:1px solid #e0e0e0">${f.normal||'—'}</td>
       </tr>`;
@@ -21027,8 +21203,8 @@ function _printViaIframe(html){
     // ٤- إدخال النتائج: بحث تحليل جديد → إنجليزي
     'res-add-test-srch' : 'en',
     // ٥- بحث المريض في الصفحة الرئيسية → عربي (srch-inp بدون id تُعالج بالكلاس)
-    'global-search'     : 'ar',
     'req-srch-inp'      : 'ar',
+    'pts-srch-inp'      : 'ar',
     'print-search-inp'  : 'ar',
     'del-pt-srch'       : 'ar',
     'ps-search'         : 'ar',
@@ -22224,18 +22400,6 @@ document.addEventListener('DOMContentLoaded', function(){
     if (typeof updateBadges === 'function') updateBadges();
   };
 
-  // 5. تحسين البحث العالمي
-  if (typeof globalSearch === 'function') {
-    var _origGS = globalSearch;
-    window.globalSearch = debounce(function(v) {
-      if (!v || v.trim().length < 1) {
-        var el = document.getElementById('gs-results');
-        if (el) el.style.display = 'none';
-        return;
-      }
-      _origGS(v);
-    }, 250);
-  }
 
 })();
 </script>
@@ -26945,17 +27109,10 @@ function _wnbRebuild(textElId, newText) {
 function initNeonBanners() {
   const saved = localStorage.getItem(NEON_BANNER_KEY) || NEON_BANNER_DEFAULT;
 
-  /* لوحة التحكم */
-  const dashEl = document.getElementById('wnb-dash-text-el');
-  if (dashEl) { dashEl.textContent = saved; }
-  _wnbMakeParticles('wnb-particles-dash');
-  _wnbAnimate('wnb-dash-text-el');
-
-  /* الطلبات */
-  const reqEl = document.getElementById('wnb-req-text-el');
-  if (reqEl) { reqEl.textContent = saved; }
-  _wnbMakeParticles('wnb-particles-req');
-  _wnbAnimate('wnb-req-text-el');
+  /* الشريط العلوي */
+  const hdrEl = document.getElementById('wnb-hdr-text-el');
+  if (hdrEl) { hdrEl.textContent = saved; }
+  _wnbAnimate('wnb-hdr-text-el');
 
   /* حقل الأدمن */
   const inp = document.getElementById('admin-neon-text-inp');
@@ -26974,8 +27131,7 @@ function saveNeonBannerText() {
   localStorage.setItem(NEON_BANNER_KEY, val);
 
   /* تطبيق فوري على البانرَين */
-  _wnbRebuild('wnb-dash-text-el', val);
-  _wnbRebuild('wnb-req-text-el',  val);
+  _wnbRebuild('wnb-hdr-text-el', val);
 
   /* رسالة النجاح */
   const msg = document.getElementById('admin-neon-save-msg');
@@ -26990,8 +27146,7 @@ function resetNeonBannerText() {
   const prev = document.getElementById('admin-neon-preview');
   if (inp)  inp.value = NEON_BANNER_DEFAULT;
   if (prev) prev.textContent = NEON_BANNER_DEFAULT;
-  _wnbRebuild('wnb-dash-text-el', NEON_BANNER_DEFAULT);
-  _wnbRebuild('wnb-req-text-el',  NEON_BANNER_DEFAULT);
+  _wnbRebuild('wnb-hdr-text-el', NEON_BANNER_DEFAULT);
   showNotif('↩ تمت الإعادة','تم استعادة النص الافتراضي','success');
 }
 
@@ -27166,7 +27321,7 @@ setTimeout(function(){
   if(typeof window.searchReq === 'function'){
     window.searchReq = function(v){
       if(window._srTimer) clearTimeout(window._srTimer);
-      var activeTab = document.querySelector('#sec-requests .tabs .tab.active');
+      var activeTab = document.querySelector('#sec-requests .req-pill[data-filter].active');
       var filter = (activeTab && activeTab.getAttribute('data-filter')) || 'today';
       if(typeof renderRequestsFiltered === 'function') renderRequestsFiltered(filter, v);
     };
@@ -27199,8 +27354,6 @@ setTimeout(function(){
         if(tech) req.tech=tech.value;
         var rd=document.getElementById('res-date');
         if(rd) req.resultDate=rd.value;
-        var rn=document.getElementById('res-notes');
-        if(rn) req.resultNotes=rn.value;
         // تحديث الحالة
         var regularTests=reqTests.filter(function(t){return !t.isSpecialExam;});
         var allFilled=regularTests.length>0 && regularTests.every(function(t){
@@ -27341,7 +27494,7 @@ setTimeout(function(){
     '.modal { animation:su 0.1s ease !important; }',
 
     /* القوائم المنسدلة: ظهور فوري */
-    '.global-search-results,.pt-suggest,#notif-panel,#hdr-cal-panel,#cal-panel,#gs-results {',
+    '.pt-suggest,#notif-panel,#cal-panel {',
     '  animation:none !important; transition:none !important;',
     '}',
 
@@ -27368,8 +27521,7 @@ setTimeout(function(){
 
   /* ─── 2. DOM cache للعناصر الثابتة ──────────────────────── */
   var _cache = {};
-  var _static = ['ptitle','pbc','sidebar','sidebar-overlay','gs-results',
-                 'global-search','notif-panel','notif-dot','hdr-cal-panel'];
+  var _static = ['ptitle','pbc','sidebar','sidebar-overlay',                 'notif-panel','notif-dot'];
   var _origGBI = document.getElementById.bind(document);
   document.getElementById = function(id){
     if(_static.indexOf(id) !== -1){
@@ -27413,13 +27565,7 @@ setTimeout(function(){
   /* ─── 5. تسريع nav: تنظيف فوري قبل الانتقال ─────────────── */
   if(typeof window.nav === 'function'){
     var _on = window.nav;
-    window.nav = function(p){
-      var gs = _origGBI('gs-results');
-      var gi = _origGBI('global-search');
-      if(gs) gs.style.display='none';
-      if(gi) gi.value='';
-      _on(p);
-    };
+    window.nav = function(p){ _on(p); };
   }
 
   /* ─── 6. preconnect للموارد الخارجية ─────────────────────── */
