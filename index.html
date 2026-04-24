@@ -15137,8 +15137,8 @@ function doLogin(){
     const localUser  = localUsers.find(u => u.username===uname);
     if(!localUser){
       err.textContent = reason==='offline'
-        ? '❌ الحساب "'+uname+'" غير موجود محلياً — تأكد من الاتصال بالإنترنت وحاول مجدداً'
-        : '❌ تعذر الاتصال بالخادم والحساب غير مخزّن محلياً';
+        ? '❌ جهاز جديد — تأكد من الاتصال بالإنترنت ثم أعد المحاولة حتى يتم جلب الحسابات من السيرفر'
+        : '❌ جهاز جديد — السيرفر لم يستجب في الوقت المحدد. تأكد من الإنترنت وأعد المحاولة';
       err.style.display='block'; return;
     }
     checkPassword(pass, localUser.password).then(ok => {
@@ -15154,7 +15154,7 @@ function doLogin(){
     let done = false;
     const timer = setTimeout(()=>{
       if(!done){ done=true; _tryLocalCache('timeout'); }
-    }, 6000);
+    }, 15000); // زيادة من 6 إلى 15 ثانية للأجهزة الجديدة
 
     loadFirebase().then(ok => {
       if(ok){ listenUsersChanges(); }
