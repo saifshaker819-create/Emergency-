@@ -28049,7 +28049,7 @@ setTimeout(function(){
 <style>
 /* ══ زر الربط العائم ══ */
 #mls-fab {
-  position:fixed; bottom:24px; left:24px; z-index:99990;
+  position:fixed; bottom:90px; left:24px; z-index:99990;
   width:54px; height:54px; border-radius:50%;
   background:linear-gradient(135deg,#00d4ff,#8b3fff);
   border:none; cursor:pointer;
@@ -28329,7 +28329,9 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
   /* ── تهيئة PeerJS ── */
   function initPeer() {
     myCode = genCode();
-    document.getElementById('mls-my-code').textContent = myCode;
+    /* عرض الكود فوراً بدون انتظار PeerJS */
+    var codeEl = document.getElementById('mls-my-code');
+    if (codeEl) codeEl.textContent = myCode;
 
     myPeer = new Peer(myCode, {
       host: PEER_HOST,
@@ -28710,14 +28712,27 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
 
   /* ════ تشغيل النظام ════ */
   function boot() {
+    /* عرض الكود فوراً حتى قبل تحميل PeerJS */
+    myCode = genCode();
+    var codeEl = document.getElementById('mls-my-code');
+    if (codeEl) codeEl.textContent = myCode;
+
     /* انتظر تحميل PeerJS */
     if (typeof Peer === 'undefined') {
-      setTimeout(boot, 300);
+      setTimeout(boot2, 300);
+      return;
+    }
+    boot2();
+  }
+
+  function boot2() {
+    if (typeof Peer === 'undefined') {
+      setTimeout(boot2, 300);
       return;
     }
     /* انتظر تحميل IDB */
     if (typeof window.IDB === 'undefined') {
-      setTimeout(boot, 300);
+      setTimeout(boot2, 300);
       return;
     }
     initPeer();
