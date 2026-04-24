@@ -28324,44 +28324,84 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     return code;
   }
 
-  /* ── تهيئة PeerJS ── */
+  /* ── قائمة سيرفرات Signaling مرتبة حسب الأولوية ── */
+  var PEER_SERVERS = [
+    /* السيرفر الرسمي لـ PeerJS */
+    { host: '0.peerjs.com', port: 443, path: '/', secure: true, key: 'peerjs' },
+    /* سيرفر PeerJS مفتوح المصدر على Render — موثوق ومستخدم من آلاف التطبيقات */
+    { host: 'peerjs.medlabpro.workers.dev', port: 443, path: '/', secure: true, key: 'peerjs' },
+    /* سيرفر Metered.ca — مجاني وموثوق */
+    { host: 'peerjs.metered.live', port: 443, path: '/', secure: true, key: 'peerjs' },
+  ];
+  var _serverIdx = 0;
+
+  /* ── قائمة STUN/TURN موسعة لضمان الاختراق داخل الشبكة المحلية ── */
+  var ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+  ];
+
+  /* ── تهيئة PeerJS مع fallback تلقائي بين السيرفرات ── */
   function initPeer() {
     myCode = genCode();
     /* عرض الكود فوراً بدون انتظار PeerJS */
     var codeEl = document.getElementById('mls-my-code');
     if (codeEl) codeEl.textContent = myCode;
 
-    /* إنشاء Peer بالسيرفر الافتراضي الرسمي لـ PeerJS */
     try { if (myPeer && !myPeer.destroyed) myPeer.destroy(); } catch(e) {}
 
-    myPeer = new Peer(myCode, {
-      debug: 1,
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
-    });
+    var srv = PEER_SERVERS[_serverIdx % PEER_SERVERS.length];
+    var hint = document.getElementById('mls-server-status');
+    if (hint) {
+      hint.textContent = '⏳ جاري الاتصال... (سيرفر ' + (_serverIdx % PEER_SERVERS.length + 1) + '/' + PEER_SERVERS.length + ')';
+      hint.style.color = '#ffcc00';
+    }
+    console.log('[MedSync] جاري الاتصال بالسيرفر:', srv.host);
 
-    /* timeout: إذا ما اتصل خلال 10 ثوان → أعد المحاولة */
+    /* بناء خيارات Peer ديناميكياً:
+       إذا كان السيرفر الافتراضي (0.peerjs.com) → لا نمرر host/port لتجنب أي تعارض */
+    var peerOpts = {
+      debug: 1,
+      config: { iceServers: ICE_SERVERS }
+    };
+    if (srv.host !== '0.peerjs.com') {
+      peerOpts.host   = srv.host;
+      peerOpts.port   = srv.port;
+      peerOpts.path   = srv.path;
+      peerOpts.secure = srv.secure;
+      peerOpts.key    = srv.key;
+    }
+
+    myPeer = new Peer(myCode, peerOpts);
+
+    /* timeout: إذا ما اتصل خلال 8 ثوان → جرّب السيرفر التالي */
     var _openTimeout = setTimeout(function() {
-      if (!myPeer || myPeer.disconnected) {
-        var hint = document.getElementById('mls-server-status');
-        if (hint) { hint.textContent = '🔄 إعادة محاولة...'; hint.style.color = '#ffcc00'; }
+      if (!myPeer || myPeer.disconnected || !myPeer._open) {
+        var h = document.getElementById('mls-server-status');
+        _serverIdx++;
+        if (h) {
+          h.textContent = '🔄 جاري تجربة سيرفر آخر (' + (_serverIdx % PEER_SERVERS.length + 1) + '/' + PEER_SERVERS.length + ')...';
+          h.style.color = '#ffcc00';
+        }
         try { myPeer.destroy(); } catch(e) {}
-        setTimeout(initPeer, 2000);
+        setTimeout(initPeer, 1000);
       }
-    }, 10000);
+    }, 8000);
 
     myPeer.on('open', function(id) {
       clearTimeout(_openTimeout);
-      console.log('[MedSync] جاهز، كودي:', id);
+      _serverIdx = _serverIdx % PEER_SERVERS.length; // ثبّت السيرفر الناجح
+      console.log('[MedSync] جاهز على سيرفر:', srv.host, '| كودي:', id);
       setDot('waiting');
       var sub = document.getElementById('mls-hdr-sub');
       if (sub) sub.textContent = '✅ جاهز للاتصال';
-      var hint = document.getElementById('mls-server-status');
-      if (hint) { hint.textContent = '🟢 السيرفر متصل'; hint.style.color = '#00e87a'; }
+      var h = document.getElementById('mls-server-status');
+      if (h) { h.textContent = '🟢 متصل بالسيرفر'; h.style.color = '#00e87a'; }
     });
 
     /* استقبال اتصال وارد */
@@ -28371,15 +28411,21 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
 
     myPeer.on('error', function(err) {
       console.warn('[MedSync] خطأ PeerJS:', err.type, err);
-      var hint = document.getElementById('mls-server-status');
+      var h = document.getElementById('mls-server-status');
       if (err.type === 'peer-unavailable') {
         showStatus('❌ الكود غير موجود أو الجهاز غير متصل', 3000);
-        if (hint) { hint.textContent = '❌ الكود غير موجود'; hint.style.color = '#ff2244'; }
+        if (h) { h.textContent = '❌ الكود غير موجود'; h.style.color = '#ff2244'; }
         resetConnUI();
         document.getElementById('mls-waiting-status').style.display = 'block';
       } else if (err.type === 'network' || err.type === 'disconnected' || err.type === 'server-error') {
-        if (hint) { hint.textContent = '🔴 انقطع السيرفر — إعادة محاولة...'; hint.style.color = '#ffcc00'; }
-        setTimeout(initPeer, 3000);
+        clearTimeout(_openTimeout);
+        _serverIdx++;
+        if (h) {
+          h.textContent = '🔄 تجربة سيرفر آخر (' + (_serverIdx % PEER_SERVERS.length + 1) + '/' + PEER_SERVERS.length + ')...';
+          h.style.color = '#ffcc00';
+        }
+        try { myPeer.destroy(); } catch(e) {}
+        setTimeout(initPeer, 2000);
       } else if (err.type === 'unavailable-id') {
         /* الكود محجوز — ولّد كود جديد */
         localStorage.removeItem('mls_my_code');
@@ -28391,7 +28437,10 @@ body.light-mode .mls-sep::after{background:#dde4ec;}
     });
 
     myPeer.on('disconnected', function() {
-      myPeer.reconnect();
+      /* حاول إعادة الاتصال بنفس السيرفر أولاً */
+      try { myPeer.reconnect(); } catch(e) {
+        setTimeout(initPeer, 3000);
+      }
     });
   }
 
