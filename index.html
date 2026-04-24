@@ -9156,105 +9156,136 @@ function renderRequestsFiltered(filter='today',srch=''){
     <td>${getStatusBdg(r.status)}</td>
     <td>${r.printed?'<span class="bdg bdg-ok">🖨️ مطبوع</span>':'<span class="bdg" style="background:rgba(255,214,10,0.13);color:var(--warning);border:1px solid rgba(255,214,10,0.28)">⏸ غير مطبوع</span>'}</td>
     <td>
-      <div class="req-radial-wrap" id="rrw-${r.id}">
-        ${r.status==='done'
-          ? `<button class="req-radial-trigger green" onclick="openRadialMenu(event,'${r.id}','done','${r.printed?'1':'0'}')" title="تعديل وطباعة">
-               <span style="font-size:13px">✏️🖨️</span>
-             </button>`
-          : `<button class="req-radial-trigger blue" onclick="openRadialMenu(event,'${r.id}','pending','0')" title="نتائج وطباعة">
-               <span style="font-size:13px">🧪</span>
-             </button>`
-        }
-        <div class="req-radial-menu" id="rrm-${r.id}"></div>
+      <div class="rrw">
+        <button class="rrt ${r.status==='done'?'green':'blue'}"
+          data-rid="${r.id}"
+          data-mode="${r.status==='done'?'done':'pending'}"
+          onclick="rrOpen(this)"
+          title="${r.status==='done'?'تعديل وطباعة':'نتائج وطباعة'}">
+          ${r.status==='done'?'✏️🖨️':'🧪'}
+        </button>
       </div>
     </td>
   </tr>`).join('');
 }
 function renderRequests(filter='all',srch=''){renderRequestsFiltered(filter,srch);}
 
-/* ═══════════════════════════════════════
-   🔵 Radial Menu Logic
-═══════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   🌀 RADIAL MENU — نظام القائمة الدائرية للطلبات
+   الحل: position:fixed + حساب اتجاه القوس بناءً على موقع الزر
+═══════════════════════════════════════════════════════ */
 (function(){
-  // overlay لإغلاق القائمة عند الضغط خارجها
-  var ov=document.createElement('div');
-  ov.className='req-radial-overlay';
-  ov.id='req-radial-ov';
-  ov.addEventListener('click',function(){window.closeAllRadial();});
-  document.body.appendChild(ov);
+  // إنشاء الـ backdrop مرة واحدة
+  var bd = document.createElement('div');
+  bd.id = 'rr-backdrop';
+  document.body.appendChild(bd);
+  bd.addEventListener('click', function(){ rrClose(); });
 })();
 
-window.closeAllRadial=function(){
-  document.querySelectorAll('.req-radial-wrap.open').forEach(function(w){
-    w.classList.remove('open');
-    var t=w.querySelector('.req-radial-trigger');
-    if(t)t.classList.remove('active');
-  });
-  var ov=document.getElementById('req-radial-ov');
-  if(ov)ov.classList.remove('show');
+// حفظ الأزرار المفتوحة حالياً
+window._rrActive = null;
+
+window.rrClose = function(){
+  if(window._rrActive){
+    // إخفاء الأزرار بالأنيميشن
+    window._rrActive.items.forEach(function(el){
+      el.classList.remove('rshow');
+      el.style.transform = 'scale(0)';
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 220);
+    });
+    window._rrActive.trigger.classList.remove('is-open');
+    window._rrActive = null;
+  }
+  var bd = document.getElementById('rr-backdrop');
+  if(bd) bd.classList.remove('show');
 };
 
-window.openRadialMenu=function(e,id,status,printed){
-  e.stopPropagation();
-  var wrap=document.getElementById('rrw-'+id);
-  var menu=document.getElementById('rrm-'+id);
-  if(!wrap||!menu)return;
-
-  // إذا كانت مفتوحة — أغلقها
-  if(wrap.classList.contains('open')){
-    window.closeAllRadial();
-    return;
+window.rrOpen = function(triggerBtn){
+  // إذا نفس الزر مضغوط — أغلق
+  if(window._rrActive && window._rrActive.trigger === triggerBtn){
+    rrClose(); return;
   }
+  rrClose();
 
-  // أغلق أي قائمة أخرى مفتوحة
-  window.closeAllRadial();
+  var rid  = triggerBtn.getAttribute('data-rid');
+  var mode = triggerBtn.getAttribute('data-mode'); // 'done' أو 'pending'
 
-  // بناء الأزرار حسب الحالة
-  var btns=[];
-  if(status==='done'){
-    btns=[
-      {cls:'ri-print', icon:'🖨️', lbl:'طباعة',  action:"goToPrint('"+id+"');window.closeAllRadial()"},
-      {cls:'ri-edit',  icon:'✏️', lbl:'تعديل',   action:"openViewResultsModal('"+id+"');window.closeAllRadial()"},
-      {cls:'ri-label', icon:'🏷️', lbl:'ملصق',    action:"printTubeLabel('"+id+"');window.closeAllRadial()"},
-      {cls:'ri-delete',icon:'🗑️', lbl:'حذف',     action:"deleteReq('"+id+"');window.closeAllRadial()"},
-    ];
-  } else {
-    btns=[
-      {cls:'ri-result',icon:'🧪', lbl:'نتائج',   action:"goToResult('"+id+"');window.closeAllRadial()"},
-      {cls:'ri-label', icon:'🏷️', lbl:'ملصق',    action:"printTubeLabel('"+id+"');window.closeAllRadial()"},
-      {cls:'ri-delete',icon:'🗑️', lbl:'حذف',     action:"deleteReq('"+id+"');window.closeAllRadial()"},
-    ];
-  }
+  // تعريف الأزرار حسب الحالة
+  var btns = mode === 'done'
+    ? [
+        { cls:'c-print',  icon:'🖨️', lbl:'طباعة',  fn: function(){ goToPrint(rid); } },
+        { cls:'c-edit',   icon:'✏️', lbl:'تعديل',   fn: function(){ openViewResultsModal(rid); } },
+        { cls:'c-label',  icon:'🏷️', lbl:'ملصق',    fn: function(){ printTubeLabel(rid); } },
+        { cls:'c-delete', icon:'🗑️', lbl:'حذف',     fn: function(){ deleteReq(rid); } }
+      ]
+    : [
+        { cls:'c-result', icon:'🧪', lbl:'نتائج',   fn: function(){ goToResult(rid); } },
+        { cls:'c-label',  icon:'🏷️', lbl:'ملصق',    fn: function(){ printTubeLabel(rid); } },
+        { cls:'c-delete', icon:'🗑️', lbl:'حذف',     fn: function(){ deleteReq(rid); } }
+      ];
 
-  // حساب الزوايا — توزيع متساوٍ نصف دائرة علوية
-  var count=btns.length;
-  var radius=62;
-  // توزيع الأزرار في نصف الدائرة العلوية (من 200 درجة إلى 340 درجة)
-  var startAngle, endAngle;
-  if(count===4){startAngle=200;endAngle=340;}
-  else if(count===3){startAngle=210;endAngle=330;}
-  else{startAngle=220;endAngle=320;}
-  var step=(endAngle-startAngle)/(count-1);
+  // موقع الزر الرئيسي
+  var rect   = triggerBtn.getBoundingClientRect();
+  var cx     = rect.left + rect.width / 2;
+  var cy     = rect.top  + rect.height / 2;
+  var vw     = window.innerWidth;
+  var vh     = window.innerHeight;
+  var R      = 68; // نصف قطر القوس
+  var count  = btns.length;
 
-  menu.innerHTML=btns.map(function(b,i){
-    var angleDeg=startAngle+step*i;
-    var rad=angleDeg*(Math.PI/180);
-    var x=Math.round(radius*Math.cos(rad));
-    var y=Math.round(radius*Math.sin(rad));
-    return '<button class="req-radial-item '+b.cls+'" style="left:'+x+'px;top:'+y+'px" onclick="'+b.action+'" title="'+b.lbl+'">'
-      +b.icon
-      +'<span class="ri-lbl">'+b.lbl+'</span>'
-      +'</button>';
-  }).join('');
+  // تحديد اتجاه القوس: إذا الزر قريب من اليسار — القوس يفتح لليمين (زوايا صغيرة)
+  // إذا قريب من اليمين — يفتح لليسار
+  // إذا قريب من الأعلى — يفتح للأسفل، إلخ
+  // الحل الأذكى: نحسب المركز ونوجه القوس نحو مركز الشاشة
+  var angleToCenter = Math.atan2(vh/2 - cy, vw/2 - cx); // بالراديان
+  var angleDeg      = angleToCenter * 180 / Math.PI;
 
-  // تأخير بسيط ثم فتح
-  setTimeout(function(){
-    wrap.classList.add('open');
-    var tr=wrap.querySelector('.req-radial-trigger');
-    if(tr)tr.classList.add('active');
-    var ov=document.getElementById('req-radial-ov');
-    if(ov)ov.classList.add('show');
-  },10);
+  // القوس يفتح باتجاه مركز الشاشة، بفتحة 140 درجة
+  var spread  = 140;
+  var startAng = angleDeg - spread/2;
+
+  var createdItems = [];
+
+  btns.forEach(function(b, i){
+    var angle = (startAng + (spread / (count - 1 || 1)) * i) * Math.PI / 180;
+    var tx    = cx + R * Math.cos(angle);
+    var ty    = cy + R * Math.sin(angle);
+
+    // ضمان عدم الخروج من الشاشة
+    tx = Math.max(24, Math.min(vw - 24, tx));
+    ty = Math.max(24, Math.min(vh - 40, ty));
+
+    var el = document.createElement('button');
+    el.className = 'rri ' + b.cls;
+    el.style.left = (tx - 19) + 'px';
+    el.style.top  = (ty - 19) + 'px';
+    el.style.transform = 'scale(0)';
+    el.innerHTML = b.icon + '<span class="rri-lbl">' + b.lbl + '</span>';
+
+    // ربط الحدث بـ addEventListener — هذا يحل مشكلة عدم الاستجابة
+    (function(btnFn){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        rrClose();
+        btnFn();
+      });
+    })(b.fn);
+
+    document.body.appendChild(el);
+    createdItems.push(el);
+
+    // تأخير متدرج للأنيميشن
+    setTimeout(function(){
+      el.style.transform = 'scale(1)';
+      el.classList.add('rshow');
+    }, 20 + i * 40);
+  });
+
+  triggerBtn.classList.add('is-open');
+  window._rrActive = { trigger: triggerBtn, items: createdItems };
+
+  var bd = document.getElementById('rr-backdrop');
+  if(bd) bd.classList.add('show');
 };
 
 function filterReq(f,el){document.querySelectorAll('#sec-requests .req-pill[data-filter]').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
@@ -26593,81 +26624,61 @@ body.light-mode .pm-btn-title{color:#0a2a25}
 body.light-mode .pm-btn-sub{color:rgba(10,42,37,.5)}
 body.light-mode .pm-note{color:rgba(10,42,37,.38)}
 
-/* ══════════════════════════════════════════
-   🔵 Radial Action Menu — قائمة دائرية للطلبات
-══════════════════════════════════════════ */
-.req-radial-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
-.req-radial-trigger{
-  width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;color:#fff;
+/* ═══════════════════════════════════════════════
+   🌀 RADIAL ACTION MENU — قائمة دائرية للطلبات
+═══════════════════════════════════════════════ */
+.rrw{display:inline-flex;align-items:center;justify-content:center;}
+.rrt{
+  width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:800;
   font-family:'Cairo','Inter',sans-serif;
-  transition:transform 0.18s,box-shadow 0.18s;
-  position:relative;z-index:2;
-  box-shadow:0 3px 10px rgba(0,0,0,0.35);
-  flex-direction:column;gap:1px;line-height:1.1;
-  text-align:center;padding:0;
+  transition:transform 0.15s,box-shadow 0.15s;
+  box-shadow:0 3px 10px rgba(0,0,0,0.4);
+  outline:none;
 }
-.req-radial-trigger.green{background:linear-gradient(135deg,#00c853,#00a040);}
-.req-radial-trigger.blue{background:linear-gradient(135deg,#1e90ff,#0066cc);}
-.req-radial-trigger:hover{transform:scale(1.1);box-shadow:0 5px 16px rgba(0,0,0,0.45);}
-.req-radial-trigger.active{transform:scale(0.92);}
+.rrt.green{background:linear-gradient(135deg,#00c853,#00902a);}
+.rrt.blue {background:linear-gradient(135deg,#1e90ff,#0050cc);}
+.rrt:hover{transform:scale(1.12);}
+.rrt.is-open{transform:scale(0.9);opacity:0.85;}
 
-/* الأزرار الدائرية المحيطة */
-.req-radial-menu{
-  position:absolute;top:50%;left:50%;
-  width:0;height:0;
-  pointer-events:none;
-  z-index:100;
-}
-.req-radial-item{
-  position:absolute;
-  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+/* الأزرار المنبثقة — position:fixed تمنع الاختفاء خلف الشاشة */
+.rri{
+  position:fixed;
+  width:38px;height:38px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.25);
+  cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   font-size:15px;color:#fff;
-  box-shadow:0 3px 10px rgba(0,0,0,0.4);
-  transform:translate(-50%,-50%) scale(0);
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+  z-index:99999;
   opacity:0;
-  transition:transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.18s ease;
   pointer-events:none;
-  font-family:'Cairo','Inter',sans-serif;
-  font-weight:800;
+  transition:opacity 0.18s ease, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  outline:none;
 }
-.req-radial-item span{font-size:9px;display:none;}
-.req-radial-item .ri-lbl{
-  position:absolute;
-  bottom:-18px;left:50%;transform:translateX(-50%);
-  font-size:8.5px;font-weight:800;white-space:nowrap;
-  color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.8);
-  font-family:'Cairo','Inter',sans-serif;
-  opacity:0;transition:opacity 0.2s 0.15s;
-  pointer-events:none;
+.rri.rshow{opacity:1;pointer-events:auto;}
+.rri:hover{filter:brightness(1.2);}
+.rri:active{transform:scale(0.88) !important;}
+.rri-lbl{
+  position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);
+  font-size:8px;font-weight:800;white-space:nowrap;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,1);
+  pointer-events:none;font-family:'Cairo','Inter',sans-serif;
 }
-.req-radial-wrap.open .req-radial-item{
-  transform:translate(-50%,-50%) scale(1);
-  opacity:1;pointer-events:auto;
-}
-.req-radial-wrap.open .req-radial-item .ri-lbl{opacity:1;}
+/* ألوان الأزرار */
+.rri.c-print {background:linear-gradient(135deg,#00c853,#007a25);}
+.rri.c-edit  {background:linear-gradient(135deg,#ff9800,#d84000);}
+.rri.c-label {background:linear-gradient(135deg,#aa00ff,#6600aa);}
+.rri.c-delete{background:linear-gradient(135deg,#f44336,#b71c1c);}
+.rri.c-result{background:linear-gradient(135deg,#1e90ff,#0040bb);}
 
-/* ألوان كل زر */
-.req-radial-item.ri-print{background:linear-gradient(135deg,#00c853,#009e3f);}
-.req-radial-item.ri-edit{background:linear-gradient(135deg,#ff9800,#e65100);}
-.req-radial-item.ri-label{background:linear-gradient(135deg,#9c27b0,#6a0080);}
-.req-radial-item.ri-delete{background:linear-gradient(135deg,#f44336,#b71c1c);}
-.req-radial-item.ri-result{background:linear-gradient(135deg,#1e90ff,#004ecc);}
-.req-radial-item:hover{filter:brightness(1.15);transform:translate(-50%,-50%) scale(1.15)!important;}
-
-/* طبقة الإغلاق عند الضغط خارج */
-.req-radial-overlay{
-  position:fixed;inset:0;z-index:99;
-  display:none;
+/* طبقة شفافة لإغلاق القائمة بالضغط خارجها */
+#rr-backdrop{
+  position:fixed;inset:0;z-index:99998;
+  display:none;background:rgba(0,0,0,0.01);
 }
-.req-radial-overlay.show{display:block;}
-
-/* وضع نهاري */
-body.light-mode .req-radial-trigger.green{background:linear-gradient(135deg,#00b248,#008a35);}
-body.light-mode .req-radial-trigger.blue{background:linear-gradient(135deg,#1976d2,#0d47a1);}
-body.light-mode .req-radial-item .ri-lbl{color:#111;text-shadow:0 1px 3px rgba(255,255,255,0.6);}
+#rr-backdrop.show{display:block;}
 </style>
 
 <!-- Modal -->
