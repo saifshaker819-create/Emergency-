@@ -1270,8 +1270,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .uavatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
 .page{padding:22px;flex:1;}
 .sec{display:none;}
-.sec.active{display:block;animation:fadeUp 0.08s ease both;}
-@keyframes fadeUp{from{opacity:0}to{opacity:1}}
+.sec.active{display:block;}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
 .scard{background:var(--bg-glass);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;cursor:default;transition:all 0.2s;}
 .scard:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
@@ -2443,7 +2442,7 @@ body.light-mode .wnb-text .wnb-char.neon-trail {
 .sidebar,.modal,.moverlay,.hdr{will-change:transform;transform:translateZ(0)}
 .tbl,.gc,.stats,.test-list{contain:layout style}
 .gc-body,.mbody,.chat-messages,.test-list,.wiz-panel-body{-webkit-overflow-scrolling:touch;scroll-behavior:auto}
-.sec.active{animation-duration:0.08s!important}
+
 .modal{animation-duration:0.12s!important}
 @media(hover:none){.btn:hover,.ni:hover,.hbtn:hover,.scard:hover{transform:none!important;box-shadow:none!important}}
 .sec:not(.active){content-visibility:auto;contain-intrinsic-size:0 500px}
@@ -7732,69 +7731,62 @@ function nav(p){
   document.getElementById('pbc').textContent=b;
   document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+p+"'"))n.classList.add('active');});
 
-  // ── تحميل بيانات القسم بـ rAF واحد فقط ──
-  requestAnimationFrame(function(){
-    if(p==='results'){
-      if(!window._goToResultCalled) currentReqId=null;
-      window._goToResultCalled=false;
-      loadResultsDropdown();
-      const _canPrint = typeof hasPermission==='function' ? hasPermission('print') : true;
-      ['finalizeAndPrint','downloadPDF','shareWhatsApp'].forEach(fn=>{
-        document.querySelectorAll(`#sec-results button[onclick*="${fn}"]`).forEach(btn=>{
-          btn.style.display = _canPrint ? '' : 'none';
-        });
+  // ── تحميل بيانات القسم فوراً بدون أي تأخير ──
+  if(p==='results'){
+    if(!window._goToResultCalled) currentReqId=null;
+    window._goToResultCalled=false;
+    loadResultsDropdown();
+    const _canPrint = typeof hasPermission==='function' ? hasPermission('print') : true;
+    ['finalizeAndPrint','downloadPDF','shareWhatsApp'].forEach(fn=>{
+      document.querySelectorAll(`#sec-results button[onclick*="${fn}"]`).forEach(btn=>{
+        btn.style.display = _canPrint ? '' : 'none';
       });
-      const cbcBtn = document.querySelector('#sec-results button[onclick*="printCBCBlank"]');
-      if(cbcBtn) cbcBtn.style.display = _canPrint ? '' : 'none';
+    });
+    const cbcBtn = document.querySelector('#sec-results button[onclick*="printCBCBlank"]');
+    if(cbcBtn) cbcBtn.style.display = _canPrint ? '' : 'none';
+  }
+  if(p==='print') loadPrintDropdown();
+  if(p==='reports'){renderReports();if(typeof phcInit==='function')phcInit();}
+  if(p==='dashboard') updateDashboard();
+  if(p==='billing'){renderBillingTests();loadBillingPtDropdown();renderBillingHistory();_syncCurrencySelectors();}
+  if(p==='database'){resetDbAuth();updateDbStats();setTimeout(_gdriveInitUI,100);setTimeout(loadAutoBackupUI,120);setTimeout(()=>_fsaUpdateIndicator(!!_fsaDirHandle),150);}
+  if(p==='culture') renderCultureList();
+  if(p==='ua') renderUAList();
+  if(p==='stool') renderStoolList();
+  if(p==='semen') renderSemenList();
+  if(p==='requests'){
+    // إعادة تعيين الـ tab
+    document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));
+    const todayTab=document.querySelector('#sec-requests .tabs .tab[onclick*="today"]');
+    if(todayTab) todayTab.classList.add('active');
+    // رسم فوري إذا البيانات موجودة في الكاش، وإلا أظهر loading ثم أعد المحاولة
+    if(requests && requests.length > 0){
+      renderRequestsFiltered('today');
+    } else {
+      const tbody=document.getElementById('requests-body');
+      if(tbody) tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">⏳ جاري التحميل...</td></tr>';
+      (function _waitAndRender(tries){
+        if(requests && requests.length > 0){
+          renderRequestsFiltered('today');
+        } else if(tries > 0){
+          setTimeout(function(){ _waitAndRender(tries-1); }, 200);
+        } else {
+          renderRequestsFiltered('today');
+        }
+      })(20);
     }
-    if(p==='print')loadPrintDropdown();
-    if(p==='reports'){renderReports();if(typeof phcInit==='function')phcInit();}
-    if(p==='dashboard')updateDashboard();
-    if(p==='billing'){renderBillingTests();loadBillingPtDropdown();renderBillingHistory();_syncCurrencySelectors();}
-    if(p==='database'){resetDbAuth();updateDbStats();setTimeout(_gdriveInitUI,100);setTimeout(loadAutoBackupUI,120);setTimeout(()=>_fsaUpdateIndicator(!!_fsaDirHandle),150);}
-    if(p==='culture') renderCultureList();
-    if(p==='ua') renderUAList();
-    if(p==='stool') renderStoolList();
-    if(p==='semen') renderSemenList();
-    if(p==='requests'){
-      // إعادة تعيين الـ tab
-      document.querySelectorAll('#sec-requests .tabs .tab').forEach(t=>t.classList.remove('active'));
-      const todayTab=document.querySelector('#sec-requests .tabs .tab[onclick*="today"]');
-      if(todayTab) todayTab.classList.add('active');
-      // رسم فوري إذا البيانات موجودة في الكاش، وإلا أظهر loading ثم أعد المحاولة
-      if(requests && requests.length > 0){
-        renderRequestsFiltered('today');
-      } else {
-        const tbody=document.getElementById('requests-body');
-        if(tbody) tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">⏳ جاري التحميل...</td></tr>';
-        // انتظر تحميل IDB ثم ارسم
-        (function _waitAndRender(tries){
-          if(requests && requests.length > 0){
-            renderRequestsFiltered('today');
-          } else if(tries > 0){
-            setTimeout(function(){ _waitAndRender(tries-1); }, 200);
-          } else {
-            renderRequestsFiltered('today'); // ارسم حتى لو فارغة
-          }
-        })(20); // حاول 20 مرة × 200ms = 4 ثانية كحد أقصى
-      }
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          const srch=document.getElementById('req-srch-inp');
-          if(srch){srch.focus();srch.select();}
-        });
-      });
-    }
-    if(p==='patients'){renderPatients();}
-    if(p==='doctors'){renderDoctors();}
-    if(p==='inventory'){renderInventory();}
-    if(p==='tests-db'){renderTestsDB();}
-    if(p==='packages'){renderPackages();}
-    if(p==='invoices'){renderInvoices();}
-    if(p==='waitqueue'){if(typeof renderWaitQueue==='function')renderWaitQueue();}
-    if(p==='lis'){if(typeof lisInit==='function')lisInit();}
-    if(p==='esr'){if(typeof esrRenderList==='function')esrRenderList();}
-  });
+    const srch=document.getElementById('req-srch-inp');
+    if(srch){srch.focus();srch.select();}
+  }
+  if(p==='patients') renderPatients();
+  if(p==='doctors') renderDoctors();
+  if(p==='inventory') renderInventory();
+  if(p==='tests-db') renderTestsDB();
+  if(p==='packages') renderPackages();
+  if(p==='invoices') renderInvoices();
+  if(p==='waitqueue'){if(typeof renderWaitQueue==='function')renderWaitQueue();}
+  if(p==='lis'){if(typeof lisInit==='function')lisInit();}
+  if(p==='esr'){if(typeof esrRenderList==='function')esrRenderList();}
 }
 
 // ============================================================
@@ -27447,8 +27439,8 @@ setTimeout(function(){
     /* استثناء الزر العائم — يحتاج touch-action:none للسحب */
     '#req-float-btn { touch-action:none !important; cursor:grab !important; }',
 
-    /* تحريك الصفحات أسرع */
-    '.sec.active { animation:fadeUp 0.07s ease both !important; }',
+    /* بدون animation عند تبديل الأقسام */
+    '.sec.active { animation:none !important; }',
 
     /* مودالات: بدون blur مكلف */
     '.moverlay { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }',
