@@ -9260,7 +9260,8 @@ window.rrOpen = function(triggerBtn){
     el.style.left = (tx - 19) + 'px';
     el.style.top  = (ty - 19) + 'px';
     el.style.transform = 'scale(0)';
-    el.innerHTML = b.icon + '<span class="rri-lbl">' + b.lbl + '</span>';
+    var lblTop = (b.cls === 'c-print' || b.cls === 'c-result');
+    el.innerHTML = b.icon + '<span class="rri-lbl" style="'+(lblTop ? 'bottom:auto;top:-17px;' : '')+'">' + b.lbl + '</span>';
 
     // ربط الحدث بـ addEventListener — هذا يحل مشكلة عدم الاستجابة
     (function(btnFn){
