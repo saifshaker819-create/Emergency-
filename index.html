@@ -22298,10 +22298,22 @@ document.addEventListener('DOMContentLoaded', function(){
     var active = document.querySelector('.sec.active');
     if (!active) { if (_origRenderAll) _origRenderAll(); return; }
     switch (active.id) {
-      case 'sec-dashboard': if (typeof updateDashboard === 'function') updateDashboard(); break;
-      case 'sec-patients': if (typeof renderPatients === 'function') renderPatients(); break;
-      case 'sec-requests': if (typeof renderRequests === 'function') renderRequests(); break;
-      case 'sec-results': if (typeof loadResultsDropdown === 'function') loadResultsDropdown(); break;
+      case 'sec-dashboard':   if (typeof updateDashboard==='function') updateDashboard(); break;
+      case 'sec-patients':    if (typeof renderPatients==='function') renderPatients(); break;
+      case 'sec-requests':    if (typeof renderRequests==='function') renderRequests(); break;
+      case 'sec-results':     if (typeof loadResultsDropdown==='function') loadResultsDropdown(); break;
+      case 'sec-tests-db':    if (typeof renderTestsDB==='function') renderTestsDB(); break;
+      case 'sec-invoices':    if (typeof renderInvoices==='function') renderInvoices(); break;
+      case 'sec-packages':    if (typeof renderPackages==='function') renderPackages(); break;
+      case 'sec-inventory':   if (typeof renderInventory==='function') renderInventory(); break;
+      case 'sec-doctors':     if (typeof renderDoctors==='function') renderDoctors(); break;
+      case 'sec-billing':     if (typeof renderBillingTests==='function') renderBillingTests(); break;
+      case 'sec-quality':     if (typeof renderQC==='function') renderQC(); break;
+      case 'sec-reports':     if (typeof renderReports==='function') renderReports(); break;
+      case 'sec-waitqueue':   if (typeof renderWaitQueue==='function') renderWaitQueue(); break;
+      case 'sec-ua':          if (typeof renderUAList==='function') renderUAList(); break;
+      case 'sec-stool-exam':  if (typeof renderStoolList==='function') renderStoolList(); break;
+      case 'sec-culture':     if (typeof _renderCultureListUI==='function') _renderCultureListUI(); break;
       default: if (_origRenderAll) _origRenderAll(); break;
     }
     if (typeof updateBadges === 'function') updateBadges();
