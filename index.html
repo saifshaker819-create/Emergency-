@@ -9155,64 +9155,108 @@ function renderRequestsFiltered(filter='today',srch=''){
     <td>${getPriorityBdg(r.priority)}</td>
     <td>${getStatusBdg(r.status)}</td>
     <td>${r.printed?'<span class="bdg bdg-ok">🖨️ مطبوع</span>':'<span class="bdg" style="background:rgba(255,214,10,0.13);color:var(--warning);border:1px solid rgba(255,214,10,0.28)">⏸ غير مطبوع</span>'}</td>
-    <td><div style="display:flex;gap:5px;align-items:center;flex-wrap:nowrap">
-      ${r.printed && r.status==='done' ? `
-        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
-          <button class="btn btn-sm" style="background:linear-gradient(135deg,rgba(0,200,100,0.18),rgba(0,160,80,0.12));border:1.5px solid rgba(0,210,100,0.5);color:#00e87a;font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="تعديل وطباعة">✏️🖨️ تعديل وطباعة</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-        </div>
-        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
-          <button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🖨️ طباعة</button>
-          <button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">✏️ تعديل</button>
-          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
-        </div>
-      ` : r.status!=='done' ? `
-        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
-          <button class="btn btn-sm btn-p" style="font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="نتائج وطباعة">🧪 نتائج وطباعة</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-        </div>
-        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
-          <button class="btn btn-sm btn-p" onclick="goToResult('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🧪 نتائج</button>
-          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
-        </div>
-      ` : `
-        <div style="display:flex;gap:5px;align-items:center" id="req-btns-${r.id}">
-          <button class="btn btn-sm" style="background:linear-gradient(135deg,rgba(0,200,100,0.18),rgba(0,160,80,0.12));border:1.5px solid rgba(0,210,100,0.5);color:#00e87a;font-size:11px;font-weight:800;padding:5px 12px;white-space:nowrap;transition:all 0.15s" onclick="toggleReqBtns('${r.id}',true)" title="تعديل وطباعة">✏️🖨️ تعديل وطباعة</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-        </div>
-        <div style="display:none;gap:5px;align-items:center" id="req-btns-${r.id}-exp">
-          <button class="btn btn-sm btn-ok" onclick="goToPrint('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">🖨️ طباعة</button>
-          <button class="btn btn-sm btn-s" onclick="openViewResultsModal('${r.id}')" style="font-size:11px;padding:5px 10px;white-space:nowrap">✏️ تعديل</button>
-          <button class="btn btn-sm" style="background:rgba(139,63,255,0.18);border:1.5px solid rgba(139,63,255,0.45);color:#c084fc;font-size:11px;padding:5px 10px;white-space:nowrap" onclick="printTubeLabel('${r.id}')">🏷️ ملصق</button>
-          <button class="btn btn-sm btn-d" onclick="deleteReq('${r.id}')" style="padding:5px 8px">🗑️</button>
-          <button class="btn btn-sm btn-s" onclick="toggleReqBtns('${r.id}',false)" style="padding:5px 7px;font-size:10px;opacity:0.7" title="إغلاق">✕</button>
-        </div>
-      `}
-    </div></td>
+    <td>
+      <div class="req-radial-wrap" id="rrw-${r.id}">
+        ${r.status==='done'
+          ? `<button class="req-radial-trigger green" onclick="openRadialMenu(event,'${r.id}','done','${r.printed?'1':'0'}')" title="تعديل وطباعة">
+               <span style="font-size:13px">✏️🖨️</span>
+             </button>`
+          : `<button class="req-radial-trigger blue" onclick="openRadialMenu(event,'${r.id}','pending','0')" title="نتائج وطباعة">
+               <span style="font-size:13px">🧪</span>
+             </button>`
+        }
+        <div class="req-radial-menu" id="rrm-${r.id}"></div>
+      </div>
+    </td>
   </tr>`).join('');
 }
 function renderRequests(filter='all',srch=''){renderRequestsFiltered(filter,srch);}
-function toggleReqBtns(id,expand){
-  const col=document.getElementById('req-btns-'+id);
-  const exp=document.getElementById('req-btns-'+id+'-exp');
-  if(!col||!exp)return;
-  if(expand){
-    col.style.display='none';
-    exp.style.display='flex';
-    if(window['_rbt_'+id])clearTimeout(window['_rbt_'+id]);
-    window['_rbt_'+id]=setTimeout(()=>{
-      if(col&&exp){col.style.display='flex';exp.style.display='none';}
-    },8000);
-  }else{
-    col.style.display='flex';
-    exp.style.display='none';
-    if(window['_rbt_'+id])clearTimeout(window['_rbt_'+id]);
+
+/* ═══════════════════════════════════════
+   🔵 Radial Menu Logic
+═══════════════════════════════════════ */
+(function(){
+  // overlay لإغلاق القائمة عند الضغط خارجها
+  var ov=document.createElement('div');
+  ov.className='req-radial-overlay';
+  ov.id='req-radial-ov';
+  ov.addEventListener('click',function(){window.closeAllRadial();});
+  document.body.appendChild(ov);
+})();
+
+window.closeAllRadial=function(){
+  document.querySelectorAll('.req-radial-wrap.open').forEach(function(w){
+    w.classList.remove('open');
+    var t=w.querySelector('.req-radial-trigger');
+    if(t)t.classList.remove('active');
+  });
+  var ov=document.getElementById('req-radial-ov');
+  if(ov)ov.classList.remove('show');
+};
+
+window.openRadialMenu=function(e,id,status,printed){
+  e.stopPropagation();
+  var wrap=document.getElementById('rrw-'+id);
+  var menu=document.getElementById('rrm-'+id);
+  if(!wrap||!menu)return;
+
+  // إذا كانت مفتوحة — أغلقها
+  if(wrap.classList.contains('open')){
+    window.closeAllRadial();
+    return;
   }
-}
+
+  // أغلق أي قائمة أخرى مفتوحة
+  window.closeAllRadial();
+
+  // بناء الأزرار حسب الحالة
+  var btns=[];
+  if(status==='done'){
+    btns=[
+      {cls:'ri-print', icon:'🖨️', lbl:'طباعة',  action:"goToPrint('"+id+"');window.closeAllRadial()"},
+      {cls:'ri-edit',  icon:'✏️', lbl:'تعديل',   action:"openViewResultsModal('"+id+"');window.closeAllRadial()"},
+      {cls:'ri-label', icon:'🏷️', lbl:'ملصق',    action:"printTubeLabel('"+id+"');window.closeAllRadial()"},
+      {cls:'ri-delete',icon:'🗑️', lbl:'حذف',     action:"deleteReq('"+id+"');window.closeAllRadial()"},
+    ];
+  } else {
+    btns=[
+      {cls:'ri-result',icon:'🧪', lbl:'نتائج',   action:"goToResult('"+id+"');window.closeAllRadial()"},
+      {cls:'ri-label', icon:'🏷️', lbl:'ملصق',    action:"printTubeLabel('"+id+"');window.closeAllRadial()"},
+      {cls:'ri-delete',icon:'🗑️', lbl:'حذف',     action:"deleteReq('"+id+"');window.closeAllRadial()"},
+    ];
+  }
+
+  // حساب الزوايا — توزيع متساوٍ نصف دائرة علوية
+  var count=btns.length;
+  var radius=62;
+  // توزيع الأزرار في نصف الدائرة العلوية (من 200 درجة إلى 340 درجة)
+  var startAngle, endAngle;
+  if(count===4){startAngle=200;endAngle=340;}
+  else if(count===3){startAngle=210;endAngle=330;}
+  else{startAngle=220;endAngle=320;}
+  var step=(endAngle-startAngle)/(count-1);
+
+  menu.innerHTML=btns.map(function(b,i){
+    var angleDeg=startAngle+step*i;
+    var rad=angleDeg*(Math.PI/180);
+    var x=Math.round(radius*Math.cos(rad));
+    var y=Math.round(radius*Math.sin(rad));
+    return '<button class="req-radial-item '+b.cls+'" style="left:'+x+'px;top:'+y+'px" onclick="'+b.action+'" title="'+b.lbl+'">'
+      +b.icon
+      +'<span class="ri-lbl">'+b.lbl+'</span>'
+      +'</button>';
+  }).join('');
+
+  // تأخير بسيط ثم فتح
+  setTimeout(function(){
+    wrap.classList.add('open');
+    var tr=wrap.querySelector('.req-radial-trigger');
+    if(tr)tr.classList.add('active');
+    var ov=document.getElementById('req-radial-ov');
+    if(ov)ov.classList.add('show');
+  },10);
+};
+
 function filterReq(f,el){document.querySelectorAll('#sec-requests .req-pill[data-filter]').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRequestsFiltered(f);}
 function searchReq(v){
   if(window._srTimer)clearTimeout(window._srTimer);
@@ -26548,6 +26592,82 @@ body.light-mode .pm-action-btn:hover{background:rgba(0,184,156,.14);border-color
 body.light-mode .pm-btn-title{color:#0a2a25}
 body.light-mode .pm-btn-sub{color:rgba(10,42,37,.5)}
 body.light-mode .pm-note{color:rgba(10,42,37,.38)}
+
+/* ══════════════════════════════════════════
+   🔵 Radial Action Menu — قائمة دائرية للطلبات
+══════════════════════════════════════════ */
+.req-radial-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.req-radial-trigger{
+  width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:#fff;
+  font-family:'Cairo','Inter',sans-serif;
+  transition:transform 0.18s,box-shadow 0.18s;
+  position:relative;z-index:2;
+  box-shadow:0 3px 10px rgba(0,0,0,0.35);
+  flex-direction:column;gap:1px;line-height:1.1;
+  text-align:center;padding:0;
+}
+.req-radial-trigger.green{background:linear-gradient(135deg,#00c853,#00a040);}
+.req-radial-trigger.blue{background:linear-gradient(135deg,#1e90ff,#0066cc);}
+.req-radial-trigger:hover{transform:scale(1.1);box-shadow:0 5px 16px rgba(0,0,0,0.45);}
+.req-radial-trigger.active{transform:scale(0.92);}
+
+/* الأزرار الدائرية المحيطة */
+.req-radial-menu{
+  position:absolute;top:50%;left:50%;
+  width:0;height:0;
+  pointer-events:none;
+  z-index:100;
+}
+.req-radial-item{
+  position:absolute;
+  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:#fff;
+  box-shadow:0 3px 10px rgba(0,0,0,0.4);
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+  transition:transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.18s ease;
+  pointer-events:none;
+  font-family:'Cairo','Inter',sans-serif;
+  font-weight:800;
+}
+.req-radial-item span{font-size:9px;display:none;}
+.req-radial-item .ri-lbl{
+  position:absolute;
+  bottom:-18px;left:50%;transform:translateX(-50%);
+  font-size:8.5px;font-weight:800;white-space:nowrap;
+  color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  font-family:'Cairo','Inter',sans-serif;
+  opacity:0;transition:opacity 0.2s 0.15s;
+  pointer-events:none;
+}
+.req-radial-wrap.open .req-radial-item{
+  transform:translate(-50%,-50%) scale(1);
+  opacity:1;pointer-events:auto;
+}
+.req-radial-wrap.open .req-radial-item .ri-lbl{opacity:1;}
+
+/* ألوان كل زر */
+.req-radial-item.ri-print{background:linear-gradient(135deg,#00c853,#009e3f);}
+.req-radial-item.ri-edit{background:linear-gradient(135deg,#ff9800,#e65100);}
+.req-radial-item.ri-label{background:linear-gradient(135deg,#9c27b0,#6a0080);}
+.req-radial-item.ri-delete{background:linear-gradient(135deg,#f44336,#b71c1c);}
+.req-radial-item.ri-result{background:linear-gradient(135deg,#1e90ff,#004ecc);}
+.req-radial-item:hover{filter:brightness(1.15);transform:translate(-50%,-50%) scale(1.15)!important;}
+
+/* طبقة الإغلاق عند الضغط خارج */
+.req-radial-overlay{
+  position:fixed;inset:0;z-index:99;
+  display:none;
+}
+.req-radial-overlay.show{display:block;}
+
+/* وضع نهاري */
+body.light-mode .req-radial-trigger.green{background:linear-gradient(135deg,#00b248,#008a35);}
+body.light-mode .req-radial-trigger.blue{background:linear-gradient(135deg,#1976d2,#0d47a1);}
+body.light-mode .req-radial-item .ri-lbl{color:#111;text-shadow:0 1px 3px rgba(255,255,255,0.6);}
 </style>
 
 <!-- Modal -->
