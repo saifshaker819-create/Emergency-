@@ -14811,8 +14811,14 @@ function _usersObjToArr(obj){
 }
 
 function getAdminUsers(){
-  if(_fbUsersCache !== null) return _fbUsersCache;
-  try{ return JSON.parse(localStorage.getItem(ADMIN_KEY)||'[]'); }catch(e){ return []; }
+  // إذا الكاش فيه بيانات — ارجعه مباشرة
+  if(_fbUsersCache !== null && _fbUsersCache.length > 0) return _fbUsersCache;
+  // إذا الكاش فارغ أو null — جرب localStorage
+  try{ 
+    const local = JSON.parse(localStorage.getItem(ADMIN_KEY)||'[]');
+    if(local.length > 0){ _fbUsersCache = local; return local; }
+    return _fbUsersCache || [];
+  }catch(e){ return []; }
 }
 
 function saveAdminUsers(users){
@@ -14852,10 +14858,7 @@ function loadUsersFromFirebase(){
         fbDb.ref('admin/users').set(obj);
         console.log('✅ رُحّل', local.length, 'مستخدم من المحلي إلى Firebase');
       } else {
-        // ❌ كلاهما فارغ — لا تفعل شيء، ابقَ على الكاش الحالي
-        if(!_fbUsersCache || _fbUsersCache.length === 0){
-          _fbUsersCache = [];
-        }
+        // ❌ كلاهما فارغ — لا تغيّر الكاش أبداً، اتركه null لإعادة المحاولة لاحقاً
         console.warn('⚠️ Firebase والمحلي كلاهما فارغان');
       }
       _fbUsersLoaded = true;
@@ -15130,6 +15133,9 @@ function doLogin(){
   err.style.display='none';
   if(btn){ btn.textContent='⏳ جاري التحقق...'; btn.disabled=true; }
 
+  // ── إعادة ضبط Firebase إذا لم يكن جاهزاً — لإعادة المحاولة ──
+  if(!fbReady){ _fbLoadingPromise = null; }
+
   // ── دالة الدخول من الكاش المحلي ──────────────────
   function _tryLocalCache(reason){
     if(btn){ btn.textContent='🔐 تسجيل الدخول'; btn.disabled=false; }
@@ -15137,8 +15143,8 @@ function doLogin(){
     const localUser  = localUsers.find(u => u.username===uname);
     if(!localUser){
       err.textContent = reason==='offline'
-        ? '❌ جهاز جديد — تأكد من الاتصال بالإنترنت ثم أعد المحاولة حتى يتم جلب الحسابات من السيرفر'
-        : '❌ جهاز جديد — السيرفر لم يستجب في الوقت المحدد. تأكد من الإنترنت وأعد المحاولة';
+        ? '❌ الحساب "'+uname+'" غير موجود محلياً — تأكد من الاتصال بالإنترنت وحاول مجدداً'
+        : '❌ تعذر الاتصال بالخادم والحساب غير مخزّن محلياً';
       err.style.display='block'; return;
     }
     checkPassword(pass, localUser.password).then(ok => {
@@ -15154,7 +15160,7 @@ function doLogin(){
     let done = false;
     const timer = setTimeout(()=>{
       if(!done){ done=true; _tryLocalCache('timeout'); }
-    }, 15000); // زيادة من 6 إلى 15 ثانية للأجهزة الجديدة
+    }, 6000);
 
     loadFirebase().then(ok => {
       if(ok){ listenUsersChanges(); }
@@ -15164,7 +15170,13 @@ function doLogin(){
       if(btn){ btn.textContent='🔐 تسجيل الدخول'; btn.disabled=false; }
       const users = getAdminUsers();
       const user  = users.find(u => u.username===uname);
-      if(!user){ err.textContent='❌ اسم المستخدم "'+uname+'" غير موجود — تحقق من الكتابة أو تواصل مع المدير'; err.style.display='block'; return; }
+      if(!user){ 
+        err.innerHTML='❌ اسم المستخدم "'+uname+'" غير موجود على هذا الجهاز.<br><small style="font-size:11px;opacity:0.8">إذا كان الحساب موجوداً — تأكد من الإنترنت ثم <strong>أعد الضغط على تسجيل الدخول</strong></small>';
+        err.style.display='block'; 
+        // إعادة ضبط كاش Firebase لمحاولة جلب المستخدمين من جديد
+        if(_fbUsersCache && _fbUsersCache.length === 0){ _fbUsersCache = null; }
+        return; 
+      }
       const passOk = await checkPassword(pass, user.password);
       if(!passOk){ err.textContent='❌ كلمة المرور غير صحيحة — جرّب مرة أخرى أو اضغط "إصلاح الحساب"'; err.style.display='block'; return; }
       // ── إذا كلمة المرور نص صريح قديم — رحّلها لـ hash تلقائياً ──
