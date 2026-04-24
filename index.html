@@ -7785,6 +7785,12 @@ function nav(p){
         });
       });
     }
+    if(p==='patients'){renderPatients();}
+    if(p==='doctors'){renderDoctors();}
+    if(p==='inventory'){renderInventory();}
+    if(p==='tests-db'){renderTestsDB();}
+    if(p==='packages'){renderPackages();}
+    if(p==='invoices'){renderInvoices();}
     if(p==='waitqueue'){if(typeof renderWaitQueue==='function')renderWaitQueue();}
     if(p==='lis'){if(typeof lisInit==='function')lisInit();}
     if(p==='esr'){if(typeof esrRenderList==='function')esrRenderList();}
