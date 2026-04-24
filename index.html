@@ -206,7 +206,7 @@ body.light-mode #login-screen { background:linear-gradient(135deg,#e8f4ff 0%,#f4
 body.light-mode .login-box { background:#ffffff; border:2px solid #b8d8ee; box-shadow:0 12px 40px rgba(0,0,0,0.18); }
 /* ── LIS Wizard ─────────────────────────── */
 .wiz-card{background:rgba(255,255,255,0.03);border:2px solid var(--border);border-radius:12px;padding:14px 12px;cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px}
-.wiz-card:hover{border-color:var(--primary);background:rgba(0,212,255,0.06);transform:translateY(-1px)}
+.wiz-card:hover{border-color:var(--primary);background:rgba(0,212,255,0.06);}
 .wiz-card.selected{border-color:var(--primary);background:rgba(0,212,255,0.1);box-shadow:0 0 0 3px rgba(0,212,255,0.15)}
 .wiz-conn-card{background:rgba(255,255,255,0.03);border:2px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s}
 .wiz-conn-card:hover{border-color:var(--primary);background:rgba(0,212,255,0.05)}
@@ -305,7 +305,7 @@ body.light-mode .chat-messages { background:#f8f9fb; }
 body.light-mode .chat-conv-hdr { background:#ffffff; border-bottom-color:#dde4ec; }
 body.light-mode .chat-settings-view { background:#ffffff; }
 body.light-mode #chat-input-text { background:#f0f3f7 !important; color:#000000 !important; border-color:#c8d4e0 !important; }
-body.light-mode #voice-rec-btn { background:#f0f3f7; color:#2d3a4a; border-color:#c8d4e0; }
+/* #voice-rec-btn removed */
 body.light-mode .chat-date-sep { color:#8899aa; }
 body.light-mode .chat-search-results { background:#ffffff; border-color:#c8d4e0; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
 body.light-mode .chat-search-result-item { border-bottom-color:#eef2f6; }
@@ -1270,8 +1270,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .uavatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;box-shadow:0 0 12px rgba(0,212,255,0.3);}
 .page{padding:22px;flex:1;}
 .sec{display:none;}
-.sec.active{display:block;animation:fadeUp 0.12s ease both;}
-@keyframes fadeUp{from{transform:translateY(5px);opacity:0}to{transform:none;opacity:1}}
+.sec.active{display:block;}
+/* @keyframes fadeUp removed */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
 .scard{background:var(--bg-glass);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;cursor:default;transition:all 0.2s;}
 .scard:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,212,255,0.12);}
@@ -1487,7 +1487,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
   color:#000;font-family:'Cairo',sans-serif;font-size:11px;font-weight:800;
   transition:all 0.2s;margin-top:6px;
 }
-.login-btn:hover{box-shadow:0 5px 22px rgba(0,212,255,0.45);transform:translateY(-1px);}
+.login-btn:hover{box-shadow:0 5px 22px rgba(0,212,255,0.45);}
 .login-err{
   background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.3);
   border-radius:8px;padding:10px 14px;color:var(--danger);font-size:11px;
@@ -1896,71 +1896,51 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input,select,textarea{accent-color:var(--primary);}
 
 /* ══════════════════════════════════════════════════════
-   ✨ تفاعلات الأزرار المتقدمة — Ripple & Animations
+   ✨ تفاعلات الأزرار — بدون أنيميشن
 ══════════════════════════════════════════════════════ */
 
-/* --- Ripple Effect --- */
 .btn{position:relative;overflow:hidden;transform:translateZ(0);}
-.btn::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at var(--rx,50%) var(--ry,50%), rgba(255,255,255,0.35) 0%, transparent 65%);
-  opacity:0;
-  transform:scale(0.3);
-  transition:opacity 0.5s ease, transform 0.5s ease;
-  pointer-events:none;
-  border-radius:inherit;
-}
-.btn.ripple-go::after{opacity:1;transform:scale(2.8);transition:opacity 0.05s,transform 0.45s ease-out;}
-.btn.ripple-fade::after{opacity:0;transform:scale(2.8);transition:opacity 0.4s ease,transform 0s;}
 
 /* --- Pulse glow للأزرار الرئيسية --- */
 .btn-p{
   background:linear-gradient(135deg,var(--primary),var(--primary-dark));
   color:#000;
   box-shadow:0 3px 12px rgba(0,212,255,0.28);
-  transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+  transition:none !important;
 }
 .btn-p:hover{
-  box-shadow:0 6px 28px rgba(0,212,255,0.55),0 0 0 3px rgba(0,212,255,0.15) !important;
-  transform:translateY(-2px) scale(1.03) !important;
+  box-shadow:0 6px 28px rgba(0,212,255,0.55) !important;
   filter:brightness(1.08);
 }
-.btn-p:active{transform:translateY(0) scale(0.97) !important;box-shadow:0 2px 8px rgba(0,212,255,0.3) !important;}
+.btn-p:active{box-shadow:0 2px 8px rgba(0,212,255,0.3) !important;}
 
 /* --- زر success --- */
 .btn-ok{
   background:linear-gradient(135deg,var(--success),#00c470);
   color:#000;
-  transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1) !important;
+  transition:none !important;
 }
-.btn-ok:hover{box-shadow:0 6px 24px rgba(0,245,147,0.45),0 0 0 3px rgba(0,245,147,0.12) !important;transform:translateY(-2px) scale(1.03) !important;filter:brightness(1.08);}
-.btn-ok:active{transform:translateY(0) scale(0.97) !important;}
+.btn-ok:hover{box-shadow:0 6px 24px rgba(0,245,147,0.45) !important;filter:brightness(1.08);}
 
 /* --- زر ثانوي --- */
 .btn-s{
   background:var(--bg-glass);
   color:var(--text);
   border:1px solid var(--border);
-  transition:all 0.16s ease !important;
+  transition:none !important;
 }
 .btn-s:hover{
   background:rgba(0,212,255,0.1) !important;
   border-color:var(--primary) !important;
   color:var(--primary) !important;
-  transform:translateY(-1px) !important;
   box-shadow:0 4px 14px rgba(0,212,255,0.18) !important;
 }
-.btn-s:active{transform:translateY(0) scale(0.97) !important;}
 
 /* --- زر خطر --- */
-.btn-d:hover{box-shadow:0 6px 24px rgba(255,34,68,0.45) !important;transform:translateY(-2px) scale(1.03) !important;}
-.btn-d:active{transform:translateY(0) scale(0.97) !important;}
+.btn-d:hover{box-shadow:0 6px 24px rgba(255,34,68,0.45) !important;}
 
 /* --- زر تحذير --- */
-.btn-w:hover{box-shadow:0 6px 24px rgba(255,204,0,0.4) !important;transform:translateY(-2px) scale(1.03) !important;}
-.btn-w:active{transform:translateY(0) scale(0.97) !important;}
+.btn-w:hover{box-shadow:0 6px 24px rgba(255,204,0,0.4) !important;}
 
 /* --- أزرار الحجم الكبير --- */
 .btn-lg{padding:11px 28px;font-size:13px;font-weight:800;letter-spacing:0.3px;}
@@ -1977,21 +1957,13 @@ input,select,textarea{accent-color:var(--primary);}
 }
 #wiz-body .fg{margin-bottom:14px;}
 
-/* أزرار اللقب - تفاعلية ومحسّنة */
+/* أزرار اللقب */
 #wiz-body .btn-sm{
-  transition:all 0.14s cubic-bezier(0.34,1.56,0.64,1) !important;
-  will-change:transform;
+  transition:none !important;
 }
-#wiz-body .btn-sm:hover{transform:translateY(-2px) scale(1.06) !important;}
-#wiz-body .btn-sm:active{transform:scale(0.94) !important;}
-#wiz-body .btn-sm.btn-p{
-  animation:titleBtnPop 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
-}
-@keyframes titleBtnPop{
-  0%{transform:scale(0.85);}
-  60%{transform:scale(1.12);}
-  100%{transform:scale(1.08);}
-}
+#wiz-body .btn-sm:hover{}
+#wiz-body .btn-sm:active{}
+#wiz-body .btn-sm.btn-p{}
 
 /* تحسين حقول الإدخال */
 .fc{
@@ -2016,14 +1988,13 @@ select.fc:focus{outline:none;}
   transform:translateZ(0);
 }
 .test-item{
-  transition:all 0.12s ease !important;
+  transition:none !important;
   transform:translateZ(0);
-  will-change:transform,background,border-color;
+  will-change:background,border-color;
 }
 .test-item:hover{
   border-color:var(--primary) !important;
   background:rgba(0,212,255,0.09) !important;
-  transform:translateX(-3px) !important;
   box-shadow:2px 0 0 0 var(--primary) inset;
 }
 .test-item.selected{
@@ -2031,7 +2002,7 @@ select.fc:focus{outline:none;}
   background:rgba(0,212,255,0.16) !important;
   box-shadow:3px 0 0 0 var(--primary) inset;
 }
-.test-item:active{transform:scale(0.98) !important;}
+.test-item:active{}
 
 /* checkbox أسرع */
 .test-item input[type=checkbox]{
@@ -2057,29 +2028,23 @@ select.fc:focus{outline:none;}
 
 /* تحسين عناصر المختارة */
 .wiz-sel-item{
-  transition:all 0.15s ease !important;
+  transition:none !important;
   transform:translateZ(0);
-  animation:selItemIn 0.2s cubic-bezier(0.34,1.56,0.64,1) forwards;
-}
-@keyframes selItemIn{
-  from{opacity:0;transform:translateX(20px) scale(0.9);}
-  to{opacity:1;transform:translateX(0) scale(1);}
 }
 .wiz-sel-rm{
-  transition:all 0.14s ease !important;
+  transition:none !important;
 }
 .wiz-sel-rm:hover{
   background:var(--danger) !important;
   color:#fff !important;
-  transform:scale(1.2) rotate(90deg) !important;
 }
 
 /* أزرار الأكثر طلباً */
 #mrt-buttons-area .btn{
-  transition:all 0.14s cubic-bezier(0.34,1.56,0.64,1) !important;
+  transition:none !important;
 }
-#mrt-buttons-area .btn:hover{transform:translateY(-2px) scale(1.05) !important;}
-#mrt-buttons-area .btn:active{transform:scale(0.94) !important;}
+#mrt-buttons-area .btn:hover{}
+#mrt-buttons-area .btn:active{}
 
 /* ══════════════════════════════════════════════════════
    🚀 تسريع واجهة إدخال النتائج
@@ -2095,12 +2060,12 @@ select.fc:focus{outline:none;}
   transform:translateZ(0);
 }
 #res-entry-tbody tr{
-  transition:background 0.1s ease !important;
+  transition:none !important;
 }
 
-/* input النتائج - تفاعلي وسريع */
+/* input النتائج */
 .res-tbl input,.res-tbl select,.res-tbl textarea{
-  transition:all 0.13s ease !important;
+  transition:none !important;
   transform:translateZ(0);
   background:rgba(255,255,255,0.04);
   border:1px solid var(--border);
@@ -2115,7 +2080,7 @@ select.fc:focus{outline:none;}
   border-color:var(--primary) !important;
   background:rgba(0,212,255,0.06) !important;
   box-shadow:0 0 0 3px rgba(0,212,255,0.1) !important;
-  transform:scale(1.01) translateZ(0) !important;
+  transform:translateZ(0) !important;
 }
 /* تمييز القيم الغير طبيعية */
 .res-tbl input.high-val{
@@ -2160,15 +2125,14 @@ select.fc:focus{outline:none;}
    🎯 تفاعلات عامة محسّنة
 ══════════════════════════════════════════════════════ */
 
-/* mclose أجمل */
+/* mclose */
 .mclose{
-  transition:all 0.16s cubic-bezier(0.34,1.56,0.64,1) !important;
+  transition:none !important;
 }
 .mclose:hover{
   background:rgba(255,77,109,0.22) !important;
   color:var(--danger) !important;
   border-color:var(--danger) !important;
-  transform:rotate(90deg) scale(1.1) !important;
 }
 
 /* Modal entrance أسرع */
@@ -5780,15 +5744,6 @@ Menopause — 25–135 IU/L" style="font-size:12px;resize:vertical;line-height:1
           🖼️ صورة
           <input type="file" accept="image/*" style="display:none" id="img-file-input" onchange="sendImageMsg(this)">
         </label>
-        <!-- Voice record -->
-        <button id="voice-rec-btn" onclick="toggleVoiceRecord()"
-          style="display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;
-          border:1px solid var(--border);background:var(--bg-glass);color:var(--text2);cursor:pointer;
-          font-size:11px;font-family:'Inter','Cairo',sans-serif;transition:all 0.2s;white-space:nowrap"
-          onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
-          onmouseout="if(!isRecording){this.style.borderColor='';this.style.color=''}">
-          🎤 صوت
-        </button>
         <!-- Send PDF -->
         <button onclick="chatSendPDF()"
           style="display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;
@@ -16387,9 +16342,6 @@ let fbReady       = false;
 let chatOpen      = false;
 let activeConvId  = null;
 let activeMsgListener = null;
-let voiceRecorder = null;
-let isRecording   = false;
-let recordedChunks= [];
 let voiceStartTime= 0, voiceDuration=0, voiceTimer=null;
 let meUsername    = '';
 let meLabName     = '';
@@ -16804,46 +16756,10 @@ function sendImageMsg(fileInput){
   fileInput.value='';
 }
 
-// ── تسجيل صوتي ────────────────────────────────────────────
-function toggleVoiceRecord(){
-  if(isRecording) stopRec(); else startRec();
-}
-function startRec(){
-  if(!navigator.mediaDevices){ showNotif('خطأ','الميكروفون غير مدعوم في هذا المتصفح','error'); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    recordedChunks=[];
-    const opts=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? {mimeType:'audio/webm;codecs=opus'}
-      : {};
-    voiceRecorder=new MediaRecorder(stream, opts);
-    voiceRecorder.ondataavailable=e=>{ if(e.data.size>0) recordedChunks.push(e.data); };
-    voiceRecorder.onstop=()=>{
-      const blob=new Blob(recordedChunks,{type:'audio/webm'});
-      const rd=new FileReader();
-      rd.onload=e=>push({ t:'voice', d:e.target.result, dur:voiceDuration });
-      rd.readAsDataURL(blob);
-      stream.getTracks().forEach(t=>t.stop());
-    };
-    voiceRecorder.start(200); // جمع كل 200ms
-    isRecording=true;
-    voiceStartTime=Date.now();
-    voiceTimer=setInterval(()=>voiceDuration=(Date.now()-voiceStartTime)/1000, 100);
-    const btn=document.getElementById('voice-rec-btn');
-    if(btn){ btn.innerHTML='⏹ <span id="rec-time">0ث</span>'; btn.classList.add('recording'); }
-    // عداد
-    setInterval(()=>{
-      const el=document.getElementById('rec-time');
-      if(el) el.textContent=Math.round((Date.now()-voiceStartTime)/1000)+'ث';
-    }, 1000);
-  }).catch(e=>{ showNotif('خطأ','لم يُسمح بالوصول للميكروفون','error'); console.error(e); });
-}
-function stopRec(){
-  if(voiceRecorder&&isRecording) voiceRecorder.stop();
-  isRecording=false;
-  clearInterval(voiceTimer);
-  const btn=document.getElementById('voice-rec-btn');
-  if(btn){ btn.innerHTML='🎤 صوت'; btn.classList.remove('recording'); }
-}
+// ── تسجيل صوتي — تمت الإزالة ────────────────────────────────
+function toggleVoiceRecord(){ /* مُزال */ }
+function startRec(){ /* مُزال */ }
+function stopRec(){ /* مُزال */ }
 function playVoice(btn){
   const src=btn.getAttribute('data-src');
   if(!src) return;
@@ -27037,27 +26953,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* ══════════════════════════════════════════════════════
-   ✨ Ripple Effect — تفاعل الضغط على الأزرار
-══════════════════════════════════════════════════════ */
-(function initRipple(){
-  document.addEventListener('mousedown',function(e){
-    const btn=e.target.closest('.btn');
-    if(!btn) return;
-    const rect=btn.getBoundingClientRect();
-    btn.style.setProperty('--rx',((e.clientX-rect.left)/rect.width*100).toFixed(1)+'%');
-    btn.style.setProperty('--ry',((e.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
-    btn.classList.remove('ripple-go','ripple-fade');
-    requestAnimationFrame(function(){
-      btn.classList.add('ripple-go');
-      setTimeout(function(){
-        btn.classList.remove('ripple-go');
-        btn.classList.add('ripple-fade');
-        setTimeout(function(){btn.classList.remove('ripple-fade');},400);
-      },450);
-    });
-  },{passive:true});
-})();
+/* Ripple Effect — تمت الإزالة */
 
 /* ══════════════════════════════════════════════════════
    🚀 تحسين wizard — badge animation + scroll reset
@@ -27354,8 +27250,8 @@ setTimeout(function(){
     /* استثناء الزر العائم — يحتاج touch-action:none للسحب */
     '#req-float-btn { touch-action:none !important; cursor:grab !important; }',
 
-    /* تحريك الصفحات أسرع */
-    '.sec.active { animation:fadeUp 0.07s ease both !important; }',
+    /* تحريك الصفحات بدون animation */
+    '.sec.active { animation:none !important; }',
 
     /* مودالات: بدون blur مكلف */
     '.moverlay { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }',
